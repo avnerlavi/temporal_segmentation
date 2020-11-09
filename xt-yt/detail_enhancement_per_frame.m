@@ -11,7 +11,7 @@ vid_matrix = uint8(captcha_running_mat(:,:,:,:));
 squeezed = squeeze(vid_matrix(:,:,1,:));
 permuted = permute(squeezed, [1,3,2]);
 if (dump_movies)
-    aviobj = VideoWriter('new\movie_permuted_x-t.avi');
+    aviobj = VideoWriter('..\results\xt-yt\movie_permuted_x-t.avi');
     aviobj.Quality = 80;
     open(aviobj);
     for i =1:size(permuted,3)
@@ -30,7 +30,7 @@ detail_enhanced_permuted = (detail_enhanced_permuted + 1) / 2;
 detail_enhanced = (detail_enhanced + 1) / 2;
 
 if (dump_movies)
-    aviobj = VideoWriter('new\movie_detail_enhanced_permuted_x-t.avi');
+    aviobj = VideoWriter('..\results\xt-yt\movie_detail_enhanced_permuted_x-t.avi');
     aviobj.Quality = 80;
     open(aviobj);
     for i =1:size(detail_enhanced_permuted,3)
@@ -40,7 +40,7 @@ if (dump_movies)
 end
 
 if (dump_movies)
-    aviobj = VideoWriter('new\movie_detail_enhanced_x-t.avi');
+    aviobj = VideoWriter('..\results\xt-yt\movie_detail_enhanced_x-t.avi');
     aviobj.Quality = 80;
     open(aviobj);
     for i =1:size(detail_enhanced,3)

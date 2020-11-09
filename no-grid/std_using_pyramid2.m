@@ -28,7 +28,7 @@ end
 vid_pyr = vid_pyr(:,:,ceil(seq_size/2):size(vid_matrix,3) - ceil(seq_size/2));
 
 if (dump_movies)
-    aviobj = VideoWriter('new\movie_stdPyramid2_noGrid.avi');
+    aviobj = VideoWriter('..\results\no-grid\movie_stdPyramid2_noGrid.avi');
     aviobj.Quality = 80;
     open(aviobj);
     for i =1:size(vid_pyr,3)
