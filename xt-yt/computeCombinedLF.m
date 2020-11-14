@@ -1,8 +1,8 @@
-function [imScaleTot] = computeCombinedLF(imgIn, nOrientations, nScales,baseFacilitationLength, alpha, m1, m2,steerableGaussians)
+function [imScaleTot] = computeCombinedLF(imgIn, nOrientations, nScales, baseFacilitationLength, alpha, m1, m2, steerableGaussians)
 sigma = 0.5;
 imScalesArray = zeros(size(imgIn,1),size(imgIn,2),nScales);
 imScaleTot = zeros(size(imgIn,1),size(imgIn,2));
-Orientations = linspace(pi/8,7*pi/8,nOrientations+1);
+Orientations = linspace(pi/6,5*pi/6,nOrientations+1);
 Orientations = Orientations(1:end-1);
 for j=1:nScales
     imgS=imresize(imgIn,1/j,'Antialiasing',true); %instead of min(1,1/(2*(j-1)))
@@ -15,7 +15,7 @@ for j=1:nScales
             Co = Gaussianed1 + Gaussianed2;
         else
             L = buildGabor(Orientations(i));
-            Co = conv2(imgS,L,'same');
+            Co = imfilter(imgS,L,'replicate');
         end
         Cp = max(Co,0);
         Cn = max(-Co,0);
