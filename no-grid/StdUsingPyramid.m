@@ -6,7 +6,7 @@ disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 %    Read movie to matrix %
 % % % % % % % % % % % % % %
 
-vid_matrix_orig = read_movie('../captcha_running.avi', true);
+vid_matrix_orig = readVideoFromFile('../captcha_running.avi', true);
 
 % % % % % % % % % % % %
 %    Downscale video  %
@@ -32,13 +32,7 @@ vid_pyr = vid_pyr - min(vid_pyr(:));
 vid_pyr = vid_pyr/max(vid_pyr(:));
 
 if (dump_movies)
-    aviobj =VideoWriter('..\results\no-grid\movie_stdPyramid2_noGrid.avi');
-    aviobj.Quality = 80;
-    open(aviobj);
-    for i =1:size(vid_pyr,3)
-       writeVideo(aviobj,vid_pyr(:,:,i));   
-    end
-    close(aviobj);
+    writeVideoToFile(vid_pyr, 'movie_stdPyramid_noGrid', '..\results\no-grid');
 end
 
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);

@@ -39,8 +39,8 @@ for j=1:nScales
     imScalesArray(:,:,j)=imresize(imOriTot_p.^m2 - imOriTot_n.^m2,size(imgIn));
     imScalesArray(:,:,j) = imScalesArray(:,:,j)/j;%2.^(j-1)
     imScaleTot=imScaleTot+imScalesArray(:,:,j);
-    
 end
+
 imScaleTot = sign(imScaleTot).*abs(imScaleTot).^(1/m2);
 imScaleTot = imScaleTot / max(abs(imScaleTot(:)));
 end
