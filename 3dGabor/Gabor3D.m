@@ -26,9 +26,10 @@ expArg = (R'*inv(Sigma)*R*r');
 expArg = sum(r'.*expArg,1);
 Gaussian = exp(-expArg); 
 
-Gaussian = Gaussian./max(abs(Gaussian),[],'all');
-Gaussian = reshape(Gaussian,shape);
+%Gaussian = Gaussian./max(abs(Gaussian),[],'all');
+Gaussian = Gaussian./sum(abs(Gaussian),'all');
 
+Gaussian = reshape(Gaussian,shape);
 Wave = WaveDir(1).*X+WaveDir(2).*Y+WaveDir(3).*Z;
 Wave = cos(2*pi*Wave/S);
 Gabor = Wave.*Gaussian;

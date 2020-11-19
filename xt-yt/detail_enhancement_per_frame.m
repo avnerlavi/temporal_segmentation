@@ -6,7 +6,7 @@ vid_matrix = imresize(vid_matrix, 0.3);
 vid_matrix(vid_matrix > 1) = 1;
 vid_matrix(vid_matrix < 0) = 0;
 
-permutedAxis = 'y';
+permutedAxis = 'x';
 if permutedAxis == 'y'
     permuted = permute(vid_matrix, [2,3,1]);
 else

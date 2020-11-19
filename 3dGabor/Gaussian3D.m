@@ -1,5 +1,5 @@
 function [Gaussian] = Gaussian3D(AzElDir,XYOrientation,sigma)
-S = max(sigma);
+S = max(ceil(sigma));
 x = -3*S:3*S;
 y = -3*S:3*S;
 z = -3*S:3*S;
@@ -26,7 +26,8 @@ expArg = (R'*inv(Sigma)*R*r');
 expArg = sum(r'.*expArg,1);
 Gaussian = exp(-expArg); 
 
-Gaussian = Gaussian./max(abs(Gaussian),[],'all');
+%Gaussian = Gaussian./max(abs(Gaussian),[],'all');
+Gaussian = Gaussian./sum(abs(Gaussian),'all');
 Gaussian = reshape(Gaussian,shape);
 end
 
