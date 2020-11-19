@@ -1,11 +1,11 @@
 function [totalVid] = compareVids(vid1raw,vid2raw,verbose)
 if(isstring(vid1raw))
-    vid1 = read_movie(vid1raw, false);
+    vid1 = readVideoFromFile(vid1raw, false);
 else
     vid1 = vid1raw;
 end
 if(isstring(vid2raw))
-    vid2 = read_movie(vid2raw, false);
+    vid2 = readVideoFromFile(vid2raw, false);
 else
     vid2 = vid2raw;
 end

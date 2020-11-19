@@ -1,30 +1,24 @@
 dump_movies = true;
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
-captcha_running_v = VideoReader('../results/no-grid/movie_stdPyramid2_noGrid.avi');
-i=1;
-while hasFrame(captcha_running_v)
-    captcha_running_mat(:,:,:,i) = readFrame(captcha_running_v);
-    i=i+1;
-end
-vid_matrix = im2double(captcha_running_mat(:,:,:,:));
+
+vid_matrix = readVideoFromFile('../results/no-grid/movie_stdPyramid_noGrid.avi', false);
 vid_matrix = imresize(vid_matrix, 0.3);
 vid_matrix(vid_matrix > 1) = 1;
 vid_matrix(vid_matrix < 0) = 0;
 
-squeezed = squeeze(vid_matrix(:,:,1,:));
-permuted = permute(squeezed, [2,3,1]);
+permutedAxis = 'y';
+if permutedAxis == 'y'
+    permuted = permute(vid_matrix, [2,3,1]);
+else
+    permuted = permute(vid_matrix, [1,3,2]);
+end
 
 if (dump_movies)
-    aviobj = VideoWriter('..\results\xt-yt\movie_permuted_x-t.avi');
-    aviobj.Quality = 80;
-    open(aviobj);
-    for i =1:size(permuted,3)
-       writeVideo(aviobj,permuted(:,:,i));   
-    end
-    close(aviobj);
+    writeVideoToFile(permuted, ['movie_permuted_',permutedAxis,'-t'], '..\results\xt-yt');
 end
+
 detail_enhanced_permuted = zeros(size(permuted));
-detail_enhanced = zeros(size(squeezed));
+detail_enhanced = zeros(size(vid_matrix));
 for i=1:size(permuted,3)
     detail_enhanced_permuted(:,:,i) = ...
         computeCombinedLF(permuted(:,:,i), ...
@@ -36,28 +30,21 @@ for i=1:size(permuted,3)
         2, ... m2
         false... isSteerableGaussian
         );
-    detail_enhanced(i,:,:) = detail_enhanced_permuted(:,:,i);
+    
+    if permutedAxis == 'y'
+        detail_enhanced(i,:,:) = detail_enhanced_permuted(:,:,i);
+    else
+        detail_enhanced(:,i,:) = detail_enhanced_permuted(:,:,i);
+    end
 end
 
 % detail_enhanced_permuted = (detail_enhanced_permuted + 1) / 2;
 % detail_enhanced = (detail_enhanced + 1) / 2;
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
-    aviobj = VideoWriter('..\results\xt-yt\movie_detail_enhanced_permuted_x-t2.avi');
-    aviobj.Quality = 80;
-    open(aviobj);
-    for i =1:size(detail_enhanced_permuted,3)
-       writeVideo(aviobj,abs(detail_enhanced_permuted(:,:,i)));   
-    end
-    close(aviobj);
+    writeVideoToFile(abs(detail_enhanced_permuted), ['movie_detail_enhanced_permuted_', permutedAxis, '-t'], '..\results\xt-yt');
 end
 
 if (dump_movies)
-    aviobj = VideoWriter('..\results\xt-yt\movie_detail_enhanced_x-t2.avi');
-    aviobj.Quality = 80;
-    open(aviobj);
-    for i =1:size(detail_enhanced,3)
-       writeVideo(aviobj,abs(detail_enhanced(10:end-10,10:end-10,i)));   
-    end
-    close(aviobj);
+    writeVideoToFile(abs(detail_enhanced), ['movie_detail_enhanced_', permutedAxis, '-t'], '..\results\xt-yt');
 end
