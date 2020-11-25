@@ -8,44 +8,26 @@ for k = 1:nScales
     vidS = imresize3(vidIn,1/k,'Antialiasing',true);
     vidOriTot_n=zeros(size(vidS));
     vidOriTot_p=zeros(size(vidS));
+    FacilitationLength=max(3, baseFacilitationLength/k);
+    
+    %0 elev handling - replace with spherical normalization
+    [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, FacilitationLength, alpha);
+    elevationNormFactor = 1 - cos(Elevations(1)/2);
+    vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
+    vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
+    
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
-            L = BuildGabor3D(Azimuths(i),Elevations(j));
-            Co = imfilter(vidS,L,'replicate');
-            Cp = max(Co,0);
-            Cn = max(-Co,0);
-            threshold = 0.3 * max(abs(Co),[],'all');
-            Cp(Cp < threshold) = 0;
-            Cn(Cn < threshold) = 0;
+            [LF_n, LF_p] = Gabor3DActivation(vidS, Azimuths(i), Elevations(j), FacilitationLength, alpha);
             
-            FacilitationLength=max(3,baseFacilitationLength/k);
-            [LF_n ,NR_n] = LFsc3D(Cn,Azimuths(i),Elevations(j),FacilitationLength);
-            [LF_p ,NR_p] = LFsc3D(Cp,Azimuths(i),Elevations(j),FacilitationLength);
-            LF_n=0.5*max(0,LF_n-alpha*NR_n);
-            LF_p=0.5*max(0,LF_p-alpha*NR_p);
-            
-            vidOriTot_n = vidOriTot_n+LF_n.^m1;
-            vidOriTot_p = vidOriTot_p+LF_p.^m1;
+            elevationStart = Elevations(j) - Elevations(1)/2;
+            elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
+            elevationNormFactor = cos(elevationStart) - cos(elevationEnd);
+            vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
+            vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
         end
         disp(['i',num2str(i)]);
     end
-    %0 elev handling - replace with spherical normalization
-    L = BuildGabor3D(0,0);
-    Co = imfilter(vidS,L,'replicate');
-    Cp = max(Co,0);
-    Cn = max(-Co,0);
-    threshold = 0.3 * max(abs(Co),[],'all');
-    Cp(Cp < threshold) = 0;
-    Cn(Cn < threshold) = 0;
-    FacilitationLength=max(3,baseFacilitationLength/k);
-    [LF_n ,NR_n] = LFsc3D(Cn,0,0,FacilitationLength);
-    [LF_p ,NR_p] = LFsc3D(Cp,0,0,FacilitationLength);
-    LF_n=0.5*max(0,LF_n-alpha*NR_n);
-    LF_p=0.5*max(0,LF_p-alpha*NR_p);
-    
-    vidOriTot_n = vidOriTot_n+LF_n.^m1;
-    vidOriTot_p = vidOriTot_p+LF_p.^m1;
-    
     
     vidOriTot_n = vidOriTot_n.^(1/m1);
     vidOriTot_p = vidOriTot_p.^(1/m1);

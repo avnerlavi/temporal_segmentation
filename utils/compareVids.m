@@ -1,4 +1,4 @@
-function [totalVid] = compareVids(vid1raw,vid2raw,verbose)
+function [vidDiff] = compareVids(vid1raw,vid2raw,verbose)
 if(isstring(vid1raw))
     vid1 = readVideoFromFile(vid1raw, false);
 else
@@ -17,5 +17,6 @@ totalVid(1:size(vid2,1),end-size(vid2,2)+1:end,1:size(vid2,3)) = vid2;
 if(verbose)
     implay(totalVid);
 end
+vidDiff = vid1 - vid2;
 end
 

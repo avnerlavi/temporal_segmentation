@@ -6,6 +6,8 @@ end
 if strcmp(fileName(end-4:end), '.avi') == false
     fileName = [fileName, '.avi'];
 end
+mkdir(fileDir);
+
 filePath = [fileDir, fileName];
 aviobj = VideoWriter(filePath);
 aviobj.Quality = 80;

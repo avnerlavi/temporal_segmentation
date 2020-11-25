@@ -12,8 +12,6 @@ vid_matrix_orig = readVideoFromFile('../captcha_running.avi', true);
 %    Downscale video  %
 % % % % % % % % % % % %
 vid_matrix = imresize(vid_matrix_orig, 0.25);
-save('vid_matrix.mat','vid_matrix');
-load('vid_matrix.mat','vid_matrix');
 %%
 
 disp(['Running Pyramid ', datestr(datetime('now'),'HH:MM:SS')]);
