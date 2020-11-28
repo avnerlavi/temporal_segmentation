@@ -10,7 +10,7 @@ for k = 1:nScales
     vidOriTot_p=zeros(size(vidS));
     FacilitationLength=max(3, baseFacilitationLength/k);
     
-    %0 elev handling - replace with spherical normalization
+    %0 elev handling
     [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, FacilitationLength, alpha);
     elevationNormFactor = 1 - cos(Elevations(1)/2);
     vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
