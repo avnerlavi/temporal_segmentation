@@ -4,7 +4,7 @@ Elevations = linspace(0,elHalfAngle,nElevations+1);
 Elevations = Elevations(2:end);
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-for k = 1:nScales
+for k = nScales:-1:1
     vidS = imresize3(vidIn,1/k,'Antialiasing',true);
     vidOriTot_n=zeros(size(vidS));
     vidOriTot_p=zeros(size(vidS));
@@ -32,9 +32,9 @@ for k = 1:nScales
     vidOriTot_n = vidOriTot_n.^(1/m1);
     vidOriTot_p = vidOriTot_p.^(1/m1);
     
-    vidScalesArray = imresize3(vidOriTot_p.^m2 - vidOriTot_n.^m2,size(vidIn));
-    vidScalesArray = vidScalesArray/k;
-    vidScaleTot=vidScaleTot+vidScalesArray;
+    vidScaled = imresize3(vidOriTot_p.^m2 - vidOriTot_n.^m2,size(vidIn));
+    vidScaled = vidScaled/(k^m2);
+    vidScaleTot=vidScaleTot+vidScaled;
     disp(['k',num2str(k)]);
 end
 vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
