@@ -2,7 +2,7 @@ dump_movies = true;
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 
 vid_matrix = readVideoFromFile('../results/no-grid/movie_stdPyramid_noGrid.avi', false);
-vid_matrix = imresize3(vid_matrix, 0.5);
+vid_matrix = imresize(vid_matrix, 1/6);
 vid_matrix(vid_matrix > 1) = 1;
 vid_matrix(vid_matrix < 0) = 0;
 
