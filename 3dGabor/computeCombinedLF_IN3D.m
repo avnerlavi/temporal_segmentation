@@ -12,7 +12,7 @@ for k = nScales:-1:1
     
     %0 elev handling
     [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, FacilitationLength, alpha);
-    elevationNormFactor = 1 - cos(Elevations(1)/2);
+    elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
     vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
     vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
     
@@ -22,7 +22,7 @@ for k = nScales:-1:1
             
             elevationStart = Elevations(j) - Elevations(1)/2;
             elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
-            elevationNormFactor = cos(elevationStart) - cos(elevationEnd);
+            elevationNormFactor = 1;%cosd(elevationStart) - cosd(elevationEnd);
             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
             vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
         end
