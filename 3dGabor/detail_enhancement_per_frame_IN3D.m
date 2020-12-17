@@ -12,12 +12,12 @@ vid_matrix = PadVideoReplicate(vid_matrix,2*numOfScales);
 detail_enhanced = ...
     computeCombinedLF_IN3D(vid_matrix, ...
     8, ... Azimuths number
-    1, ... elevations number
-    0, ... elevation half angle
+    6, ... elevations number
+    25, ... elevation half angle
     numOfScales , ... scale number
     10, ... base facilitation length
     0, ... alpha
-    2, ... m1
+    1, ... m1
     2  ... m2
     );
 
