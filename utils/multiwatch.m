@@ -25,6 +25,9 @@ end
 if parser.Results.displayPermuted
     permuted_xt = permute(vidNormed, [1,3,2]);
     permuted_yt = permute(vidNormed, [2,3,1]);
-    compareVids(permuted_xt, permuted_yt, true, parser.Results.fps);
+    implay(permuted_xt, parser.Results.fps);
+    maintainFitToWindow();
+    implay(permuted_yt, parser.Results.fps);
+    maintainFitToWindow();
 end
 end
