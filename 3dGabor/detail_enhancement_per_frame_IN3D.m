@@ -1,4 +1,5 @@
 dump_movies = true;
+addpath(genpath('../utils'));
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 
 vid_matrix = readVideoFromFile('..\results\no-grid\movie_stdPyramid_noGrid.avi', false);
@@ -9,7 +10,7 @@ vid_matrix(vid_matrix < 0) = 0;
 numOfScales = 4;
 vid_matrix = PadVideoReplicate(vid_matrix,2*numOfScales);
 
-[detail_enhanced, vidScalesPyr, cLocalScalesPyr] = ...
+detail_enhanced = ...
     computeCombinedLF_IN3D(vid_matrix, ...
     8, ... Azimuths number
     6, ... elevations number

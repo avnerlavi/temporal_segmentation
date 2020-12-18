@@ -1,4 +1,4 @@
-function [vidScaleTot, vidScalesPyr, cLocalScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, baseFacilitationLength, alpha, m1, m2)
+function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, baseFacilitationLength, alpha, m1, m2)
 vidScaleTot = zeros(size(vidIn));
 Elevations = linspace(0,elHalfAngle,nElevations+1);
 Elevations = Elevations(2:end);
@@ -6,12 +6,10 @@ Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
 
 gauss_local = Gaussian3D([0, 0], 0, [1,1,1], []);
-c_local_curr = ones(size(vidIn));
-c_local_prev = ones(size(vidIn));
+gauss_remote = Gaussian3D([0, 0], 0, [3,3,3], []);
 beta = 0.4;
 
 vidScalesPyr = cell(nScales);
-cLocalScalesPyr = cell(nScales);
 
 for k = nScales:-1:1
     vidS = imresize3(vidIn,1/k,'Antialiasing',true);
@@ -43,11 +41,6 @@ for k = nScales:-1:1
     
     vidScaled = imresize3(vidOriTot_p.^m2 - vidOriTot_n.^m2,size(vidIn));
     vidScaled = vidScaled/(k^m2);
-%     c_local_prev = c_local_curr;
-    c_local_curr = computeContrast(vidScaled, gauss_local);
-%     gf = (c_local_curr + beta)./(c_local_prev + beta);
-%     vidScaled = vidScaled .* gf;
-    cLocalScalesPyr{k} = c_local_curr;
     vidScalesPyr{k} = vidScaled;
     vidScaleTot = vidScaleTot + vidScaled;
     disp(['k',num2str(k)]);
