@@ -2,7 +2,7 @@ gauss_local = Gaussian3D([0, 0], 0, [1,1,1], []);
 c_local_curr = ones(size(vidIn));
 c_local_prev = ones(size(vidIn));
 
-for each scale:
+for each scale, from largest (original size) to smallest:
 ...
     vidScaled = imresize3(vidOriTot_p.^m2 - vidOriTot_n.^m2,size(vidIn));
     vidScaled = vidScaled/(k^m2);
