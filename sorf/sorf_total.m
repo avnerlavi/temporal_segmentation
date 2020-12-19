@@ -43,7 +43,7 @@ gf_tot = (c_local_tot + beta)./(c_remote + beta);
 vid_scaled_tot = ones(size(vid_matrix));
 for k=numOfScales:-1:1
 vidScaled = vidScalesPyr{k};
-vid_scaled_tot = vid_scaled_tot + vidScaled;
+vid_scaled_tot = vid_scaled_tot + vidScaled .* gf_tot;
 end
 
 vid_scaled_tot = sign(vid_scaled_tot).*abs(vid_scaled_tot).^(1/2);  %this reuses m2
@@ -53,7 +53,7 @@ detail_enhanced = vid_scaled_tot(2*numOfScales+1:end-2*numOfScales, 2*numOfScale
 detail_enhanced = detail_enhanced/max(abs(detail_enhanced(:)));
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
-    writeVideoToFile(abs(detail_enhanced), 'movie_detail_enhanced_3d', '..\results\3dGabor');
+    writeVideoToFile(abs(detail_enhanced), 'movie_detail_enhanced_3d', '..\results\sorf');
 end
 vid = abs(detail_enhanced);
 implay(vid);
