@@ -15,7 +15,7 @@ if parser.Results.displayMinMax
     fprintf('maximum: %d\n', max_val);
 end
 %% normalize video
-vidNormed = abs(vidIn);
+vidNormed = vidIn-min(vidIn, [], 'all');
 vidNormed = vidNormed / max(vidNormed, [], 'all');
 if parser.Results.displayNormed
     implay(vidNormed, parser.Results.fps);
