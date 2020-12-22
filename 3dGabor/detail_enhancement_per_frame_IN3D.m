@@ -17,7 +17,7 @@ detail_enhanced = ...
     numOfScales , ... scale number
     10, ... base facilitation length
     0, ... alpha
-    2, ... m1
+    1, ... m1
     2  ... m2
     );
 
