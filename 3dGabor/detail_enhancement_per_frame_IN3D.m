@@ -1,8 +1,8 @@
 dump_movies = true;
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 
-vid_matrix = readVideoFromFile('..\results\3dStd\movie_std_3d_diffVarTrue.avi', false);
-vid_matrix = imresize(vid_matrix, 1/3);
+vid_matrix = readVideoFromFile('..\results\no-grid\movie_stdPyramid_noGrid.avi', false);
+vid_matrix = imresize3(vid_matrix, [1/3, 1/3, 1/2] .* size(vid_matrix));
 vid_matrix(vid_matrix > 1) = 1;
 vid_matrix(vid_matrix < 0) = 0;
 
@@ -29,4 +29,5 @@ if (dump_movies)
     writeVideoToFile(abs(detail_enhanced), 'movie_detail_enhanced_3d', '..\results\3dGabor');
 end
 vid = abs(detail_enhanced);
-implay(vid)
+implay(vid);
+maintainFitToWindow();

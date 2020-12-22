@@ -24,6 +24,7 @@ totalVid(1:size(vid1,1),1:size(vid1,2),1:size(vid1,3)) = vid1;
 totalVid(1:size(vid2,1),end-size(vid2,2)+1:end,1:size(vid2,3)) = vid2;
 if parser.Results.verbose
     implay(totalVid, parser.Results.fps);
+    maintainFitToWindow();
 end
 vidDiff = zeros(size(vid1));
 if size(vid1) == size(vid2)
