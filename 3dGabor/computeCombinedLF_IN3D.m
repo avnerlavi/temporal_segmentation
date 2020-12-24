@@ -12,7 +12,7 @@ beta = 0.4;
 vidScalesPyr = cell(nScales);
 
 for k = 1:nScales
-    vidS = imresize3(vidIn,1/k,'Antialiasing',true);
+    vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
     vidOriTot_n=zeros(size(vidS));
     vidOriTot_p=zeros(size(vidS));
     FacilitationLength=max(3, baseFacilitationLength/k);
