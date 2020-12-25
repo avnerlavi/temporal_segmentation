@@ -11,7 +11,8 @@ vid_matrix(vid_matrix < 0) = 0;
 numOfScales = 4;
 vid_matrix = PadVideoReplicate(vid_matrix,2*numOfScales);
 
-elevationHalfAngle = atand(tand(30) / resizeFactors(3));
+elevationHalfAngle = 60;
+elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 detail_enhanced = ...
     computeCombinedLF_IN3D(vid_matrix, ...
     8, ... Azimuths number

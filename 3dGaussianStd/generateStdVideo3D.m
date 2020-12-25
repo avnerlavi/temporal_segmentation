@@ -1,4 +1,4 @@
-dump_movies = true;
+dump_movies = false;
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 
 vid_matrix = readVideoFromFile('..\captcha_running.avi', false);
@@ -19,7 +19,7 @@ detail_enhanced = ...
     );
 
 detail_enhanced = detail_enhanced(2*numOfScales+1:end-2*numOfScales, 2*numOfScales+1:end-2*numOfScales, 2*numOfScales+1:end-2*numOfScales);
-detail_enhanced = detail_enhanced/max(abs(detail_enhanced(:)));
+detail_enhanced = minMaxNorm(detail_enhanced);
 
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)

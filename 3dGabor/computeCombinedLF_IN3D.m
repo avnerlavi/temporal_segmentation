@@ -46,5 +46,5 @@ for k = 1:nScales
     disp(['k',num2str(k)]);
 end
 vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
-vidScaleTot = vidScaleTot / max(abs(vidScaleTot(:)));
+%vidScaleTot = vidScaleTot / max(abs(vidScaleTot(:)));
 end
