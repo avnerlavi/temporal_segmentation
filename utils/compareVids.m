@@ -1,4 +1,4 @@
-function [vidDiff] = compareVids(vid1raw,vid2raw,varargin)
+function [vidDiff, totalVid] = compareVids(vid1raw,vid2raw,varargin)
 %% create default flags and parse optional parameters
 parser = inputParser;
 addRequired(parser, 'vid1raw');

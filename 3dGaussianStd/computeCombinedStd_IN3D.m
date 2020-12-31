@@ -8,7 +8,7 @@ sigmaS = [5,5,0.1];
 Gshort = Gaussian3D([0,0],0,sigmaS,[]);
 for k = nScales:-1:1
     vidS = imresize3(vidIn,1/k,'Antialiasing',true);
-    vidStd = Gaussain3dStd(vidS,Gshort);
+    vidStd = Gaussian3dStd(vidS,Gshort);
     vidOriTot=zeros(size(vidS));
 
     %0 elev handling
@@ -29,11 +29,11 @@ for k = nScales:-1:1
     end
     
     vidOriTot = vidOriTot.^(1/m1);
-    vidScaled = imresize3(vidOriTot.^m2,size(vidIn));
+    vidStdDiff = vidStd - vidOriTot;
+    vidScaled = imresize3(vidStdDiff.^m2,size(vidIn));
     vidScaled = vidScaled/(k^m2);
-    vidScaleTot=vidScaleTot+vidScaled;
+    vidScaleTot = vidScaleTot + vidScaled;
     disp(['k',num2str(k)]);
 end
 vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
-vidScaleTot = vidScaleTot / max(abs(vidScaleTot(:)));
 end

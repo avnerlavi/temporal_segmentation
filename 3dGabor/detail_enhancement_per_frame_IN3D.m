@@ -1,20 +1,23 @@
-dump_movies = true;
+dump_movies = false;
 addpath(genpath('../utils'));
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 
 vid_matrix = readVideoFromFile('..\results\no-grid\movie_stdPyramid_noGrid.avi', false);
-vid_matrix = imresize3(vid_matrix, [1/3, 1/3, 1/2] .* size(vid_matrix));
+resizeFactors = [1/3, 1/3, 1/2];
+vid_matrix = imresize3(vid_matrix, resizeFactors .* size(vid_matrix));
 vid_matrix(vid_matrix > 1) = 1;
 vid_matrix(vid_matrix < 0) = 0;
 
 numOfScales = 4;
 vid_matrix = PadVideoReplicate(vid_matrix,2*numOfScales);
 
+elevationHalfAngle = 60;
+elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 detail_enhanced = ...
     computeCombinedLF_IN3D(vid_matrix, ...
     8, ... Azimuths number
     6, ... elevations number
-    30, ... elevation half angle
+    elevationHalfAngle, ... elevation half angle
     numOfScales , ... scale number
     10, ... base facilitation length
     0, ... alpha
