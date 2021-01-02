@@ -1,5 +1,6 @@
 function [Gaussian] = Gaussian3D(AzElDir,XYOrientation,Sigma,Shape)
 S = max(ceil(Sigma));
+Shape = ceil(Shape);
 if(numel(Shape)~=0)
     if(numel(Shape)==1)
     x = -(Shape-1)/2:(Shape-1)/2;

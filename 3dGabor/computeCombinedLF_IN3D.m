@@ -1,4 +1,6 @@
 function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, baseFacilitationLength, alpha, m1, m2)
+vidIn = PadVideoReplicate(vidIn,2*nScales);
+
 vidScaleTot = zeros(size(vidIn));
 Elevations = linspace(0,elHalfAngle,nElevations+1);
 Elevations = Elevations(2:end);
@@ -46,5 +48,7 @@ for k = 1:nScales
     disp(['k',num2str(k)]);
 end
 vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
-%vidScaleTot = vidScaleTot / max(abs(vidScaleTot(:)));
+
+vidScaleTot = stripVideo(vidScaleTot, 2*nScales);
+vidScaleTot = vidScaleTot/max(abs(vidScaleTot(:)));
 end

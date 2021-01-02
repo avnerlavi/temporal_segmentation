@@ -3,5 +3,5 @@ addpath(genpath('no-grid'));
 addpath(genpath('3dGabor'));
 archiveResults();
 cd 'no-grid';
-StdUsingPyramid;
+detail_enhancement_per_frame_IN3D;
 cd '..';
