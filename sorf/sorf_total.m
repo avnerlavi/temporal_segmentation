@@ -1,9 +1,9 @@
 dump_movies = true;
-addpath(genpath('../3dGabor'));
-addpath(genpath('../utils'));
+root = getenv('TemporalSegmentation');
+addpath(genpath([root,'/3dGabor']));
+addpath(genpath([root,'/utils']));
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
-
-vid_matrix = readVideoFromFile('..\results\no-grid\movie_stdPyramid_noGrid.avi', false);
+vid_matrix = readVideoFromFile([root,'\results\no-grid\movie_stdPyramid_noGrid.avi'], false);
 vid_matrix = imresize(vid_matrix, 1/3);
 vid_matrix(vid_matrix > 1) = 1;
 vid_matrix(vid_matrix < 0) = 0;
@@ -53,7 +53,7 @@ detail_enhanced = vid_scaled_tot(2*numOfScales+1:end-2*numOfScales, 2*numOfScale
 detail_enhanced = detail_enhanced/max(abs(detail_enhanced(:)));
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
-    writeVideoToFile(abs(detail_enhanced), 'movie_detail_enhanced_3d', '..\results\sorf');
+    writeVideoToFile(abs(detail_enhanced), 'movie_detail_enhanced_3d', [root,'\results\sorf']);
 end
 vid = abs(detail_enhanced);
 implay(vid);

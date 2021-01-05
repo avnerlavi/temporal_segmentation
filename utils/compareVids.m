@@ -26,6 +26,7 @@ if parser.Results.verbose
     implay(totalVid, parser.Results.fps);
     maintainFitToWindow();
 end
+
 vidDiff = zeros(size(vid1));
 if size(vid1) == size(vid2)
     vidDiff = vid1 - vid2;

@@ -1,5 +1,6 @@
-vid_matrix = readVideoFromFile('..\results\3dGabor\movie_detail_enhanced_3d.avi', false);
-sizeRef = readVideoFromFile('..\results\no-grid\movie_stdPyramid_noGrid.avi', false);
+root = getenv('TemporalSegmentation');
+vid_matrix = readVideoFromFile([root , '\results\3dGabor\movie_detail_enhanced_3d.avi'], false);
+sizeRef = readVideoFromFile([root , '\results\no-grid\movie_stdPyramid_noGrid.avi'], false);
 facilitationLength = 10;
 vid_trimmed = zeros(size(vid_matrix));
 sizeMask = zeros(size(vid_matrix));
@@ -24,14 +25,15 @@ vid_CC = minMaxNorm(vid_CC);
 g = Gaussian3dIso(3,11);
 g = minMaxNorm(g)/4;
 mask = convn(vid_CC,g,'same');
-vid_CC = imresize3(vid_CC,size(sizeRef));
-vid_CC(vid_CC > 1) = 1;
-vid_CC(vid_CC < 0) = 0;
+% vid_CC = imresize3(vid_CC,size(sizeRef));
+% vid_CC(vid_CC > 1) = 1;
+% vid_CC(vid_CC < 0) = 0;
 %mask = convn(vid_CC,g,'same');
-mask = imresize3(mask,size(sizeRef));
+% mask = imresize3(mask,size(sizeRef));
 mask(mask > 1) = 1;
 mask(mask < 0) = 0;
-implay(0.9*mask.*sizeRef+0.1*sizeRef);
+maskedVid = maskVid(sizeRef,mask) ;
+implay(0.9*maskedVid+0.1*sizeRef);
 
 %% smol gaussian
 g = Gaussian3dIso(1,[]);

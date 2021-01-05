@@ -8,8 +8,8 @@ disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 % % % % % % % % % % % % % %
 %    Read movie to matrix %
 % % % % % % % % % % % % % %
-
-vid_matrix_orig = read_movie('../captcha_running.avi', true);
+root = getenv('TemporalSegmentation');
+vid_matrix_orig = read_movie([root,'/captcha_running.avi'], true);
 
 % % % % % % % % % % % %
 %    Downscale video  %
@@ -48,7 +48,7 @@ disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 %load('vid_after_mask.mat','vid_after_mask');
 
 if (dump_movies)
-    aviobj = VideoWriter(['..\results\tomer+hadar-grid\movie_center_mass_',num2str(block_size),'.avi']);
+    aviobj = VideoWriter([root,'\results\tomer+hadar-grid\movie_center_mass_',num2str(block_size),'.avi']);
     aviobj.Quality = 80;
     open(aviobj);
     for i =1:size(vid_after_mask,3)
@@ -86,7 +86,7 @@ disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 %load('std_vid.mat','Msdt');
 
 if (dump_movies)
-    aviobj = VideoWriter(['..\results\tomer+hadar-grid\movie_std_',num2str(block_size),'.avi']);
+    aviobj = VideoWriter([root,'\results\tomer+hadar-grid\movie_std_',num2str(block_size),'.avi']);
     aviobj.Quality = 80;
     open(aviobj);
     for i =1:size(Msdt,3)
@@ -119,7 +119,7 @@ largest_cc_obj(CC.PixelIdxList{indexOfMax}) = 1;
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 
 if (dump_movies)
-    aviobj = VideoWriter(['..\results\tomer+hadar-grid\movie_std_cc_obj_',num2str(block_size),'.avi']);
+    aviobj = VideoWriter([root,'\results\tomer+hadar-grid\movie_std_cc_obj_',num2str(block_size),'.avi']);
     aviobj.Quality = 80;
     open(aviobj);
     for i =1:size(largest_cc_obj,3)
@@ -182,7 +182,7 @@ end
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 
 if (dump_movies)
-    aviobj = VideoWriter(['..\results\tomer+hadar-grid\movie_prob_map_',num2str(block_size),'.avi']);
+    aviobj = VideoWriter([root,'\results\tomer+hadar-grid\movie_prob_map_',num2str(block_size),'.avi']);
     aviobj.Quality = 80;
     open(aviobj);
     for i =1:size(merge_prob,3)
@@ -195,7 +195,7 @@ end
 % % % % % % % % % % % % % % % % % % % % % %
 %    Combine all results to Final movie   %
 % % % % % % % % % % % % % % % % % % % % % %
-aviobj = VideoWriter(['..\results\tomer+hadar-grid\movie_final_w_cc_obj_',num2str(block_size),'.avi']);
+aviobj = VideoWriter([root,'\results\tomer+hadar-grid\movie_final_w_cc_obj_',num2str(block_size),'.avi']);
 aviobj.Quality = 80;
 open(aviobj);
 for i =1:15
@@ -215,7 +215,7 @@ close(aviobj);
 % % % % % % % % % % % % % % % % % % % % % %
 %    Combine all results to Final movie   %
 % % % % % % % % % % % % % % % % % % % % % %
-aviobj = VideoWriter(['..\results\tomer+hadar-grid\movie_final_w_prob_map_',num2str(block_size),'.avi']);
+aviobj = VideoWriter([root,'\results\tomer+hadar-grid\movie_final_w_prob_map_',num2str(block_size),'.avi']);
 aviobj.Quality = 80;
 open(aviobj);
 for i =1:15

@@ -1,7 +1,7 @@
 dump_movies = true;
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
-
-vid_matrix = readVideoFromFile('../results/no-grid/movie_stdPyramid_noGrid.avi', false);
+root = getenv('TemporalSegmentation');
+vid_matrix = readVideoFromFile([root,'/results/no-grid/movie_stdPyramid_noGrid.avi'], false);
 vid_matrix = imresize(vid_matrix, 0.3);
 vid_matrix(vid_matrix > 1) = 1;
 vid_matrix(vid_matrix < 0) = 0;
@@ -14,7 +14,7 @@ else
 end
 
 if (dump_movies)
-    writeVideoToFile(permuted, ['movie_permuted_',permutedAxis,'-t'], '..\results\xt-yt');
+    writeVideoToFile(permuted, ['movie_permuted_',permutedAxis,'-t'], [root,'\results\xt-yt']);
 end
 
 detail_enhanced_permuted = zeros(size(permuted));
@@ -42,9 +42,9 @@ end
 % detail_enhanced = (detail_enhanced + 1) / 2;
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
-    writeVideoToFile(abs(detail_enhanced_permuted), ['movie_detail_enhanced_permuted_', permutedAxis, '-t'], '..\results\xt-yt');
+    writeVideoToFile(abs(detail_enhanced_permuted), ['movie_detail_enhanced_permuted_', permutedAxis, '-t'], [root,'\results\xt-yt']);
 end
 
 if (dump_movies)
-    writeVideoToFile(abs(detail_enhanced), ['movie_detail_enhanced_', permutedAxis, '-t'], '..\results\xt-yt');
+    writeVideoToFile(abs(detail_enhanced), ['movie_detail_enhanced_', permutedAxis, '-t'], [root,'\results\xt-yt']);
 end

@@ -1,7 +1,7 @@
 dump_movies = false;
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
-
-vid_matrix = readVideoFromFile('..\captcha_running.avi', false);
+root = getenv('TemporalSegmentation');
+vid_matrix = readVideoFromFile([root,'\captcha_running.avi'], false);
 vid_matrix = imresize(vid_matrix, 1/3);
 vid_matrix(vid_matrix > 1) = 1;
 vid_matrix(vid_matrix < 0) = 0;
@@ -23,7 +23,7 @@ detail_enhanced = minMaxNorm(detail_enhanced);
 
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
-    writeVideoToFile(abs(detail_enhanced), 'movie_std_3d', '..\results\3dStd');
+    writeVideoToFile(abs(detail_enhanced), 'movie_std_3d', [root,'\results\3dStd']);
 end
 vid = abs(detail_enhanced);
 implay(vid)
