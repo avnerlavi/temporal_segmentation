@@ -1,10 +1,10 @@
 function [masked] = maskVid(vidInRaw,MaskRaw)
-if(isstring(vidInRaw))
+if(isstring(vidInRaw) || ischar(vidInRaw))
     vidIn = readVideoFromFile(vidInRaw, false);
 else
     vidIn = vidInRaw;
 end
-if(isstring(MaskRaw))
+if(isstring(MaskRaw) || ischar(MaskRaw))
     mask = readVideoFromFile(MaskRaw, false);
 else
     mask =MaskRaw;

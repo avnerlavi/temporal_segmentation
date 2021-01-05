@@ -7,12 +7,12 @@ addOptional(parser, 'verbose', true, @islogical);
 addOptional(parser, 'fps', 20, (@(x) isnumeric(x) && (x > 0)));
 parse(parser, vid1raw, vid2raw, varargin{:});
 %% compare videos
-if(isstring(vid1raw))
+if(isstring(vid1raw) || ischar(vid1raw))
     vid1 = readVideoFromFile(parser.Results.vid1raw, false);
 else
     vid1 = parser.Results.vid1raw;
 end
-if(isstring(vid2raw))
+if(isstring(vid2raw) || ischar(vid2raw))
     vid2 = readVideoFromFile(parser.Results.vid2raw, false);
 else
     vid2 = parser.Results.vid2raw;

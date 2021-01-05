@@ -9,12 +9,12 @@ addOptional(parser, 'method', 'Complementry', @(x) isstring(x)||ischar(x)) ;
 parse(parser, vid1raw, vid2raw, varargin{:});
 
 %% validity handling
-if(isstring(vid1raw))
+if(isstring(vid1raw) || ischar(vid1raw))
     vid1 = readVideoFromFile(parser.Results.vid1raw, false);
 else
     vid1 = parser.Results.vid1raw;
 end
-if(isstring(vid2raw))
+if(isstring(vid2raw) || ischar(vid2raw))
     vid2 = readVideoFromFile(parser.Results.vid2raw, false);
 else
     vid2 = parser.Results.vid2raw;
@@ -23,7 +23,7 @@ if(~isequal(size(vid1),size(vid2))) % size check
     error('Videos must be of equal sizes to overlay')
 end
 if(length(size(vid1))~= 3) % assuming grayscale videos
- error('Videos must be 3 dimentional ')
+ error('Videos must be 3 dimentional')
 end
 
 %% overlay
