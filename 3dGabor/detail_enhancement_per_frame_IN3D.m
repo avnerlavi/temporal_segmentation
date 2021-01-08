@@ -1,8 +1,10 @@
+disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
+
 dump_movies = true;
-generatePyrFlag  = true;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
-disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
+
+generatePyrFlag  = true;
 numOfScales = 4;
 elevationHalfAngle = 60;
 resizeFactors = [2/3, 2/3, 1];
@@ -15,9 +17,10 @@ if(generatePyrFlag)
 else
     vid_matrix = readVideoFromFile(inFileDir, false);
 end
+
 vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
-vid_matrix = PadVideoReplicate(vid_matrix,2*numOfScales);
 elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
+
 detail_enhanced = ...
     computeCombinedLF_IN3D(vid_matrix, ...
     8, ... Azimuths number
@@ -30,8 +33,6 @@ detail_enhanced = ...
     2  ... m2
     );
 
-detail_enhanced = stripVideo(detail_enhanced,2*numOfScales);
-detail_enhanced = detail_enhanced/max(abs(detail_enhanced(:)));
 vidOut = abs(detail_enhanced);
 implay(vidOut);
 maintainFitToWindow();

@@ -1,4 +1,5 @@
 function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, baseFacilitationLength, alpha, m1, m2)
+
 vidIn = PadVideoReplicate(vidIn,2*nScales);
 
 vidScaleTot = zeros(size(vidIn));
@@ -6,12 +7,9 @@ Elevations = linspace(0,elHalfAngle,nElevations+1);
 Elevations = Elevations(2:end);
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-
-gauss_local = Gaussian3D([0, 0], 0, [1,1,1], []);
-gauss_remote = Gaussian3D([0, 0], 0, [3,3,3], []);
-beta = 0.4;
-
 vidScalesPyr = cell(nScales);
+
+
 
 for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
