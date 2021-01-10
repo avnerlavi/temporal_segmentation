@@ -1,6 +1,6 @@
 root = getenv('TemporalSegmentation');
-vid_matrix = readVideoFromFile([root , '\results\iterations\conf_4\vid_conf_4_masked_large.avi'], false);
-sizeRef = readVideoFromFile([root , '\results\no-grid\movie_stdPyramid_noGrid.avi'], false);
+vid_matrix = readVideoFromFile([root , '\results-05-01-2021-20_01\iterations\conf_4\vid_conf_4_masked_large_th_03.avi'], false);
+sizeRef = readVideoFromFile([root , '\results-05-01-2021-20_01\no-grid\movie_stdPyramid_noGrid.avi'], false);
 facilitationLength = 10;
 vid_trimmed = zeros(size(vid_matrix));
 sizeMask = zeros(size(vid_matrix));

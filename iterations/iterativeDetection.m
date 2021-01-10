@@ -1,21 +1,21 @@
 %% initilization
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 dump_movies = true;
-generatePyrFlag = false;
+generatePyrFlag = true;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGabor']));
-inFileDir = [root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
 baseResizeFactors = [1/3 , 1/3 , 1/2];
 
 if(generatePyrFlag)
+    inFileDir = [root,'\captcha_running.avi'];
     vid_matrix_orig = readVideoFromFile(inFileDir, true);
     vid_matrix = imresize(vid_matrix_orig, 0.25);
-    [vid_matrix] = StdUsingPyramidFunc(vid_matrix);
+    vid_matrix = StdUsingPyramidFunc(vid_matrix);
 else
+    inFileDir = [root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
     vid_matrix = readVideoFromFile(inFileDir, false);
 end
-
 
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
@@ -35,7 +35,8 @@ thresholdAreaOfCC = 0.5;
 maskBlurFilt = Gaussian3dIso(3,11);
 maskBlurFilt = minMaxNorm(maskBlurFilt)/4;
 
-totalMask = zeros(size(vid_matrix));
+totalMask = ones(size(vid_matrix));
+gamma = 0.5;
 
 for i=1:2 %parametrize iteration num
     %% detail enhancement
@@ -69,8 +70,5 @@ for i=1:2 %parametrize iteration num
     %% create mask 
     currMask = convn(vidCC,maskBlurFilt,'same');
     currMask = safeResize(currMask,size(vid_matrix));
-    totalMask = max(currMask,totalMask);
+    totalMask = gamma * currMask + (1 - gamma) * totalMask;
 end
-
-
-
