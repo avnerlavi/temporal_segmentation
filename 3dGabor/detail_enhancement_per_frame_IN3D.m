@@ -7,7 +7,7 @@ addpath(genpath([root,'/utils']));
 generatePyrFlag  = true;
 numOfScales = 4;
 elevationHalfAngle = 60;
-resizeFactors = [2/3, 2/3, 1];
+resizeFactors = [1/3, 1/3, 1/2];
 inFileDir = [root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
 %%
 if(generatePyrFlag)

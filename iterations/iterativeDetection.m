@@ -5,7 +5,7 @@ generatePyrFlag = true;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGabor']));
-baseResizeFactors = [1/3 , 1/3 , 1/2];
+baseResizeFactors = [2/3 , 2/3 , 2/2]*1/3;
 
 if(generatePyrFlag)
     inFileDir = [root,'\captcha_running.avi'];
@@ -30,17 +30,18 @@ CCLFParams.resizeFactors = baseResizeFactors;
 
 boundryMaskWidth = ceil(CCLFParams.facilitationLength/4);
 thresholdCC = 0.3;
-thresholdAreaOfCC = 0.5;
+thresholdAreaOfCC = 0.3;
 
 maskBlurFilt = Gaussian3dIso(3,11);
-maskBlurFilt = minMaxNorm(maskBlurFilt)/4;
+maskBlurFilt = minMaxNorm(maskBlurFilt)/8;
 
-totalMask = ones(size(vid_matrix));
-gamma = 0.5;
-
-for i=1:2 %parametrize iteration num
+totalMask = zeros(size(vid_matrix));
+gamma = 1.5;
+iterationNumber = 5; %TODO: link to scales
+maskPyr = cell(1,iterationNumber);
+for i=1:iterationNumber 
     %% detail enhancement
-    CCLFParams.resizeFactors = baseResizeFactors*i;
+    CCLFParams.resizeFactors = baseResizeFactors*((i-1)/2+1);
     detailEnhanced = detailEnhancement3Dfunc(vid_matrix,CCLFParams,false);
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
     %% connected components
@@ -70,5 +71,24 @@ for i=1:2 %parametrize iteration num
     %% create mask 
     currMask = convn(vidCC,maskBlurFilt,'same');
     currMask = safeResize(currMask,size(vid_matrix));
-    totalMask = gamma * currMask + (1 - gamma) * totalMask;
+    maskPyr{i} = currMask;
+    %totalMask = gamma * currMask + (1 - gamma) * totalMask;
+    totalMask = max(currMask ,totalMask.^gamma);
+    
+    
+end
+%% test 
+
+implay(totalMask)
+maintainFitToWindow();
+
+disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
+if (dump_movies)
+    writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
+    for i=1:iterationNumber
+        writeVideoToFile(maskPyr{i}, ['movie_mask_',num2str(baseResizeFactors(1)*((i-1)/2+1),'%.3f'),'_'...
+                                                   ,num2str(baseResizeFactors(2)*((i-1)/2+1),'%.3f'),'_'...
+                                                   ,num2str(baseResizeFactors(3)*((i-1)/2+1),'%.3f')]...
+                                                   ,[root,'\results\iterativeDetection\iterative_mask']);
+    end
 end
