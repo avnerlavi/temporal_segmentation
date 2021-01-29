@@ -33,10 +33,13 @@ thresholdCC = 0.3;
 thresholdAreaOfCC = 0.3;
 
 maskBlurFilt = Gaussian3dIso(3,11);
-maskBlurFilt = minMaxNorm(maskBlurFilt)/8;
+maskBlurFilt = minMaxNorm(maskBlurFilt)/4;
 
 totalMask = zeros(size(vid_matrix));
 gamma = 1.5;
+alpha = 0.5;
+backOff = 0.95;
+SE = strel('sphere',2);
 iterationNumber = 5; %TODO: link to scales
 maskPyr = cell(1,iterationNumber);
 for i=1:iterationNumber 
@@ -72,9 +75,9 @@ for i=1:iterationNumber
     currMask = convn(vidCC,maskBlurFilt,'same');
     currMask = safeResize(currMask,size(vid_matrix));
     maskPyr{i} = currMask;
-    %totalMask = gamma * currMask + (1 - gamma) * totalMask;
-    totalMask = max(currMask ,totalMask.^gamma);
-    
+    totalMask = alpha* currMask + (1 - alpha) * totalMask;
+    %totalMask = max(currMask ,(backOff*totalMask).^gamma);
+    %totalMask = max(imerode(totalMask,SE),currMask);
     
 end
 %% test 
