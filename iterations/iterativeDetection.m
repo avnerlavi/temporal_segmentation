@@ -78,7 +78,6 @@ for i=1:iterationNumber
     totalMask = alpha* currMask + (1 - alpha) * totalMask;
     %totalMask = max(currMask ,(backOff*totalMask).^gamma);
     %totalMask = max(imerode(totalMask,SE),currMask);
-    
 end
 %% test 
 
