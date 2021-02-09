@@ -44,10 +44,11 @@ iterationNumber = 5; %TODO: link to scales
 maskPyr = cell(1,iterationNumber);
 for i=1:iterationNumber 
     %% detail enhancement
-    CCLFParams.resizeFactors = baseResizeFactors*((i-1)/2+1);
+    CCLFParams.resizeFactors = baseResizeFactors*((i-1)/2+1); %TODO: link to scales
     detailEnhanced = detailEnhancement3Dfunc(vid_matrix,CCLFParams,false);
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
-    %% connected components
+    %% connected components 
+    %TODO: into function
     if(i~=1)
         detailEnhanced = detailEnhanced.*safeResize(totalMask,size(detailEnhanced));
     end
@@ -78,6 +79,7 @@ for i=1:iterationNumber
     totalMask = alpha* currMask + (1 - alpha) * totalMask;
     %totalMask = max(currMask ,(backOff*totalMask).^gamma);
     %totalMask = max(imerode(totalMask,SE),currMask);
+    %% connected components two electric boogaloo
 end
 %% test 
 
