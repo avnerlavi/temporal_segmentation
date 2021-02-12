@@ -1,11 +1,13 @@
 function [vidScaleTot] = computeCombinedStd_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, m1, m2)
+vidIn = PadVideoReplicate(vidIn,2*nScales);
 vidScaleTot = zeros(size(vidIn));
 Elevations = linspace(0,elHalfAngle,nElevations+1);
 Elevations = Elevations(2:end);
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-sigmaS = [5,5,0.1];
+sigmaS = [3,3,0.1];
 Gshort = Gaussian3D([0,0],0,sigmaS,[]);
+
 for k = nScales:-1:1
     vidS = imresize3(vidIn,1/k,'Antialiasing',true);
     vidStd = Gaussian3dStd(vidS,Gshort);
@@ -36,4 +38,5 @@ for k = nScales:-1:1
     disp(['k',num2str(k)]);
 end
 vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
+vidScaleTot = stripVideo(vidScaleTot, 2*nScales);
 end
