@@ -5,7 +5,7 @@ Elevations = linspace(0,elHalfAngle,nElevations+1);
 Elevations = Elevations(2:end);
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-sigmaS = [3,3,0.1];
+sigmaS = [5,5,0.1];
 Gshort = Gaussian3D([0,0],0,sigmaS,[]);
 
 for k = nScales:-1:1
@@ -37,6 +37,6 @@ for k = nScales:-1:1
     vidScaleTot = vidScaleTot + vidScaled;
     disp(['k',num2str(k)]);
 end
-vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
+vidScaleTot = sign(vidScaleTot).*(abs(vidScaleTot).^(1/m2));
 vidScaleTot = stripVideo(vidScaleTot, 2*nScales);
 end

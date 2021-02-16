@@ -26,15 +26,16 @@ vid_std = ...
     CCLFParams.m2  ...
     );
 
-vidOut = minMaxNorm(vid_std);
+vid_std_squared = sign(vid_std).*(vid_std.^2);
+vidOut = minMaxNorm(vid_std_squared);
 implay(vidOut);
 maintainFitToWindow();
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
-    writeVideoToFile(vidOut, 'movie_vid_std_3d', [root,'\results\3dGabor']);
+    writeVideoToFile(vidOut, 'movie_vid_std_3d', [root,'\results\3dStd']);
     max_val = max(vid_std, [], 'all');
     min_val = min(vid_std, [], 'all');
-    saveParams([root,'\results\3dGabor'], generatePyrFlag, inFileDir, CCLFParams, min_val, max_val);
+    saveParams([root,'\results\3dStd'], generatePyrFlag, inFileDir, CCLFParams, min_val, max_val);
 end
 
 

@@ -1,14 +1,14 @@
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 
-dump_movies = true;
+dump_movies = false;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
-generatePyrFlag  = true;
+generatePyrFlag  = false;
 numOfScales = 4;
 elevationHalfAngle = 60;
 resizeFactors = [1/3, 1/3, 1/2];
-inFileDir = [root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
+inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\normed_then_squared\movie_3d_std.avi";%[root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];

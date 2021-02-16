@@ -1,7 +1,7 @@
 %% initilization
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
-dump_movies = true;
-generatePyrFlag = true;
+dump_movies = false;
+generatePyrFlag = false;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGabor']));
@@ -13,7 +13,7 @@ if(generatePyrFlag)
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     vid_matrix = StdUsingPyramidFunc(vid_matrix);
 else
-    inFileDir = [root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
+    inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\normed_then_squared\movie_3d_std.avi";
     vid_matrix = readVideoFromFile(inFileDir, false);
 end
 
