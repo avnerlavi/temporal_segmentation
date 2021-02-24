@@ -1,6 +1,6 @@
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 
-dump_movies = false;
+dump_movies = true;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
@@ -8,7 +8,7 @@ generatePyrFlag  = false;
 numOfScales = 4;
 elevationHalfAngle = 60;
 resizeFactors = [1/3, 1/3, 1/2];
-inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\normed_then_squared\movie_3d_std.avi";%[root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
+inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\stdfilt_instead_of_gaussian3dstd\std\movie_vid_std_3d.avi";%[root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -17,6 +17,7 @@ if(generatePyrFlag)
     [vid_matrix] = StdUsingPyramidFunc(vid_matrix);
 else
     vid_matrix = readVideoFromFile(inFileDir, false);
+%     vid_matrix = sqrt(vid_matrix) .* (vid_matrix > 0);
 end
 
 vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));

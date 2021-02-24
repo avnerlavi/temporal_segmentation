@@ -9,12 +9,12 @@ vid_matrix_orig = readVideoFromFile(inFileDir, false);
 vid_matrix = imresize(vid_matrix_orig, 0.25);
 
 CCLFParams = struct;
-CCLFParams.numOfScales = 4;
-CCLFParams.elevationHalfAngle = 60;
-CCLFParams.azimuthNum = 1;
+CCLFParams.numOfScales = 1;
+CCLFParams.elevationHalfAngle = 0;
+CCLFParams.azimuthNum = 4;
 CCLFParams.elevationNum = 1;
 CCLFParams.m1 = 1;
-CCLFParams.m2 = 2;
+CCLFParams.m2 = 1;
 
 vid_std = ...
     computeCombinedStd_IN3D(vid_matrix, ...
@@ -35,7 +35,7 @@ if (dump_movies)
     writeVideoToFile(vidOut, 'movie_vid_std_3d', [root,'\results\3dStd']);
     max_val = max(vid_std, [], 'all');
     min_val = min(vid_std, [], 'all');
-    saveParams([root,'\results\3dStd'], generatePyrFlag, inFileDir, CCLFParams, min_val, max_val);
+    saveParams([root,'\results\3dStd'], inFileDir, CCLFParams, min_val, max_val);
 end
 
 

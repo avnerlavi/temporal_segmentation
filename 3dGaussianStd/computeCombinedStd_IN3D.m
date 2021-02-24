@@ -5,12 +5,12 @@ Elevations = linspace(0,elHalfAngle,nElevations+1);
 Elevations = Elevations(2:end);
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-sigmaS = [5,5,0.1];
+sigmaS = [3,3,0.1];
 Gshort = Gaussian3D([0,0],0,sigmaS,[]);
 
 for k = nScales:-1:1
     vidS = imresize3(vidIn,1/k,'Antialiasing',true);
-    vidStd = Gaussian3dStd(vidS,Gshort);
+    vidStd = stdfilt(vidS,ones(5,5,1));
     vidOriTot=zeros(size(vidS));
 
     %0 elev handling
