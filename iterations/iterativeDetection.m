@@ -1,6 +1,6 @@
 %% initilization
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
-dump_movies = false;
+dump_movies = true;
 generatePyrFlag = false;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
@@ -13,7 +13,7 @@ if(generatePyrFlag)
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     vid_matrix = StdUsingPyramidFunc(vid_matrix);
 else
-    inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\normed_then_squared\movie_3d_std.avi";
+    inFileDir = "F:\Matlab\docs\temporal_segmentation\results\3dStd\stdVid_4_3_az_el_harmonic_-1\movie_vid_std_3d.avi";%[root,'\results\3dStd\movie_3d_std.avi'];
     vid_matrix = readVideoFromFile(inFileDir, false);
 end
 
