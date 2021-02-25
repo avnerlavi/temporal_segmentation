@@ -8,7 +8,7 @@ generatePyrFlag  = false;
 numOfScales = 4;
 elevationHalfAngle = 60;
 resizeFactors = [1/3, 1/3, 1/2];
-inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\std_min\movie_vid_std_3d.avi";%[root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
+inFileDir = [root,'\results\3dStd\movie_vid_std_3d.avi'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -25,7 +25,7 @@ CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 CCLFParams.azimuthNum = 8;
-CCLFParams.elevationNum = 6;
+CCLFParams.elevationNum = 7;
 CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;
 CCLFParams.m1 = 1;

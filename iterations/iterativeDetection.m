@@ -5,7 +5,6 @@ generatePyrFlag = false;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGabor']));
-baseResizeFactors = [2/3 , 2/3 , 2/2]*1/3;
 
 if(generatePyrFlag)
     inFileDir = [root,'\captcha_running.avi'];
@@ -13,39 +12,46 @@ if(generatePyrFlag)
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     vid_matrix = StdUsingPyramidFunc(vid_matrix);
 else
-    inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\std_min\movie_vid_std_3d.avi";%[root,'\results\3dStd\movie_3d_std.avi'];
+    inFileDir = [root,'\results\3dStd\movie_vid_std_3d.avi'];
     vid_matrix = readVideoFromFile(inFileDir, false);
 end
 
-%vid_matrix = minMaxNorm(sign(vid_std_single).*(vid_std_single.^2));
+resizeParams = struct;
+resizeParams.initialReduction = 3;
+resizeParams.targetResizeFactors  = [2/3 , 2/3 , 2/2];
+resizeParams.resizeIncrement = 0.25;
+baseResizeFactors  = resizeParams.targetResizeFactors./resizeParams.initialReduction;
+iterationNumber = (resizeParams.initialReduction-1)/resizeParams.resizeIncrement +1;
+
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = 60;
 CCLFParams.azimuthNum = 8;
-CCLFParams.elevationNum = 6;
+CCLFParams.elevationNum = 7;
 CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;
 CCLFParams.m1 = 1;
 CCLFParams.m2 = 1;
 CCLFParams.resizeFactors = baseResizeFactors;
-
 boundryMaskWidth = ceil(CCLFParams.facilitationLength/4);
-thresholdCC = 0.3;
-thresholdAreaOfCC = 0.3;
 
-maskBlurFilt = Gaussian3dIso(3,11);
-maskBlurFilt = minMaxNorm(maskBlurFilt)/4;
+thresholdCC = 0.2;
+thresholdAreaOfCC = 0.1;
+alpha = 0.125;
 
-totalMask = zeros(size(vid_matrix));
-gamma = 1.5;
-alpha = 0.5;
-backOff = 0.95;
-SE = strel('sphere',2);
-iterationNumber = 5; %TODO: link to scales
+MaskGaussianParams = struct;
+MaskGaussianParams.sigma = 4;
+MaskGaussianParams.shape = 13;
+MaskGaussianParams.maxVal = 1/4;
+maskBlurFilt = Gaussian3dIso(MaskGaussianParams.sigma,MaskGaussianParams.shape);
+maskBlurFilt = minMaxNorm(maskBlurFilt)*MaskGaussianParams.maxVal;
+
+totalMask = ones(size(vid_matrix));
+
 maskPyr = cell(1,iterationNumber);
 for i=1:iterationNumber 
     %% detail enhancement
-    CCLFParams.resizeFactors = baseResizeFactors*((i-1)/2+1); %TODO: link to scales
+    CCLFParams.resizeFactors = baseResizeFactors*((i-1)*resizeParams.resizeIncrement+1);
     detailEnhanced = detailEnhancement3Dfunc(vid_matrix,CCLFParams,false);
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
     %% connected components 
@@ -78,9 +84,6 @@ for i=1:iterationNumber
     currMask = safeResize(currMask,size(vid_matrix));
     maskPyr{i} = currMask;
     totalMask = alpha* currMask + (1 - alpha) * totalMask;
-    %totalMask = max(currMask ,(backOff*totalMask).^gamma);
-    %totalMask = max(imerode(totalMask,SE),currMask);
-    %% connected components two electric boogaloo
 end
 %% test 
 
@@ -91,9 +94,14 @@ disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
     writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
     for i=1:iterationNumber
-        writeVideoToFile(maskPyr{i}, ['movie_mask_',num2str(baseResizeFactors(1)*((i-1)/2+1),'%.3f'),'_'...
-                                                   ,num2str(baseResizeFactors(2)*((i-1)/2+1),'%.3f'),'_'...
-                                                   ,num2str(baseResizeFactors(3)*((i-1)/2+1),'%.3f')]...
+        writeVideoToFile(maskPyr{i}, ['movie_mask_',num2str(baseResizeFactors(1)*((i-1)*resizeParams.resizeIncrement+1),'%.3f'),'_'...
+                                                   ,num2str(baseResizeFactors(2)*((i-1)*resizeParams.resizeIncrement+1),'%.3f'),'_'...
+                                                   ,num2str(baseResizeFactors(3)*((i-1)*resizeParams.resizeIncrement+1),'%.3f')]...
                                                    ,[root,'\results\iterativeDetection\iterative_mask']);
     end
+    
+    saveParams([root,'\results\iterativeDetection\iterative_mask'],generatePyrFlag ... 
+        ,resizeParams,CCLFParams,thresholdCC,thresholdAreaOfCC,alpha,MaskGaussianParams);
+    save([root,'\results\iterativeDetection\iterative_mask\params.mat'],'generatePyrFlag' ... 
+        ,'resizeParams','CCLFParams','thresholdCC','thresholdAreaOfCC','alpha','MaskGaussianParams');
 end

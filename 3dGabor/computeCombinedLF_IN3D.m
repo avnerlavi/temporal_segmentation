@@ -6,7 +6,7 @@ totalIterationNumber = nScales * nElevations * nAzimuths + nScales;
 vidIn = PadVideoReplicate(vidIn,2*nScales);
 
 vidScaleTot = zeros(size(vidIn));
-Elevations = linspace(0,elHalfAngle,nElevations+1);
+Elevations = linspace(0,elHalfAngle,nElevations);
 Elevations = Elevations(2:end);
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
