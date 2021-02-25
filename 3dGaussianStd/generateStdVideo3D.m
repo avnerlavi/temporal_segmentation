@@ -11,11 +11,11 @@ vid_matrix = imresize(vid_matrix_orig, 0.25);
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = 60;
-CCLFParams.azimuthNum = 4;
-CCLFParams.elevationNum = 3;
-CCLFParams.sigmaSpatial = [  3,  3,0.1];
-CCLFParams.sigmTemporal = [0.1,0.1,  7];
-CCLFParams.m1 = -2;
+CCLFParams.azimuthNum = 1;
+CCLFParams.elevationNum = 1;
+CCLFParams.sigmaSpatial =  [  3,  3,0.1];
+CCLFParams.sigmaTemporal = [0.1,0.1,  7];
+CCLFParams.m1 = 1;
 CCLFParams.m2 = 2;
 
 vid_std = ...
@@ -25,7 +25,7 @@ vid_std = ...
     CCLFParams.elevationHalfAngle, ...
     CCLFParams.numOfScales, ...
     CCLFParams.sigmaSpatial, ...
-    CCLFParams.sigmTemporal, ...
+    CCLFParams.sigmaTemporal, ...
     CCLFParams.m1, ...
     CCLFParams.m2  ...
     );
@@ -39,6 +39,8 @@ if (dump_movies)
     writeVideoToFile(vidOut, 'movie_vid_std_3d', [root,'\results\3dStd']);
     max_val = max(vid_std, [], 'all');
     min_val = min(vid_std, [], 'all');
-    saveParams([root,'\results\3dStd'], inFileDir, CCLFParams, min_val, max_val);
-    save([root,'\results\3dStd\params.mat'], 'inFileDir', 'CCLFParams', 'min_val', 'max_val');
+    max_val_squared = max(vid_std_squared, [], 'all');
+    min_val_squared = min(vid_std_squared, [], 'all');
+    saveParams([root,'\results\3dStd'], inFileDir, CCLFParams, min_val, max_val, min_val_squared, max_val_squared);
+    save([root,'\results\3dStd\params.mat'], 'inFileDir', 'CCLFParams', 'min_val', 'max_val', 'min_val_squared', 'max_val_squared');
 end

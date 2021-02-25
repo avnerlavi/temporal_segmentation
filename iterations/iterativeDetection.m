@@ -13,19 +13,20 @@ if(generatePyrFlag)
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     vid_matrix = StdUsingPyramidFunc(vid_matrix);
 else
-    inFileDir = "F:\Matlab\docs\temporal_segmentation\results\3dStd\stdVid_4_3_az_el_harmonic_-1\movie_vid_std_3d.avi";%[root,'\results\3dStd\movie_3d_std.avi'];
+    inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\std_min\movie_vid_std_3d.avi";%[root,'\results\3dStd\movie_3d_std.avi'];
     vid_matrix = readVideoFromFile(inFileDir, false);
 end
 
+%vid_matrix = minMaxNorm(sign(vid_std_single).*(vid_std_single.^2));
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = 60;
 CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 6;
-CCLFParams.facilitationLength = 10;
+CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;
 CCLFParams.m1 = 1;
-CCLFParams.m2 = 2;
+CCLFParams.m2 = 1;
 CCLFParams.resizeFactors = baseResizeFactors;
 
 boundryMaskWidth = ceil(CCLFParams.facilitationLength/4);

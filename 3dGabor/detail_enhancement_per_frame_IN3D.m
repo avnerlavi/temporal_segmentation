@@ -8,7 +8,7 @@ generatePyrFlag  = false;
 numOfScales = 4;
 elevationHalfAngle = 60;
 resizeFactors = [1/3, 1/3, 1/2];
-inFileDir = "F:\Matlab\docs\temporal_segmentation\results\3dStd\stdVid_4_3_az_el_min\movie_vid_std_3d.avi";%[root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
+inFileDir = "C:\Users\Avner\Documents\Elec. Eng. II\Project\temporal_segmentation\results\3dStd\std_min\movie_vid_std_3d.avi";%[root,'\results\no-grid\movie_stdPyramid_noGrid.avi'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -26,10 +26,10 @@ CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 6;
-CCLFParams.facilitationLength = 10;
+CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;
 CCLFParams.m1 = 1;
-CCLFParams.m2 = 2;
+CCLFParams.m2 = 1;
 
 detail_enhanced = ...
     computeCombinedLF_IN3D(vid_matrix, ...
