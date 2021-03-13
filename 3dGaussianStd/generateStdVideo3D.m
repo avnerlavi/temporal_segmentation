@@ -4,9 +4,9 @@ dump_movies = true;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
-inFileDir = [root,'/captcha_running.avi'];
+inFileDir = "C:\Users\Avner\Downloads\video (online-video-cutter.com).mp4";%["C:\Users\Avner\Documents\Elec. Eng. II\Project\Old Code\14.10.20\Shape_from_motion_only_online-video-cutter.mp4"];
 vid_matrix_orig = readVideoFromFile(inFileDir, false);
-vid_matrix = imresize(vid_matrix_orig, 0.25);
+%vid_matrix = imresize(vid_matrix_orig, 0.25);
 
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
@@ -41,6 +41,6 @@ if (dump_movies)
     min_val = min(vid_std, [], 'all');
     max_val_squared = max(vid_std_squared, [], 'all');
     min_val_squared = min(vid_std_squared, [], 'all');
-    saveParams([root,'\results\3dStd'], inFileDir, CCLFParams, min_val, max_val, min_val_squared, max_val_squared);
+    saveParams([root,'\results\3dStd'], inFileDir, resizeFactors, CCLFParams, min_val, max_val, min_val_squared, max_val_squared);
     save([root,'\results\3dStd\params.mat'], 'inFileDir', 'CCLFParams', 'min_val', 'max_val', 'min_val_squared', 'max_val_squared');
 end

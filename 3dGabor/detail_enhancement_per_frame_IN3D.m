@@ -7,11 +7,11 @@ addpath(genpath([root,'/utils']));
 generatePyrFlag  = false;
 numOfScales = 4;
 elevationHalfAngle = 60;
-resizeFactors = [1/3, 1/3, 1/2];
-inFileDir = [root,'\results\3dStd\movie_vid_std_3d.avi'];
+resizeFactors = [1/9, 1/9, 1/2];
+inFileDir = "C:\Users\Avner\Downloads\video (online-video-cutter.com).mp4";%[root,'\results\3dStd\movie_vid_std_3d.avi'];
 %%
 if(generatePyrFlag)
-    inFileDir = [root,'/captcha_running.avi'];
+    inFileDir = "C:\Users\Avner\Downloads\video (online-video-cutter.com).mp4"; %[root,'/captcha_running.avi'];
     vid_matrix_orig = readVideoFromFile(inFileDir, true);
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     [vid_matrix] = StdUsingPyramidFunc(vid_matrix);
