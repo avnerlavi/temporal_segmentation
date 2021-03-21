@@ -6,7 +6,7 @@ addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
 numOfScales = 4;
-elevationHalfAngle = [77.4712,77.4712];
+elevationHalfAngle = 60;
 resizeFactors = [1/9, 1/9, 1/2];
 inFileDir = [root ,'/resources/video_online-video-cutter.com.mp4'];
 %%
@@ -24,8 +24,8 @@ vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
-CCLFParams.azimuthNum = 8;
-CCLFParams.elevationNum = 1;
+CCLFParams.azimuthNum = 2;
+CCLFParams.elevationNum = 7;
 CCLFParams.activationThreshold = 0.03;%for runing man - 0.3
 CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;
@@ -46,10 +46,17 @@ detail_enhanced = ...
     );
 
 vidOut = abs(detail_enhanced);
+minVideoValue = min(detail_enhanced(:));
+maxVideoValue = max(detail_enhanced(:));
 implay(vidOut);
 maintainFitToWindow();
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
-    writeVideoToFile(abs(detail_enhanced), 'movie_detail_enhanced_3d', [root,'\results\3dGabor']);
-    saveParams([root,'\results\3dGabor'], generatePyrFlag, inFileDir, resizeFactors, elevationHalfAngle, CCLFParams);
+    writeVideoToFile(minMaxNorm(detail_enhanced), ...
+        'movie_detail_enhanced_3d_minmax', [root,'\results\3dGabor\detail_enhancement']);
+    writeVideoToFile(abs(detail_enhanced), ...
+        'movie_detail_enhanced_3d_abs', [root,'\results\3dGabor\detail_enhancement']);
+    saveParams([root,'\results\3dGabor\detail_enhancement'], ...
+        generatePyrFlag, inFileDir, resizeFactors, elevationHalfAngle, CCLFParams, ...
+        minVideoValue, maxVideoValue);
 end
