@@ -6,12 +6,14 @@ addpath(genpath([root,'/utils']));
 inFileDir = [root ,'/resources/video_online-video-cutter.com.mp4'];
 vid_matrix_orig = readVideoFromFile(inFileDir, false);
 %vid_matrix = imresize(vid_matrix_orig, 0.25);
+resizeFactors = [1/9, 1/9, 1/2];
+vid_matrix = safeResize(vid_matrix_orig, resizeFactors.*size(vid_matrix_orig));
 
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = 60;
-CCLFParams.azimuthNum = 4;
-CCLFParams.elevationNum = 4;
+CCLFParams.azimuthNum = 1;
+CCLFParams.elevationNum = 1;
 CCLFParams.sigmaSpatial =  [  3,  3,0.1];
 CCLFParams.sigmaTemporal = [0.1,0.1,  7];
 CCLFParams.m1 = 1;

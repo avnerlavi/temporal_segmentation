@@ -19,7 +19,7 @@ end
 resizeParams = struct;
 resizeParams.initialReduction = 3;
 resizeParams.targetResizeFactors  = [2/3 , 2/3 , 2/2];
-resizeParams.resizeIncrement = 0.25;
+resizeParams.resizeIncrement = 0.5;
 baseResizeFactors  = resizeParams.targetResizeFactors./resizeParams.initialReduction;
 iterationNumber = (resizeParams.initialReduction-1)/resizeParams.resizeIncrement +1;
 
@@ -35,8 +35,8 @@ CCLFParams.m2 = 1;
 CCLFParams.resizeFactors = baseResizeFactors;
 boundryMaskWidth = ceil(CCLFParams.facilitationLength/4);
 
-thresholdCC = 0.2;
-thresholdAreaOfCC = 0.1;
+thresholdCC = 0.3;
+thresholdAreaOfCC = 0.5;
 alpha = 0.125;
 
 MaskGaussianParams = struct;
