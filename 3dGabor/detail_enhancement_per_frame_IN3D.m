@@ -6,12 +6,12 @@ addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
 numOfScales = 4;
-elevationHalfAngle = 60;
+elevationHalfAngle = [77.4712,77.4712];
 resizeFactors = [1/9, 1/9, 1/2];
-inFileDir = "C:\Users\Avner\Downloads\video (online-video-cutter.com).mp4";%[root,'\results\3dStd\movie_vid_std_3d.avi'];
+inFileDir = [root ,'/resources/video_online-video-cutter.com.mp4'];
 %%
 if(generatePyrFlag)
-    inFileDir = "C:\Users\Avner\Downloads\video (online-video-cutter.com).mp4"; %[root,'/captcha_running.avi'];
+    inFileDir = [root,'/captcha_running.avi'];
     vid_matrix_orig = readVideoFromFile(inFileDir, true);
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     [vid_matrix] = StdUsingPyramidFunc(vid_matrix);
@@ -25,7 +25,8 @@ CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 CCLFParams.azimuthNum = 8;
-CCLFParams.elevationNum = 7;
+CCLFParams.elevationNum = 1;
+CCLFParams.activationThreshold = 0.03;%for runing man - 0.3
 CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;
 CCLFParams.m1 = 1;
@@ -37,6 +38,7 @@ detail_enhanced = ...
     CCLFParams.elevationNum, ...
     CCLFParams.elevationHalfAngle, ...
     CCLFParams.numOfScales , ...
+    CCLFParams.activationThreshold, ...
     CCLFParams.facilitationLength, ...
     CCLFParams.alpha, ...
     CCLFParams.m1, ...

@@ -3,8 +3,7 @@ disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 dump_movies = true;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
-
-inFileDir = "C:\Users\Avner\Downloads\video (online-video-cutter.com).mp4";%["C:\Users\Avner\Documents\Elec. Eng. II\Project\Old Code\14.10.20\Shape_from_motion_only_online-video-cutter.mp4"];
+inFileDir = [root ,'/resources/video_online-video-cutter.com.mp4'];
 vid_matrix_orig = readVideoFromFile(inFileDir, false);
 %vid_matrix = imresize(vid_matrix_orig, 0.25);
 
