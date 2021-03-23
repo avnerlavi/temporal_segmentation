@@ -1,5 +1,6 @@
 function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, activationThreshold, baseFacilitationLength, alpha, m1, m2)
-
+Nvals = zeros(3,nScales * nElevations * nAzimuths + nScales);
+Pvals = zeros(3,nScales * nElevations * nAzimuths + nScales);
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
 totalIterationNumber = nScales * nElevations * nAzimuths + nScales;
@@ -23,7 +24,7 @@ end
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
 vidScalesPyr = cell(nScales);
-
+n = 1;
 for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
     vidOriTot_n=zeros(size(vidS));
@@ -35,6 +36,11 @@ for k = 1:nScales
         elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
+        disp(['elevation: ',num2str(0),' azimuth: ',num2str(0), ...
+            ' valueN: ', num2str(max(LF_n(5:end-5,5:end-5,5:end-5),[],'all')),' valueP: ', num2str(max(LF_p(5:end-5,5:end-5,5:end-5),[],'all'))])
+        Nvals(:,n) = [0,0,max(LF_n(5:end-5,5:end-5,5:end-5),[],'all')];
+        Pvals(:,n) = [0,0,max(LF_p(5:end-5,5:end-5,5:end-5),[],'all')];
+        n=n+1;
     end
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
@@ -43,12 +49,15 @@ for k = 1:nScales
             elevationStart = Elevations(j) - Elevations(1)/2;
             elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
             elevationNormFactor = 1;%cosd(elevationStart) - cosd(elevationEnd);
-%             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
-%             vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
             vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
+            disp(['elevation: ',num2str(Elevations(j)),' azimuth: ',num2str(Azimuths(i)),...
+                 ' valueN: ', num2str(max(LF_n(5:end-5,5:end-5,5:end-5),[],'all')),' valueP: ', num2str(max(LF_p(5:end-5,5:end-5,5:end-5),[],'all'))])
+        Nvals(:,n) = [Elevations(j),Azimuths(i),max(LF_n(5:end-5,5:end-5,5:end-5),[],'all')];
+        Pvals(:,n) = [Elevations(j),Azimuths(i),max(LF_p(5:end-5,5:end-5,5:end-5),[],'all')];
+        n=n+1;
         end
     end
     
