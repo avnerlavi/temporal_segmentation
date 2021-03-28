@@ -7,7 +7,7 @@ addpath(genpath([root,'/utils']));
 generatePyrFlag  = false;
 elevationHalfAngle = 90;
 resizeFactors = [1,1,1];%[1/9, 1/9, 1/2];
-inFileDir = [root ,'/ImpulseCheckingVids/movingLine.avi'];%[root ,'/resources/video_online-video-cutter.com.mp4'];
+inFileDir = [root ,'/ImpulseCheckingVids/movingDot.avi'];%[root ,'/resources/video_online-video-cutter.com.mp4'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -19,11 +19,12 @@ else
 end
 
 vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
+vid_matrix = vid_matrix-0.5;
 CCLFParams = struct;
 CCLFParams.numOfScales = 1;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
-CCLFParams.azimuthNum = 8;
-CCLFParams.elevationNum = 7;
+CCLFParams.azimuthNum = 72;
+CCLFParams.elevationNum = 19;
 CCLFParams.activationThreshold = 0.03;%for runing man - 0.3
 CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;

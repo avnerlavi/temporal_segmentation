@@ -37,9 +37,9 @@ for k = 1:nScales
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
         disp(['elevation: ',num2str(0),' azimuth: ',num2str(0), ...
-            ' valueN: ', num2str(max(LF_n(5:end-5,5:end-5,5:end-5),[],'all')),' valueP: ', num2str(max(LF_p(5:end-5,5:end-5,5:end-5),[],'all'))])
-        Nvals(:,n) = [0,0,max(LF_n(5:end-5,5:end-5,5:end-5),[],'all')];
-        Pvals(:,n) = [0,0,max(LF_p(5:end-5,5:end-5,5:end-5),[],'all')];
+            ' valueN: ', num2str(max(stripVideo(LF_n,2*nScales+3),[],'all')),' valueP: ', num2str(max(stripVideo(LF_p,2*nScales+3),[],'all'))])
+        Nvals(:,n) = [0,0,max(stripVideo(LF_n,2*nScales+3),[],'all')];
+        Pvals(:,n) = [0,0,max(stripVideo(LF_p,2*nScales+3),[],'all')];
         n=n+1;
     end
     for i = 1:length(Azimuths)
@@ -54,9 +54,9 @@ for k = 1:nScales
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
             disp(['elevation: ',num2str(Elevations(j)),' azimuth: ',num2str(Azimuths(i)),...
-                 ' valueN: ', num2str(max(LF_n(5:end-5,5:end-5,5:end-5),[],'all')),' valueP: ', num2str(max(LF_p(5:end-5,5:end-5,5:end-5),[],'all'))])
-        Nvals(:,n) = [Elevations(j),Azimuths(i),max(LF_n(5:end-5,5:end-5,5:end-5),[],'all')];
-        Pvals(:,n) = [Elevations(j),Azimuths(i),max(LF_p(5:end-5,5:end-5,5:end-5),[],'all')];
+                 ' valueN: ', num2str(max(stripVideo(LF_n,2*nScales+3),[],'all')),' valueP: ', num2str(max(stripVideo(LF_p,2*nScales+3),[],'all'))])
+        Nvals(:,n) = [Elevations(j),Azimuths(i),max(stripVideo(LF_n,2*nScales+3),[],'all')];
+        Pvals(:,n) = [Elevations(j),Azimuths(i),max(stripVideo(LF_p,2*nScales+3),[],'all')];
         n=n+1;
         end
     end
@@ -76,6 +76,28 @@ vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
 
 vidScaleTot = stripVideo(vidScaleTot, 2*nScales);
 vidScaleTot = vidScaleTot/max(abs(vidScaleTot(:)));
-
+Ncart = [Nvals(3,:).*sind(Nvals(1,:)).*cosd(Nvals(2,:));Nvals(3,:).*sind(Nvals(1,:)).*sind(Nvals(2,:));Nvals(3,:).*cosd(Nvals(1,:))];
+Pcart = [Pvals(3,:).*sind(Pvals(1,:)).*cosd(Pvals(2,:));Pvals(3,:).*sind(Pvals(1,:)).*sind(Pvals(2,:));Pvals(3,:).*cosd(Pvals(1,:))];
+sphere = [sind(Pvals(1,:)).*cosd(Pvals(2,:));sind(Pvals(1,:)).*sind(Pvals(2,:));cosd(Pvals(1,:))];
+limit = max([abs(Ncart(:));abs(Pcart(:))]);
+figure()
+subplot(1,2,1)
+scatter3(Ncart(1,:),Ncart(2,:),Ncart(3,:))
+hold on 
+scatter3(sphere(1,:),sphere(2,:),sphere(3,:))
+hold off
+xlim([-limit,limit])
+ylim([-limit,limit])
+zlim([-limit,limit])
+title('Gabor Impulse - Negative')
+subplot(1,2,2)
+scatter3(Pcart(1,:),Pcart(2,:),Pcart(3,:))
+hold on 
+scatter3(sphere(1,:),sphere(2,:),sphere(3,:))
+hold off
+xlim([-limit,limit])
+ylim([-limit,limit])
+zlim([-limit,limit])
+title('Gabor Impulse - Positive')
 close(w);
 end
