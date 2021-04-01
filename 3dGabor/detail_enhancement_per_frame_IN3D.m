@@ -5,10 +5,9 @@ root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
-numOfScales = 4;
-elevationHalfAngle = 60;
-resizeFactors = [1/9, 1/9, 1/2];
-inFileDir = [root ,'/resources/video_online-video-cutter.com.mp4'];
+elevationHalfAngle = [30, 90];
+resizeFactors = [1/4, 1/4, 1/4];
+inFileDir = [root ,'/resources/ultrasound_1_cropped.avi'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -24,13 +23,13 @@ vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
-CCLFParams.azimuthNum = 2;
+CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 7;
 CCLFParams.activationThreshold = 0.03;%for runing man - 0.3
-CCLFParams.facilitationLength = 16;
+CCLFParams.facilitationLength = 5;
 CCLFParams.alpha = 0;
 CCLFParams.m1 = 1;
-CCLFParams.m2 = 1;
+CCLFParams.m2 = 2;
 
 detail_enhanced = ...
     computeCombinedLF_IN3D(vid_matrix, ...

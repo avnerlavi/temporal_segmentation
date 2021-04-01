@@ -7,7 +7,7 @@ addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGabor']));
 
 if(generatePyrFlag)
-    inFileDir = [root,'\captcha_running.avi'];
+    inFileDir = [root,'\resources\captcha_running.avi'];
     vid_matrix_orig = readVideoFromFile(inFileDir, true);
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     vid_matrix = StdUsingPyramidFunc(vid_matrix);
