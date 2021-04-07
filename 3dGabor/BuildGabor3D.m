@@ -7,7 +7,10 @@ Gaus3d_1 = Gaussian3D([Azimuth,Elevation],0,[sigma1, sigma1, sigmaT],5);
 Gaus3d_2 = Gaussian3D([Azimuth,Elevation],0,[sigma2, sigma2, sigmaT],5);
 Gaus3d_3 = Gaussian3D([Azimuth,Elevation],0,[sigma3, sigma3, sigmaT],5);
 GausDiff = Gaus3d_1 - 2*Gaus3d_2 + Gaus3d_3;
-Gab3d  = GausDiff / max(abs(GausDiff),[],'all');
+[distance2D] = PlanarDist([Azimuth,Elevation],5);
+Gab3d = GausDiff./(distance2D +1); 
+Gab3d = Gab3d - mean(Gab3d,'all');
+Gab3d = Gab3d / max(abs(Gab3d),[],'all');
 
 % Shape = 5;
 % sigma=8/5;
