@@ -88,7 +88,7 @@ scatter3(sphere(1,:),sphere(2,:),sphere(3,:))
 hold off
 xlim([-limit,limit])
 ylim([-limit,limit])
-zlim([-limit,limit])
+zlim([0,limit])
 title('Gabor Impulse - Negative')
 subplot(1,2,2)
 scatter3(Pcart(1,:),Pcart(2,:),Pcart(3,:))
@@ -97,7 +97,7 @@ scatter3(sphere(1,:),sphere(2,:),sphere(3,:))
 hold off
 xlim([-limit,limit])
 ylim([-limit,limit])
-zlim([-limit,limit])
+zlim([0,limit])
 title('Gabor Impulse - Positive')
 close(w);
 end

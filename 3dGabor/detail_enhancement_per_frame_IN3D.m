@@ -6,8 +6,8 @@ addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
 elevationHalfAngle = 90;
-resizeFactors = [1,1,1];%[1/9, 1/9, 1/2];
-inFileDir = [root ,'/ImpulseCheckingVids/movingDot.avi'];%[root ,'/resources/video_online-video-cutter.com.mp4'];
+resizeFactors = [1,1,1];
+inFileDir = [root ,'\þþImpulseCheckingVids\detail_enhancement_verticalLine_dotted\verticalLine_dotted.avi'];%"F:\Matlab\docs\temporal_segmentation\þþImpulseCheckingVids\detail_enhancement_movingDot_dilate\movingDot_dilate.avi"
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -47,7 +47,7 @@ detail_enhanced = ...
 vidOut = abs(detail_enhanced);
 minVideoValue = min(detail_enhanced(:));
 maxVideoValue = max(detail_enhanced(:));
-implay(vidOut);
+implay(minMaxNorm(detail_enhanced));
 maintainFitToWindow();
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
