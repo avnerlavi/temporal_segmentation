@@ -1,16 +1,19 @@
 dump_movies = true;
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 root = getenv('TemporalSegmentation');
-vid_matrix = readVideoFromFile([root,'/results/no-grid/movie_stdPyramid_noGrid.avi'], false);
-vid_matrix = imresize(vid_matrix, 0.3);
-vid_matrix(vid_matrix > 1) = 1;
-vid_matrix(vid_matrix < 0) = 0;
+addpath(genpath([root,'/utils']));
 
-permutedAxis = 'x';
+vid_matrix = readVideoFromFile([root ,'/resources/ultrasound_1_cropped.avi'], false);
+resizeFactors = [1/4, 1/4, 1/4];
+vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
+
+permutedAxis = 't';
 if permutedAxis == 'y'
     permuted = permute(vid_matrix, [2,3,1]);
-else
+elseif permutedAxis == 'x'
     permuted = permute(vid_matrix, [1,3,2]);
+else
+    permuted = vid_matrix;
 end
 
 if (dump_movies)
@@ -22,19 +25,21 @@ detail_enhanced = zeros(size(vid_matrix));
 for i=1:size(permuted,3)
     detail_enhanced_permuted(:,:,i) = ...
         computeCombinedLF(permuted(:,:,i), ...
-        12, ... orientation number
-        4, ... scale number
-        10, ... base facilitation length
+        8, ... orientation number
+        1, ... scale number
+        5, ... base facilitation length
         0, ... alpha
-        2, ... m1
+        1, ... m1
         2, ... m2
         false... isSteerableGaussian
         );
     
     if permutedAxis == 'y'
         detail_enhanced(i,:,:) = detail_enhanced_permuted(:,:,i);
-    else
+    elseif permutedAxis == 'x'
         detail_enhanced(:,i,:) = detail_enhanced_permuted(:,:,i);
+    else
+        detail_enhanced(:,:,i) = detail_enhanced_permuted(:,:,i);
     end
 end
 

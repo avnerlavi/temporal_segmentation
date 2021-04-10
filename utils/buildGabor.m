@@ -10,7 +10,7 @@ w = 2*pi/lambda;
 X = X-x0;
 Y= Y-y0;
 G = exp(-X.^2/sigma^2 - Y.^2/sigma^2);
-Wave = X * cos(orientation)+ Y * sin(orientation);
+Wave = X * cosd(orientation)+ Y * sind(orientation);
 Wave = cos(w * Wave);
 L = G .* Wave;
 

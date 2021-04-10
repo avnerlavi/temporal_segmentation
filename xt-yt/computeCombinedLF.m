@@ -2,7 +2,7 @@ function [imScaleTot] = computeCombinedLF(imgIn, nOrientations, nScales, baseFac
 sigma = 0.5;
 imScalesArray = zeros(size(imgIn,1),size(imgIn,2),nScales);
 imScaleTot = zeros(size(imgIn,1),size(imgIn,2));
-Orientations = linspace(pi/6,5*pi/6,nOrientations+1);
+Orientations = linspace(0,360,nOrientations+1);
 Orientations = Orientations(1:end-1);
 for j=1:nScales
     imgS=imresize(imgIn,1/j,'Antialiasing',true); %instead of min(1,1/(2*(j-1)))
@@ -15,17 +15,17 @@ for j=1:nScales
             Co = Gaussianed1 + Gaussianed2;
         else
             L = buildGabor(Orientations(i));
-            Co = imfilter(imgS,L,'replicate');
+            Co = conv2(imgS,L,'same');
         end
         Cp = max(Co,0);
         Cn = max(-Co,0);
-        threshold = 0.3 * max(abs(Co),[],'all'); %% to change
+        threshold = 0.03 * max(abs(Co),[],'all'); %% to change
         Cp(Cp < threshold) = 0;
         Cn(Cn < threshold) = 0;
         
         FacilitationLength=max(3,baseFacilitationLength/j);
-        [LF_n ,NR_n] = LFsc2(Cn,rad2deg(Orientations(i)),FacilitationLength);
-        [LF_p ,NR_p] = LFsc2(Cp,rad2deg(Orientations(i)),FacilitationLength);
+        [LF_n ,NR_n] = LFsc2(Cn,Orientations(i),FacilitationLength);
+        [LF_p ,NR_p] = LFsc2(Cp,Orientations(i),FacilitationLength);
         LF_n=0.5*max(0,LF_n-alpha*NR_n);
         LF_p=0.5*max(0,LF_p-alpha*NR_p);
         

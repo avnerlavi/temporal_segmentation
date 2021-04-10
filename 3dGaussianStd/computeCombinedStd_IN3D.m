@@ -1,14 +1,26 @@
 function [vidScaleTot] = computeCombinedStd_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2)
 vidIn = PadVideoReplicate(vidIn,2*nScales);
 vidScaleTot = zeros(size(vidIn));
-Elevations = linspace(0,elHalfAngle,nElevations);
-Elevations = Elevations(2:end);
+
+if(length(elHalfAngle) == 2)
+    minAngle = elHalfAngle(1);
+    maxAngle = elHalfAngle(2);
+elseif(length(elHalfAngle) == 1)
+    minAngle = 0;
+    maxAngle = elHalfAngle;
+else
+    error('Invalid Parameter length, elHalfAngle needs to be of length 1 or 2');
+end
+
+vidScaleTot = zeros(size(vidIn));
+Elevations = linspace(minAngle, maxAngle, nElevations);
+if(minAngle == 0)
+    Elevations = Elevations(2:end);
+end
+
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-%sigmaS = [5,5,0.1];
-% SigmaShape = 3*sigmaSpatial;
-% SigmaShape(3) = 1;
-%Gshort = Gaussian3D([0,0],0,sigmaSpatial,SigmaShape);
+
 Gshort = Gaussian3D([0,0],0,sigmaSpatial,[]);
 
 w = waitbar(0, 'starting per-resolution STD computation');
@@ -19,12 +31,14 @@ for k = nScales:-1:1
     vidS = imresize3(vidIn,1/k,'Antialiasing',true);
     vidStd = Gaussian3dStd(vidS,Gshort);
     vidOriTot=zeros(size(vidS));
-
-    %0 elev handling
-    [std_out] = Std3DActivation(vidStd,sigmaTemporal, 0, 0);
-    elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
-    vidOriTot = vidOriTot+(std_out*elevationNormFactor).^m1;
-
+    
+    if(minAngle == 0)
+        %0 elev handling
+        [std_out] = Std3DActivation(vidStd,sigmaTemporal, 0, 0);
+        elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
+        vidOriTot = vidOriTot+(std_out*elevationNormFactor).^m1;
+    end
+    
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             [std_out] = Std3DActivation(vidStd, sigmaTemporal, Azimuths(i), Elevations(j));
@@ -35,7 +49,7 @@ for k = nScales:-1:1
             vidOriTot = min(vidOriTot,elevationNormFactor.*(std_out.^m1));
             
             progressCounter = progressCounter + 1;
-            waitbar(progressCounter / totalIterationNumber, w);   
+            waitbar(progressCounter / totalIterationNumber, w);
         end
     end
     
