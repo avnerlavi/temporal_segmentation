@@ -3,7 +3,7 @@ function [] = writeVideoToFile(videoToWrite, fileName, fileDir)
 if fileDir(end) ~= '\'
     fileDir = [fileDir, '\'];
 end
-if strcmp(fileName(end-4:end), '.avi') == false
+if strcmp(fileName(end-3:end), '.avi') == false
     fileName = [fileName, '.avi'];
 end
 mkdir(fileDir);

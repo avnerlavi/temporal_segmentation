@@ -1,4 +1,7 @@
-function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, activationThreshold, baseFacilitationLength, alpha, m1, m2)
+function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, activationThreshold, baseFacilitationLength, alpha, m1, m2, resultsDir)
+
+save_params = true;
+
 Nvals = zeros(3,nScales * nElevations * nAzimuths + nScales);
 Pvals = zeros(3,nScales * nElevations * nAzimuths + nScales);
 w = waitbar(0, 'starting per-resolution LF computation');
@@ -80,24 +83,39 @@ Ncart = [Nvals(3,:).*sind(Nvals(1,:)).*cosd(Nvals(2,:));Nvals(3,:).*sind(Nvals(1
 Pcart = [Pvals(3,:).*sind(Pvals(1,:)).*cosd(Pvals(2,:));Pvals(3,:).*sind(Pvals(1,:)).*sind(Pvals(2,:));Pvals(3,:).*cosd(Pvals(1,:))];
 sphere = [sind(Pvals(1,:)).*cosd(Pvals(2,:));sind(Pvals(1,:)).*sind(Pvals(2,:));cosd(Pvals(1,:))];
 limit = max([abs(Ncart(:));abs(Pcart(:))]);
-figure()
-subplot(1,2,1)
-scatter3(Ncart(1,:),Ncart(2,:),Ncart(3,:))
-hold on 
-scatter3(sphere(1,:),sphere(2,:),sphere(3,:))
-hold off
-xlim([-limit,limit])
-ylim([-limit,limit])
-zlim([0,limit])
-title('Gabor Impulse - Negative')
-subplot(1,2,2)
-scatter3(Pcart(1,:),Pcart(2,:),Pcart(3,:))
-hold on 
-scatter3(sphere(1,:),sphere(2,:),sphere(3,:))
-hold off
-xlim([-limit,limit])
-ylim([-limit,limit])
-zlim([0,limit])
-title('Gabor Impulse - Positive')
+
 close(w);
+
+fig = figure();
+subplot(1,2,1);
+scatter3(Ncart(1,:),Ncart(2,:),Ncart(3,:));
+hold on;
+scatter3(sphere(1,:),sphere(2,:),sphere(3,:));
+hold off;
+xlim([-limit,limit]);
+ylim([-limit,limit]);
+zlim([0,limit]);
+title('Gabor Impulse - Negative');
+subplot(1,2,2);
+scatter3(Pcart(1,:),Pcart(2,:),Pcart(3,:));
+hold on;
+scatter3(sphere(1,:),sphere(2,:),sphere(3,:));
+hold off;
+xlim([-limit,limit]);
+ylim([-limit,limit]);
+zlim([0,limit]);
+title('Gabor Impulse - Positive');
+
+if (save_params)
+%     params = struct;
+%     params.Nvals = Nvals;
+%     params.Pvals = Pvals;
+%     params.Ncart = Ncart;
+%     params.Pcart = Pcart;   
+%     saveParams([root,'\results\ImpulseCheckingVids'], params);
+    saveas(fig, [resultsDir, '\facilitations_figure.fig']);
+    close(fig);
+    save([resultsDir, '\detailed_params.mat'], 'Nvals', 'Pvals', 'Ncart', 'Pcart');
+end
+
 end
