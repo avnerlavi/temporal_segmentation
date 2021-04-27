@@ -5,7 +5,7 @@ root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
-elevationHalfAngle = [30, 90];
+elevationHalfAngle = [0, 90];
 resizeFactors = [1/4, 1/4, 1/4];
 inFileDir = [root ,'/resources/ultrasound_1_cropped.avi'];
 %%
@@ -44,7 +44,7 @@ detail_enhanced = ...
     CCLFParams.m2  ...
     );
 
-vidOut = abs(detail_enhanced);
+vidOut = minMaxNorm(detail_enhanced);
 minVideoValue = min(detail_enhanced(:));
 maxVideoValue = max(detail_enhanced(:));
 implay(vidOut);

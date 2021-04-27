@@ -23,6 +23,12 @@ end
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
 vidScalesPyr = cell(nScales);
+if length(Elevations) > 1
+    dElevation = Elevations(2)- Elevations(1);
+else
+    dElevation = nan;
+end
+a = 10;
 
 for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
@@ -32,17 +38,24 @@ for k = 1:nScales
     if(minAngle == 0)
         %0 elev handling
         [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, activationThreshold, FacilitationLength, alpha);
-        elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
+        if length(Elevations) > 1 
+            elevationNormFactor = a*(1 - cosd(dElevation/2));
+        else
+            elevationNormFactor = 1;
+        end
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
     end
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             [LF_n, LF_p] = Gabor3DActivation(vidS, Azimuths(i), Elevations(j), activationThreshold, FacilitationLength, alpha);
-            
-            elevationStart = Elevations(j) - Elevations(1)/2;
-            elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
-            elevationNormFactor = 1;%cosd(elevationStart) - cosd(elevationEnd);
+            if length(Elevations) > 1
+                elevationStart = Elevations(j) - dElevation/2;
+                elevationEnd = min(Elevations(j) + dElevation/2, Elevations(end));
+                elevationNormFactor = sqrt(a*cosd(Elevations(j))^2 + sind(Elevations(j))^2)*(cosd(elevationStart) - cosd(elevationEnd));
+            else
+                elevationNormFactor = 1;
+            end
 %             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
 %             vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
