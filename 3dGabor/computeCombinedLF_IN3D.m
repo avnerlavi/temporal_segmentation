@@ -37,11 +37,11 @@ for k = 1:nScales
     if(minAngle == 0)
         %0 elev handling
         [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, activationThreshold, FacilitationLength, alpha);
-        elevationNormFactor = (1 - cosd(dElevation/2))*nAzimuths;
+        elevationNormFactor = 1;%(1 - cosd(dElevation/2))*nAzimuths;
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
-        disp(['elevation: ',num2str(0),' azimuth: ',num2str(0), ...
-            ' valueN: ', num2str(max(stripVideo(LF_n,2*nScales+3),[],'all')),' valueP: ', num2str(max(stripVideo(LF_p,2*nScales+3),[],'all'))])
+        %disp(['elevation: ',num2str(0),' azimuth: ',num2str(0), ...
+        %    ' valueN: ', num2str(max(stripVideo(LF_n,2*nScales+3),[],'all')),' valueP: ', num2str(max(stripVideo(LF_p,2*nScales+3),[],'all'))])
         Nvals(:,n) = [0,0,max(stripVideo(LF_n,2*nScales+3)*elevationNormFactor,[],'all')];
         Pvals(:,n) = [0,0,max(stripVideo(LF_p,2*nScales+3)*elevationNormFactor,[],'all')];
         n=n+1;
@@ -52,13 +52,13 @@ for k = 1:nScales
             
             elevationStart = Elevations(j) - dElevation/2;
             elevationEnd = min(Elevations(j) + dElevation/2, Elevations(end));
-            elevationNormFactor = cosd(elevationStart) - cosd(elevationEnd);
+            elevationNormFactor = 1;%cosd(elevationStart) - cosd(elevationEnd);
             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
             vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
-            disp(['elevation: ',num2str(Elevations(j)),' azimuth: ',num2str(Azimuths(i)),...
-                 ' valueN: ', num2str(max(stripVideo(LF_n,2*nScales+3),[],'all')),' valueP: ', num2str(max(stripVideo(LF_p,2*nScales+3),[],'all'))])
+            %disp(['elevation: ',num2str(Elevations(j)),' azimuth: ',num2str(Azimuths(i)),...
+            %     ' valueN: ', num2str(max(stripVideo(LF_n,2*nScales+3),[],'all')),' valueP: ', num2str(max(stripVideo(LF_p,2*nScales+3),[],'all'))])
         Nvals(:,n) = [Elevations(j),Azimuths(i),max(stripVideo(LF_n,2*nScales+3)*elevationNormFactor,[],'all')];
         Pvals(:,n) = [Elevations(j),Azimuths(i),max(stripVideo(LF_p,2*nScales+3)*elevationNormFactor,[],'all')];
         n=n+1;

@@ -22,9 +22,9 @@ videoNames = {
     'verticalLine_dotted.avi'
     };
 
-for member = videoNames
-    videoName = member{1};
-    videoPath = [root, '\resources\ImpulseCheckingVids\', videoName];
+for i = 1:length(videoNames)%member = videoNames
+    videoName = videoNames{i};
+    videoPath = [root, '\resources\þþImpulseCheckingVids\', videoName];
     videoName = videoName(1: end-4);
     resultsDir = [root, '\results\ImpulseCheckingVids\', videoName];
     mkdir(resultsDir);
@@ -40,7 +40,7 @@ for member = videoNames
     CCLFParams.alpha = 0;
     CCLFParams.m1 = 1;
     CCLFParams.m2 = 1;
-    
+
     vid_matrix = readVideoFromFile(videoPath, false);
     vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
     vid_matrix = vid_matrix-0.5;
