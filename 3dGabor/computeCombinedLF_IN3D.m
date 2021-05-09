@@ -1,4 +1,4 @@
-function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, activationThreshold, baseFacilitationLength, alpha, m1, m2)
+function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, eccentricity, nScales, activationThreshold, baseFacilitationLength, alpha, m1, m2)
 %waitbar handling
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
@@ -7,7 +7,6 @@ totalIterationNumber = nScales * nElevations * nAzimuths + nScales;
 vidIn = PadVideoReplicate(vidIn,2*nScales); %adding margin to avoid edge effects
 vidScaleTot = zeros(size(vidIn));
 vidScalesPyr = cell(nScales);
-eccentricity = 10;
 %halfAngle parsing
 %TODO: might want to change input format
 if(length(elHalfAngle) == 2)
@@ -34,7 +33,6 @@ elevationNormFactors = computeElevationNormFactor(Elevations, dElevation, eccent
 %creating azimuths
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-
 
 for k = 1:nScales %main loop
     
