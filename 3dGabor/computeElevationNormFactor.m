@@ -9,8 +9,7 @@ elevationEnd   = min(Elevations + dElevation/2, ElevationMax);
 areaNormFactor = cosd(elevationStart) - cosd(elevationEnd);
 areaNormFactor(Elevations==0) = areaNormFactor(Elevations==0).*nAzimuths; 
 %areaNormFactor = areaNormFactor./sum(areaNormFactor);
-stNormFactor = eccentricity*cosd(Elevations).^2 + sind(Elevations).^2; %ellipsoid heuristic
-stNormFactor = sqrt(stNormFactor);
+stNormFactor = computeEllipsoidRadius(Elevations, eccentricity, 1);
 %stNormFactor = stNormFactor./sum(stNormFactor);
 elevationNormFactor = areaNormFactor.*stNormFactor;
 %elevationNormFactor = elevationNormFactor./sum(elevationNormFactor);
