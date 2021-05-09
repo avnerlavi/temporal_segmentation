@@ -1,4 +1,6 @@
-function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, eccentricity, nScales, activationThreshold, baseFacilitationLength, alpha, m1, m2)
+function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, ...
+    nElevations, elHalfAngle, eccentricity, nScales, activationThreshold, ...
+    baseFacilitationLengths, alpha, m1, m2)
 %waitbar handling
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
@@ -16,38 +18,52 @@ elseif(length(elHalfAngle) == 1)
     minAngle = 0;
     maxAngle = elHalfAngle;
 else
-    error('Invalid Parameter length, elHalfAngle needs to be of length 1 or 2');
+    error('Invalid parameter length, elHalfAngle needs to be of length 1 or 2');
+end
+if(length(baseFacilitationLengths) == 2)
+    minFacilitationLength = baseFacilitationLengths(1);
+    maxFacilitationLength = baseFacilitationLengths(2);
+elseif(length(baseFacilitationLengths) == 1)
+    minFacilitationLength = baseFacilitationLengths;
+    maxFacilitationLength = baseFacilitationLengths;
+else
+    error('Invalid parameter length, baseFacilitationLengths needs to be of length 1 or 2');
 end
 %creating elevations + norm factors
-Elevations = linspace(minAngle, maxAngle, nElevations);
-if length(Elevations) > 1 %single elevation norm factor
-    dElevation = Elevations(2)- Elevations(1);
+elevations = linspace(minAngle, maxAngle, nElevations);
+if length(elevations) > 1 %single elevation norm factor
+    dElevation = elevations(2)- elevations(1);
 else
     dElevation = nan;
 end
 if(minAngle == 0) %0 elev handling
-    Elevations = Elevations(2:end);
-    elevationNorm0Factor = computeElevationNormFactor(0, dElevation, eccentricity, minAngle, maxAngle, nAzimuths);
+    elevations = elevations(2:end);
+    elevationNorm0Factor = computeElevationNormFactor(0, dElevation, ...
+        eccentricity, minAngle, maxAngle, nAzimuths);
 end
-elevationNormFactors = computeElevationNormFactor(Elevations, dElevation, eccentricity, minAngle, maxAngle, nAzimuths);
+elevationNormFactors = computeElevationNormFactor(elevations, dElevation, ...
+    eccentricity, minAngle, maxAngle, nAzimuths);
 %creating azimuths
-Azimuths = linspace(0,360,nAzimuths+1);
-Azimuths = Azimuths(1:end-1);
+azimuths = linspace(0,360,nAzimuths+1);
+azimuths = azimuths(1:end-1);
 
 for k = 1:nScales %main loop
     
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
-    vidOriTot_n=zeros(size(vidS));
-    vidOriTot_p=zeros(size(vidS));
-    FacilitationLength=max(3, baseFacilitationLength/k);
+    vidOriTot_n = zeros(size(vidS));
+    vidOriTot_p = zeros(size(vidS));
+    primaryFL = max(3, maxFacilitationLength/k);
+    secondaryFL = max(3, minFacilitationLength/k);    
+    facilitationLengths = computeEllipsoidRadius(elevations, primaryFL, secondaryFL);
     if(minAngle == 0) %0 elev handling
-        [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, activationThreshold, FacilitationLength, alpha);
+        [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, activationThreshold, primaryFL, alpha);
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNorm0Factor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNorm0Factor).^m1;
     end
-    for i = 1:length(Azimuths)
-        for j = 1:length(Elevations)
-            [LF_n, LF_p] = Gabor3DActivation(vidS, Azimuths(i), Elevations(j), activationThreshold, FacilitationLength, alpha);
+    for i = 1:length(azimuths)
+        for j = 1:length(elevations)
+            [LF_n, LF_p] = Gabor3DActivation(vidS, azimuths(i), elevations(j), ...
+                activationThreshold, facilitationLengths(j), alpha);
             %combining angles
             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactors(j)).^m1;
             vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactors(j)).^m1;
