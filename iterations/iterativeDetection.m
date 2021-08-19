@@ -1,7 +1,7 @@
 %% initilization
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 dump_movies = true;
-generatePyrFlag = false;
+generatePyrFlag = true;
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGabor']));
@@ -10,7 +10,8 @@ if(generatePyrFlag)
     inFileDir = [root,'\captcha_running.avi'];
     vid_matrix_orig = readVideoFromFile(inFileDir, true);
     vid_matrix = imresize(vid_matrix_orig, 0.25);
-    vid_matrix = StdUsingPyramidFunc(vid_matrix);
+    std_pyr = StdUsingPyramidFunc(vid_matrix);
+    vid_matrix = std_pyr;
 else
     inFileDir = [root,'\results\3dStd\movie_vid_std_3d.avi'];
     vid_matrix = readVideoFromFile(inFileDir, false);
@@ -19,7 +20,7 @@ end
 resizeParams = struct;
 resizeParams.initialReduction = 3;
 resizeParams.targetResizeFactors  = [2/3 , 2/3 , 2/2];
-resizeParams.resizeIncrement = 0.25;
+resizeParams.resizeIncrement = 0.5;
 baseResizeFactors  = resizeParams.targetResizeFactors./resizeParams.initialReduction;
 iterationNumber = (resizeParams.initialReduction-1)/resizeParams.resizeIncrement +1;
 
@@ -92,6 +93,10 @@ maintainFitToWindow();
 
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
+    if (generatePyrFlag) 
+        writeVideoToFile(std_pyr, 'movie_std_pyr', [root,'\results\iterativeDetection\std']);
+    end
+
     writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
     for i=1:iterationNumber
         writeVideoToFile(maskPyr{i}, ['movie_mask_',num2str(baseResizeFactors(1)*((i-1)*resizeParams.resizeIncrement+1),'%.3f'),'_'...
