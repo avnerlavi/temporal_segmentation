@@ -1,4 +1,4 @@
-function [k_local,k_remote] = calculatRemoteLocalFilters(ro_local,ro_remote,size_local,size_remote)
+function [k_local,k_remote] = calculateRemoteLocalFilters(ro_local,ro_remote,size_local,size_remote)
 if(mod(size_local,2)==0)
     size_local = size_local+1;
 end
