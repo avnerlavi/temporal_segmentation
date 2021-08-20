@@ -13,8 +13,9 @@ for i=2:N+1
 %     if(mod(n,2) == 0)
 %         n = n + 1;
 %     end
-    
-    StdPyramid{i} = stdfilt(Ip(:, :, seq_middle),ones(FiltSize))-(std(stdfilt(Ip,ones(FiltSize)),0,3));
+    middleFrameStd = stdfilt(Ip(:, :, seq_middle),ones(FiltSize));
+    temporalSegmentStd = std(stdfilt(Ip, ones(FiltSize)),0,3);
+    StdPyramid{i} = middleFrameStd - temporalSegmentStd;
 end
 
 ResizedImage = zeros(size(StdPyramid{2}));
