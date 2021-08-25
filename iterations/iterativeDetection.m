@@ -44,7 +44,7 @@ MaskGaussianParams = struct;
 MaskGaussianParams.sigma = 4;
 MaskGaussianParams.shape = 13;
 MaskGaussianParams.maxVal = 1/4;
-maskBlurFilt = Gaussian3dIso(MaskGaussianParams.sigma,MaskGaussianParams.shape);
+maskBlurFilt = Gaussian3DIso(MaskGaussianParams.sigma,MaskGaussianParams.shape);
 maskBlurFilt = minMaxNorm(maskBlurFilt)*MaskGaussianParams.maxVal;
 
 totalMask = ones(size(vid_matrix));
