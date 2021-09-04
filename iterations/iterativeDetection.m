@@ -53,13 +53,12 @@ maskPyr = cell(1,iterationNumber);
 for i=1:iterationNumber 
     %% detail enhancement
     CCLFParams.resizeFactors = baseResizeFactors*((i-1)*resizeParams.resizeIncrement+1);
-    detailEnhanced = detailEnhancement3Dfunc(vid_matrix,CCLFParams,false);
+    vidMasked = vid_matrix .* safeResize(totalMask,size(vid_matrix));
+    detailEnhanced = detailEnhancement3Dfunc(vidMasked,CCLFParams,false);
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
     %% connected components 
     %TODO: into function
-    if(i~=1)
-        detailEnhanced = detailEnhanced.*safeResize(totalMask,size(detailEnhanced));
-    end
+%     detailEnhanced = detailEnhanced.*safeResize(totalMask,size(detailEnhanced));
     vidTrimmed = zeros(size(detailEnhanced));
     boundryMask = zeros(size(detailEnhanced));
     boundryMask(boundryMaskWidth+1 : end-boundryMaskWidth...
