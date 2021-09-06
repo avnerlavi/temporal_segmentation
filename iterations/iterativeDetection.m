@@ -1,20 +1,47 @@
 %% initilization
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 dump_movies = true;
-generatePyrFlag = true;
+
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGabor']));
+addpath(genpath([root,'/3dGaussianStd']));
 
-if(generatePyrFlag)
-    inFileDir = [root,'\captcha_running.avi'];
+STDParams = struct;
+stdMethod = 'Pyr';
+if(strcmp(stdMethod, 'Pyr'))
+    inFileDir = [root,'\resources\horse_running.avi'];
     vid_matrix_orig = readVideoFromFile(inFileDir, true);
-    vid_matrix = imresize(vid_matrix_orig, 0.25);
-    std_pyr = StdUsingPyramidFunc(vid_matrix);
-    vid_matrix = std_pyr;
-else
+    
+    STDParams.resizeFactors = [1/2, 1/2, 1];
+    vid_matrix = imresize3(vid_matrix_orig, STDParams.resizeFactors);
+    
+    vid_std = StdUsingPyramidFunc(vid_matrix);
+    vid_matrix = vid_std;
+    
+elseif(strcmp(stdMethod, '3D'))
+    inFileDir = [root,'\resources\horse_running.avi'];
+    vid_matrix_orig = readVideoFromFile(inFileDir, true);
+    
+    STDParams.numOfScales = 4;
+    STDParams.elevationHalfAngle = 60;
+    STDParams.azimuthNum = 4;
+    STDParams.elevationNum = 4;
+    STDParams.sigmaSpatial =  [  3,  3,0.1];
+    STDParams.sigmaTemporal = [0.1,0.1,  7];
+    STDParams.m1 = 1;
+    STDParams.m2 = 2;
+    STDParams.resizeFactors = [1/2, 1/2, 1];
+    
+    vid_std = generateStdVideo3DFunc(vid_matrix_orig, STDParams);
+    vid_matrix = vid_std;
+    
+elseif(strcmp(stdMethod, 'None'))
     inFileDir = [root,'\results\3dStd\movie_vid_std_3d.avi'];
     vid_matrix = readVideoFromFile(inFileDir, false);
+    
+else
+    error('invalid stdMethod value');
 end
 
 resizeParams = struct;
@@ -92,8 +119,8 @@ maintainFitToWindow();
 
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
-    if (generatePyrFlag) 
-        writeVideoToFile(std_pyr, 'movie_std_pyr', [root,'\results\iterativeDetection\std']);
+    if (~strcmp(stdMethod, 'None')) 
+        writeVideoToFile(vid_std, 'vid_std', [root,'\results\iterativeDetection\std']);
     end
 
     writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
@@ -104,8 +131,8 @@ if (dump_movies)
                                                    ,[root,'\results\iterativeDetection\iterative_mask']);
     end
     
-    saveParams([root,'\results\iterativeDetection\iterative_mask'],generatePyrFlag ... 
+    saveParams([root,'\results\iterativeDetection\iterative_mask'],stdMethod, STDParams ... 
         ,resizeParams,CCLFParams,thresholdCC,thresholdAreaOfCC,alpha,MaskGaussianParams);
-    save([root,'\results\iterativeDetection\iterative_mask\params.mat'],'generatePyrFlag' ... 
+    save([root,'\results\iterativeDetection\iterative_mask\params.mat'],'stdMethod', 'STDParams' ... 
         ,'resizeParams','CCLFParams','thresholdCC','thresholdAreaOfCC','alpha','MaskGaussianParams');
 end
