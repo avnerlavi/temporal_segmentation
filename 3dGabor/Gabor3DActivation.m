@@ -1,4 +1,5 @@
-function [LF_n, LF_p] = Gabor3DActivation(vidS, Azimuth, Elevation, FacilitationLength, alpha)
+function [LF_n, LF_p] = Gabor3DActivation(vidS, Azimuth, Elevation, activationThreshold ...
+    , FacilitationLength, alpha)
 L = BuildGabor3D(Azimuth, Elevation);
 Co = convn(vidS, L, 'same');
 threshold = 0.3 * max(abs(Co(3:end-2,3:end-2,3:end-2)), [], 'all');

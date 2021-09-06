@@ -1,4 +1,5 @@
-function [vidScaleTot] = computeCombinedStd_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2)
+function [vidScaleTot] = computeCombinedStd_IN3D(vidIn, nAzimuths, nElevations ...
+    , elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2)
 vidIn = PadVideoReplicate(vidIn,2*nScales);
 vidScaleTot = zeros(size(vidIn));
 Elevations = linspace(0,elHalfAngle,nElevations);

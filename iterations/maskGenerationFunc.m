@@ -1,10 +1,12 @@
-function [totalMask, maskPyr] = maskGenerationFunc(vidIn, maskParams, cclfParams)
-boundryMaskWidth = ceil(cclfParams.facilitationLength/4);
+function [totalMask, maskPyr, detailEnhancementPyr] = maskGenerationFunc(vidIn ...
+    , maskParams, cclfParams)
 
+boundryMaskWidth = ceil(cclfParams.facilitationLength/4);
 maskBlurFilt = Gaussian3DIso(maskParams.gaussianSigma, maskParams.gaussianShape);
 maskBlurFilt = minMaxNorm(maskBlurFilt) * maskParams.gaussianMaxVal;
 
 totalMask = ones(size(vidIn));
+detailEnhancementPyr = cell(1,maskParams.iterationNumber);
 maskPyr = cell(1,maskParams.iterationNumber);
 
 for i=1:maskParams.iterationNumber 
@@ -13,6 +15,7 @@ for i=1:maskParams.iterationNumber
     vidMasked = vidIn .* safeResize(totalMask,size(vidIn));
     detailEnhanced = detailEnhancement3Dfunc(vidMasked,cclfParams,false);
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
+    detailEnhancementPyr{i} = detailEnhanced;
     %% connected components 
     vidTrimmed = zeros(size(detailEnhanced));
     boundryMask = zeros(size(detailEnhanced));

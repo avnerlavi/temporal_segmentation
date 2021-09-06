@@ -63,6 +63,7 @@ MaskParams.gaussianMaxVal = 1/4;
 
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
+CCLFParams.activationThreshold = 0.3;
 CCLFParams.elevationHalfAngle = 60;
 CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 7;
@@ -72,7 +73,7 @@ CCLFParams.m1 = 1;
 CCLFParams.m2 = 1;
 CCLFParams.resizeFactors = MaskParams.baseResizeFactors;
 
-[totalMask, maskPyr] = maskGenerationFunc(vid_matrix, MaskParams, CCLFParams);
+[totalMask, maskPyr,  detailEnhancementPyr] = maskGenerationFunc(vid_matrix, MaskParams, CCLFParams);
 
 %% test 
 
@@ -84,14 +85,19 @@ if (dump_movies)
     if (~strcmp(STDMethod, 'None')) 
         writeVideoToFile(vid_std, 'vid_std', [root,'\results\iterativeDetection\std']);
     end
-
-    writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
+    
     for i=1:MaskParams.iterationNumber
-        writeVideoToFile(maskPyr{i}, ['movie_mask_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
+        writeVideoToFile(detailEnhancementPyr{i}, ['detail_enhanced_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
+                                                   ,num2str(MaskParams.baseResizeFactors(2)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
+                                                   ,num2str(MaskParams.baseResizeFactors(3)*((i-1)*MaskParams.resizeIncrement+1),'%.3f')]...
+                                                   ,[root,'\results\iterativeDetection\detail_enhancement']);
+
+        writeVideoToFile(maskPyr{i}, ['mask_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
                                                    ,num2str(MaskParams.baseResizeFactors(2)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
                                                    ,num2str(MaskParams.baseResizeFactors(3)*((i-1)*MaskParams.resizeIncrement+1),'%.3f')]...
                                                    ,[root,'\results\iterativeDetection\iterative_mask']);
     end
+        writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
     
     saveParams([root,'\results\iterativeDetection\iterative_mask'],STDMethod, STDParams ... 
         ,CCLFParams, MaskParams);

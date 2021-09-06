@@ -1,4 +1,6 @@
-function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths, nElevations, elHalfAngle, nScales, baseFacilitationLength, alpha, m1, m2)
+function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
+    , nElevations, elHalfAngle, nScales, activationThreshold, baseFacilitationLength ...
+    , alpha, m1, m2)
 
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
@@ -19,14 +21,14 @@ for k = 1:nScales
     FacilitationLength=max(3, baseFacilitationLength/k);
     
     %0 elev handling
-    [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, FacilitationLength, alpha);
+    [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, activationThreshold, FacilitationLength, alpha);
     elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
     vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
     vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
-            [LF_n, LF_p] = Gabor3DActivation(vidS, Azimuths(i), Elevations(j), FacilitationLength, alpha);
+            [LF_n, LF_p] = Gabor3DActivation(vidS, Azimuths(i), Elevations(j), activationThreshold, FacilitationLength, alpha);
             
             elevationStart = Elevations(j) - Elevations(1)/2;
             elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
