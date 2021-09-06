@@ -32,7 +32,8 @@ for k = nScales:-1:1
             elevationStart = Elevations(j) - Elevations(1)/2;
             elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
             elevationNormFactor = 1;%cosd(elevationStart) - cosd(elevationEnd);
-            vidOriTot = min(vidOriTot,elevationNormFactor.*(std_out.^m1));
+            currVidOri = elevationNormFactor.*(std_out.^m1);
+            vidOriTot = min(vidOriTot, currVidOri);
             
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);   
