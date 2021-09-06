@@ -5,10 +5,6 @@ Elevations = linspace(0,elHalfAngle,nElevations);
 Elevations = Elevations(2:end);
 Azimuths = linspace(0,360,nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-%sigmaS = [5,5,0.1];
-% SigmaShape = 3*sigmaSpatial;
-% SigmaShape(3) = 1;
-%Gshort = Gaussian3D([0,0],0,sigmaSpatial,SigmaShape);
 Gshort = Gaussian3D([0,0],0,sigmaSpatial,[]);
 
 w = waitbar(0, 'starting per-resolution STD computation');
