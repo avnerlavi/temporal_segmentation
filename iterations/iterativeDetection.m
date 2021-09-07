@@ -1,6 +1,6 @@
 %% initilization
 disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
-dump_movies = true;
+dumpMovies = true;
 
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
@@ -8,21 +8,22 @@ addpath(genpath([root,'/3dGabor']));
 addpath(genpath([root,'/3dGaussianStd']));
 
 STDParams = struct;
-STDMethod = '3D';
+STDMethod = 'Pyr';
+
 if(strcmp(STDMethod, 'Pyr'))
     inFileDir = [root,'\resources\horse_running.avi'];
-    vid_matrix_orig = readVideoFromFile(inFileDir, false);
+    vidMatrixOrig = readVideoFromFile(inFileDir, false);
     
     STDParams.resizeFactors = [1/2, 1/2, 1];
-    vid_matrix = safeResize(vid_matrix_orig, ...
-        STDParams.resizeFactors .* size(vid_matrix_orig));
+    STDParams.segmentLength = 9;
+    STDParams.pyramidLevel = 5;
     
-    vid_std = StdUsingPyramidFunc(vid_matrix);
-    vid_matrix = vid_std;
+    vidStd = StdUsingPyramidFunc(vidMatrixOrig, STDParams);
+    vidMatrix = vidStd;
     
 elseif(strcmp(STDMethod, '3D'))
     inFileDir = [root,'\resources\horse_running.avi'];
-    vid_matrix_orig = readVideoFromFile(inFileDir, false);
+    vidMatrixOrig = readVideoFromFile(inFileDir, false);
     
     STDParams.numOfScales = 4;
     STDParams.elevationHalfAngle = 60;
@@ -34,13 +35,13 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.m2 = 2;
     STDParams.resizeFactors = [1/2, 1/2, 1];
     
-    vid_std = generateStdVideo3DFunc(vid_matrix_orig, STDParams);
-    vid_matrix = vid_std;
+    vidStd = generateStdVideo3DFunc(vidMatrixOrig, STDParams);
+    vidMatrix = vidStd;
     
 elseif(strcmp(STDMethod, 'None'))
-    inFileDir = [root,'\results\3dStd\movie_vid_std_3d.avi'];
-    vid_matrix_orig = readVideoFromFile(inFileDir, false);
-    vid_matrix = vid_matrix_orig;
+    inFileDir = [root,'\resources\horse_running.avi'];
+    vidMatrixOrig = readVideoFromFile(inFileDir, false);
+    vidMatrix = vidMatrixOrig;
     
 else
     error('invalid stdMethod value');
@@ -62,28 +63,28 @@ MaskParams.gaussianShape = 13;
 MaskParams.gaussianMaxVal = 1/4;
 
 CCLFParams = struct;
-CCLFParams.numOfScales = 4;
+CCLFParams.numOfScales = 1;
 CCLFParams.activationThreshold = 0.3;
 CCLFParams.elevationHalfAngle = 60;
-CCLFParams.azimuthNum = 8;
-CCLFParams.elevationNum = 7;
+CCLFParams.azimuthNum = 16;
+CCLFParams.elevationNum = 16;
 CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;
-CCLFParams.m1 = 1;
+CCLFParams.m1 = 2;
 CCLFParams.m2 = 1;
 CCLFParams.resizeFactors = MaskParams.baseResizeFactors;
 
-[totalMask, maskPyr,  detailEnhancementPyr] = maskGenerationFunc(vid_matrix, MaskParams, CCLFParams);
+[totalMask, maskPyr,  detailEnhancementPyr] = maskGenerationFunc(vidMatrix, MaskParams, CCLFParams);
 
 %% test 
 
-implay(vid_matrix_orig .* safeResize(totalMask, size(vid_matrix_orig)));
+implay(vidMatrixOrig .* safeResize(totalMask, size(vidMatrixOrig)));
 maintainFitToWindow();
 
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
-if (dump_movies)
+if (dumpMovies)
     if (~strcmp(STDMethod, 'None')) 
-        writeVideoToFile(vid_std, 'vid_std', [root,'\results\iterativeDetection\std']);
+        writeVideoToFile(vidStd, ['vid_std_', lower(STDMethod)], [root,'\results\iterativeDetection\std']);
     end
     
     for i=1:MaskParams.iterationNumber
