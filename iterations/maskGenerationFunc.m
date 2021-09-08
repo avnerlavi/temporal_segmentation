@@ -38,7 +38,7 @@ for i=1:maskParams.iterationNumber
     end
     vidCC = minMaxNorm(vidCC);
     %% create mask 
-    currMask = convn(vidCC,maskBlurFilt,'same');
+    currMask = conv3FFT(vidCC,maskBlurFilt);
     currMask = safeResize(currMask,size(vidIn));
     maskPyr{i} = currMask;
     totalMask = maskParams.alpha * currMask + (1 - maskParams.alpha) * totalMask;
