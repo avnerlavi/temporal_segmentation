@@ -8,6 +8,8 @@ Cp = max(Co,0);
 Cn = max(-Co,0);
 Cp_threshold = activationThreshold * max(Cp(3:end-2,3:end-2,3:end-2), [], 'all');
 Cn_threshold = activationThreshold * max(Cn(3:end-2,3:end-2,3:end-2), [], 'all');
+% Cp(Cp < Cp_threshold) = 0;
+% Cn(Cn < Cn_threshold) = 0;
 
 [LF_n ,NR_n] = LFsc3D(Cn, Azimuth, Elevation ,FacilitationLength);
 [LF_p ,NR_p] = LFsc3D(Cp, Azimuth, Elevation, FacilitationLength);
