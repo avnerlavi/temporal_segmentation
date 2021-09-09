@@ -8,13 +8,13 @@ addpath(genpath([root,'/3dGabor']));
 addpath(genpath([root,'/3dGaussianStd']));
 
 STDParams = struct;
-STDMethod = 'Pyr';
+STDMethod = '3D';
 
 if(strcmp(STDMethod, 'Pyr'))
-    inFileDir = [root,'\resources\horse_running.avi'];
+    inFileDir = [root,'\resources\man_running.avi'];
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
     
-    STDParams.resizeFactors = [1/2, 1/2, 1];
+    STDParams.resizeFactors = [1/4, 1/4, 1];
     STDParams.segmentLength = 9;
     STDParams.pyramidLevel = 5;
     
@@ -22,7 +22,7 @@ if(strcmp(STDMethod, 'Pyr'))
     vidMatrix = vidStd;
     
 elseif(strcmp(STDMethod, '3D'))
-    inFileDir = [root,'\resources\horse_running.avi'];
+    inFileDir = [root,'\resources\man_running.avi'];
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
     
     STDParams.numOfScales = 4;
@@ -74,11 +74,13 @@ CCLFParams.m1 = 2;
 CCLFParams.m2 = 1;
 CCLFParams.resizeFactors = MaskParams.baseResizeFactors;
 
-[totalMask, maskPyr,  detailEnhancementPyr] = maskGenerationFunc(vidMatrix, MaskParams, CCLFParams);
+[totalMask, maskPyr, detailEnhancementPyr] = maskGenerationFunc(...
+    vidMatrix, MaskParams, CCLFParams);
 
 %% test 
 
-implay(vidMatrixOrig .* safeResize(totalMask, size(vidMatrixOrig)));
+vidMasked = vidMatrixOrig .* safeResize(totalMask, size(vidMatrixOrig));
+implay(vidMasked);
 maintainFitToWindow();
 
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
@@ -88,17 +90,21 @@ if (dumpMovies)
     end
     
     for i=1:MaskParams.iterationNumber
-        writeVideoToFile(detailEnhancementPyr{i}, ['detail_enhanced_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
-                                                   ,num2str(MaskParams.baseResizeFactors(2)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
-                                                   ,num2str(MaskParams.baseResizeFactors(3)*((i-1)*MaskParams.resizeIncrement+1),'%.3f')]...
-                                                   ,[root,'\results\iterativeDetection\detail_enhancement']);
+        writeVideoToFile(detailEnhancementPyr{i}, ...
+            ['detail_enhanced_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
+            ,num2str(MaskParams.baseResizeFactors(2)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
+            ,num2str(MaskParams.baseResizeFactors(3)*((i-1)*MaskParams.resizeIncrement+1),'%.3f')]...
+            ,[root,'\results\iterativeDetection\detail_enhancement']);
 
-        writeVideoToFile(maskPyr{i}, ['mask_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
-                                                   ,num2str(MaskParams.baseResizeFactors(2)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
-                                                   ,num2str(MaskParams.baseResizeFactors(3)*((i-1)*MaskParams.resizeIncrement+1),'%.3f')]...
-                                                   ,[root,'\results\iterativeDetection\iterative_mask']);
+        writeVideoToFile(maskPyr{i}, ...
+            ['mask_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
+            ,num2str(MaskParams.baseResizeFactors(2)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
+            ,num2str(MaskParams.baseResizeFactors(3)*((i-1)*MaskParams.resizeIncrement+1),'%.3f')]...
+            ,[root,'\results\iterativeDetection\iterative_mask']);
     end
-        writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
+    
+    writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
+    writeVideoToFile(vidMasked, 'movie_masked', [root,'\results\iterativeDetection']);
     
     saveParams([root,'\results\iterativeDetection\iterative_mask'],STDMethod, STDParams ... 
         ,CCLFParams, MaskParams);
