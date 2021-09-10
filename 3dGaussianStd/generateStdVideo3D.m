@@ -7,12 +7,12 @@ addpath(genpath([root,'/utils']));
 elevationHalfAngle = 60;
 resizeFactors = [1/4, 1/4, 1];
 
-inFileDir = [root,'/captcha_running.avi'];
+inFileDir = [root,'/resources/man_running.avi'];
 vid_matrix_orig = readVideoFromFile(inFileDir, false);
 vid_matrix = safeResize(vid_matrix_orig, resizeFactors.*size(vid_matrix_orig));
 
 CCLFParams = struct;
-CCLFParams.numOfScales = 1;
+CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 CCLFParams.azimuthNum = 4;
 CCLFParams.elevationNum = 4;
@@ -30,7 +30,8 @@ vid_std = ...
     CCLFParams.sigmaSpatial, ...
     CCLFParams.sigmaTemporal, ...
     CCLFParams.m1, ...
-    CCLFParams.m2  ...
+    CCLFParams.m2, ...
+    2 ...
     );
 
 vid_std_squared = sign(vid_std).*(vid_std.^2);

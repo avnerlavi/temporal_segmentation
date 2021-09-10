@@ -31,15 +31,16 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.elevationNum = 4;
     STDParams.sigmaSpatial = [3, 3, 0.1];
     STDParams.sigmaTemporal = [0.1, 0.1, 7];
-    STDParams.m1 = 1;
+    STDParams.m1 = 2;
     STDParams.m2 = 2;
-    STDParams.resizeFactors = [1/2, 1/2, 1];
+    STDParams.normQ = 2;
+    STDParams.resizeFactors = [1/4, 1/4, 1];
     
     vidStd = generateStdVideo3DFunc(vidMatrixOrig, STDParams);
     vidMatrix = vidStd;
     
 elseif(strcmp(STDMethod, 'None'))
-    inFileDir = [root,'\resources\horse_running.avi'];
+    inFileDir = [root,'\results\IterativeDetection\std\vid_std_3d.avi'];
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
     vidMatrix = vidMatrixOrig;
     

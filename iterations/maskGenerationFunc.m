@@ -26,7 +26,8 @@ for i=1:maskParams.iterationNumber
     vidTrimmed(boundryMask == 1) = detailEnhanced(boundryMask == 1);
     vidTrimmed = minMaxNorm(vidTrimmed);
 
-    CC = bwconncomp(vidTrimmed > maskParams.thresholdCC);
+    vidThresholded = vidTrimmed > maskParams.thresholdCC;
+    CC = bwconncomp(vidThresholded);
     numOfPixels = cellfun(@numel,CC.PixelIdxList);
     largestCCArea = max(numOfPixels);
 
