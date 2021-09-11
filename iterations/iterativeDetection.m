@@ -4,8 +4,9 @@ dumpMovies = true;
 
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
-addpath(genpath([root,'/3dGabor']));
 addpath(genpath([root,'/3dGaussianStd']));
+addpath(genpath([root,'/3dGabor']));
+addpath(genpath([root,'/maskGeneration']));
 
 STDParams = struct;
 STDMethod = '3D';
