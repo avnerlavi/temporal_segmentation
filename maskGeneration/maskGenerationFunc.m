@@ -20,7 +20,8 @@ for i=1:maskParams.iterationNumber
     detailEnhancementPyr{i} = detailEnhanced;
     %% connected components 
     currMask = generateConnectedComponentsMask(detailEnhanced, boundryMaskWidth ...
-        , maskParams.thresholdCC, maskParams.thresholdAreaOfCC, maskBlurFilt);
+        , maskParams.percentileThreshold, maskParams.thresholdAreaOfCC, maskBlurFilt);
+    currMask = safeResize(currMask,size(vidIn));
     
     maskPyr{i} = currMask;
     totalMask = maskParams.alpha * currMask + (1 - maskParams.alpha) * totalMask;
