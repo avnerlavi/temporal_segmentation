@@ -1,5 +1,6 @@
 %% initilization
-disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
+startTime = datetime('now');
+disp(['Start ', datestr(startTime, 'HH:MM:SS')]);
 dumpMovies = true;
 
 root = getenv('TemporalSegmentation');
@@ -23,7 +24,7 @@ if(strcmp(STDMethod, 'Pyr'))
     vidMatrix = vidStd;
     
 elseif(strcmp(STDMethod, '3D'))
-    inFileDir = [root,'\resources\man_running.avi'];
+    inFileDir = [root,'\resources\horse_running.avi'];
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
     
     STDParams.numOfScales = 4;
@@ -35,7 +36,7 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.m1 = 2;
     STDParams.m2 = 2;
     STDParams.normQ = 2;
-    STDParams.resizeFactors = [1/4, 1/4, 1];
+    STDParams.resizeFactors = [1/2, 1/2, 1];
     
     vidStd = generateStdVideo3DFunc(vidMatrixOrig, STDParams);
     vidMatrix = vidStd;
@@ -57,7 +58,7 @@ MaskParams.baseResizeFactors = ...
 MaskParams.resizeIncrement = 0.5;
 MaskParams.iterationNumber = ...
     ((MaskParams.initialReduction - 1) / MaskParams.resizeIncrement) + 1;
-MaskParams.thresholdCC = 0.2;
+MaskParams.percentileThreshold = 95;
 MaskParams.thresholdAreaOfCC = 0.1;
 MaskParams.alpha = 0.125;
 MaskParams.gaussianSigma = 4;
@@ -65,15 +66,16 @@ MaskParams.gaussianShape = 13;
 MaskParams.gaussianMaxVal = 1/4;
 
 CCLFParams = struct;
-CCLFParams.numOfScales = 1;
+CCLFParams.numOfScales = 4;
 CCLFParams.activationThreshold = 0.3;
 CCLFParams.elevationHalfAngle = 60;
-CCLFParams.azimuthNum = 16;
-CCLFParams.elevationNum = 16;
+CCLFParams.azimuthNum = 8;
+CCLFParams.elevationNum = 7;
 CCLFParams.facilitationLength = 16;
 CCLFParams.alpha = 0;
 CCLFParams.m1 = 2;
 CCLFParams.m2 = 1;
+CCLFParams.normQ = 2;
 CCLFParams.resizeFactors = MaskParams.baseResizeFactors;
 
 [totalMask, maskPyr, detailEnhancementPyr] = maskGenerationFunc(...
@@ -85,8 +87,14 @@ vidMasked = vidMatrixOrig .* safeResize(totalMask, size(vidMatrixOrig));
 implay(vidMasked);
 maintainFitToWindow();
 
-disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
+finishTime = datetime('now');
+disp(['Done ' datestr(finishTime,'HH:MM:SS')]);
+
+runDuration = finishTime - startTime;
+disp(['Took ' datestr(runDuration,'HH:MM:SS')]);
+
 if (dumpMovies)
+    warning('off');
     if (~strcmp(STDMethod, 'None')) 
         writeVideoToFile(vidStd, ['vid_std_', lower(STDMethod)], [root,'\results\iterativeDetection\std']);
     end
@@ -96,20 +104,20 @@ if (dumpMovies)
             ['detail_enhanced_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
             ,num2str(MaskParams.baseResizeFactors(2)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
             ,num2str(MaskParams.baseResizeFactors(3)*((i-1)*MaskParams.resizeIncrement+1),'%.3f')]...
-            ,[root,'\results\iterativeDetection\detail_enhancement']);
+            ,[root,'\results\iterativeDetection\detailEnhancement']);
 
         writeVideoToFile(maskPyr{i}, ...
             ['mask_',num2str(MaskParams.baseResizeFactors(1)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
             ,num2str(MaskParams.baseResizeFactors(2)*((i-1)*MaskParams.resizeIncrement+1),'%.3f'),'_'...
             ,num2str(MaskParams.baseResizeFactors(3)*((i-1)*MaskParams.resizeIncrement+1),'%.3f')]...
-            ,[root,'\results\iterativeDetection\iterative_mask']);
+            ,[root,'\results\iterativeDetection\maskGeneration']);
     end
     
-    writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\iterative_mask']);
+    writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\maskGeneration']);
     writeVideoToFile(vidMasked, 'movie_masked', [root,'\results\iterativeDetection']);
     
-    saveParams([root,'\results\iterativeDetection\iterative_mask'],STDMethod, STDParams ... 
-        ,CCLFParams, MaskParams);
-    save([root,'\results\iterativeDetection\iterative_mask\params.mat'],'STDMethod', 'STDParams' ... 
-        ,'CCLFParams','MaskParams');
+    saveParams([root,'\results\iterativeDetection'],STDMethod, STDParams ... 
+        ,CCLFParams, MaskParams, runDuration);
+    save([root,'\results\iterativeDetection\params.mat'], 'STDMethod', 'STDParams' ... 
+        ,'CCLFParams', 'MaskParams', 'runDuration');
 end
