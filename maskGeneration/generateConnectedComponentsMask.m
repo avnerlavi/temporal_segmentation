@@ -1,12 +1,12 @@
-function ccMask = generateConnectedComponentsMask(detailEnhanced, boundryMaskWidth ...
+function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth ...
     , percentileThreshold, thresholdAreaOfCC, maskBlurFilt)
-    vidTrimmed = zeros(size(detailEnhanced));
-    boundryMask = zeros(size(detailEnhanced));
+    vidTrimmed = zeros(size(vidIn));
+    boundryMask = zeros(size(vidIn));
     boundryMask(boundryMaskWidth+1 : end-boundryMaskWidth...
             ,boundryMaskWidth+1 : end-boundryMaskWidth...
             ,boundryMaskWidth+1 : end-boundryMaskWidth) = 1;
         
-    vidTrimmed(boundryMask == 1) = detailEnhanced(boundryMask == 1);
+    vidTrimmed(boundryMask == 1) = vidIn(boundryMask == 1);
     vidTrimmed = minMaxNorm(vidTrimmed);
 
     thresholdCC = prctile(vidTrimmed(boundryMaskWidth+1 : end-boundryMaskWidth...
