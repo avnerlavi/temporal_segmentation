@@ -37,7 +37,7 @@ for k = 1:nScales
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
-            currOrientationIndex = i * length(Elevations) + j;
+            currOrientationIndex = (i-1) * length(Elevations) + j;
             L = gpuArray(BuildGabor3D(Azimuths(i), Elevations(j)));
             Co = gather(conv3FFT(vidS, L));
             CpArr(:,:,:,currOrientationIndex) = max(Co,0);

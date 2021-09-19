@@ -12,44 +12,6 @@ addpath(genpath([root,'/maskGeneration']));
 STDParams = struct;
 STDMethod = '3D';
 
-if(strcmp(STDMethod, 'Pyr'))
-    inFileDir = [root,'\resources\man_running.avi'];
-    vidMatrixOrig = readVideoFromFile(inFileDir, false);
-    
-    STDParams.resizeFactors = [1/4, 1/4, 1];
-    STDParams.segmentLength = 9;
-    STDParams.pyramidLevel = 5;
-    
-    vidStd = StdUsingPyramidFunc(vidMatrixOrig, STDParams);
-    vidMatrix = vidStd;
-    
-elseif(strcmp(STDMethod, '3D'))
-    inFileDir = [root,'\resources\horse_running.avi'];
-    vidMatrixOrig = readVideoFromFile(inFileDir, false);
-    
-    STDParams.numOfScales = 4;
-    STDParams.elevationHalfAngle = 60;
-    STDParams.azimuthNum = 4;
-    STDParams.elevationNum = 4;
-    STDParams.sigmaSpatial = [3, 3, 0.1];
-    STDParams.sigmaTemporal = [0.1, 0.1, 7];
-    STDParams.m1 = 2;
-    STDParams.m2 = 2;
-    STDParams.normQ = 2;
-    STDParams.resizeFactors = [1/2, 1/2, 1];
-    
-    vidStd = generateStdVideo3DFunc(vidMatrixOrig, STDParams);
-    vidMatrix = vidStd;
-    
-elseif(strcmp(STDMethod, 'None'))
-    inFileDir = [root,'\results\IterativeDetection\std\vid_std_3d.avi'];
-    vidMatrixOrig = readVideoFromFile(inFileDir, false);
-    vidMatrix = vidMatrixOrig;
-    
-else
-    error('invalid stdMethod value');
-end
-
 MaskParams = struct;
 MaskParams.initialReduction = 3;
 MaskParams.targetResizeFactors  = [2/3, 2/3, 1];
@@ -77,6 +39,48 @@ CCLFParams.m1 = 2;
 CCLFParams.m2 = 1;
 CCLFParams.normQ = 2;
 CCLFParams.resizeFactors = MaskParams.baseResizeFactors;
+
+%% image loading / STD preprocessing
+
+if(strcmp(STDMethod, 'Pyr'))
+    inFileDir = [root,'\resources\man_running.avi'];
+    vidMatrixOrig = readVideoFromFile(inFileDir, false);
+    
+    STDParams.resizeFactors = [1/4, 1/4, 1];
+    STDParams.segmentLength = 9;
+    STDParams.pyramidLevel = 5;
+    
+    vidStd = StdUsingPyramidFunc(vidMatrixOrig, STDParams);
+    vidMatrix = vidStd;
+    
+elseif(strcmp(STDMethod, '3D'))
+    inFileDir = [root,'\resources\man_running.avi'];
+    vidMatrixOrig = readVideoFromFile(inFileDir, false);
+    
+    STDParams.numOfScales = 4;
+    STDParams.elevationHalfAngle = 60;
+    STDParams.azimuthNum = 4;
+    STDParams.elevationNum = 4;
+    STDParams.sigmaSpatial = [3, 3, 0.1];
+    STDParams.sigmaTemporal = [0.1, 0.1, 7];
+    STDParams.m1 = 2;
+    STDParams.m2 = 2;
+    STDParams.normQ = 2;
+    STDParams.resizeFactors = [1/4, 1/4, 1];
+    
+    vidStd = generateStdVideo3DFunc(vidMatrixOrig, STDParams);
+    vidMatrix = vidStd;
+    
+elseif(strcmp(STDMethod, 'None'))
+    inFileDir = [root,'\results\IterativeDetection\std\vid_std_3d.avi'];
+    vidMatrixOrig = readVideoFromFile(inFileDir, false);
+    vidMatrix = vidMatrixOrig;
+    
+else
+    error('invalid stdMethod value');
+end
+
+%% object detection
 
 [totalMask, maskPyr, detailEnhancementPyr] = maskGenerationFunc(...
     vidMatrix, MaskParams, CCLFParams);
