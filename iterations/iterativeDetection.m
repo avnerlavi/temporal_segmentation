@@ -1,6 +1,5 @@
 %% initilization
 startTime = datetime('now');
-disp(['Start ', datestr(startTime, 'HH:MM:SS')]);
 dumpMovies = true;
 
 root = getenv('TemporalSegmentation');
@@ -8,9 +7,12 @@ addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGaussianStd']));
 addpath(genpath([root,'/3dGabor']));
 addpath(genpath([root,'/maskGeneration']));
+addpath(genpath([root,'/evaluation']));
 
-STDParams = struct;
+vidFileName = 'man_running';
+
 STDMethod = '3D';
+STDParams = struct;
 
 MaskParams = struct;
 MaskParams.initialReduction = 3;
@@ -42,11 +44,17 @@ CCLFParams.resizeFactors = MaskParams.baseResizeFactors;
 
 %% image loading / STD preprocessing
 
+disp(['Start ', datestr(startTime, 'HH:MM:SS')]);
+
 if(strcmp(STDMethod, 'Pyr'))
-    inFileDir = [root,'\resources\man_running.avi'];
+    inFileDir = [root,'\resources\', vidFileName, '.avi'];
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
     
-    STDParams.resizeFactors = [1/4, 1/4, 1];
+    if(strcmp(vidFileName, 'man_running'))
+        STDParams.resizeFactors = [1/4, 1/4, 1];
+    else
+        STDParams.resizeFactors = [1/2, 1/2, 1];
+    end
     STDParams.segmentLength = 9;
     STDParams.pyramidLevel = 5;
     
@@ -54,7 +62,7 @@ if(strcmp(STDMethod, 'Pyr'))
     vidMatrix = vidStd;
     
 elseif(strcmp(STDMethod, '3D'))
-    inFileDir = [root,'\resources\man_running.avi'];
+    inFileDir = [root,'\resources\', vidFileName, '.avi'];
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
     
     STDParams.numOfScales = 4;
@@ -66,7 +74,11 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.m1 = 2;
     STDParams.m2 = 2;
     STDParams.normQ = 2;
-    STDParams.resizeFactors = [1/4, 1/4, 1];
+    if(strcmp(vidFileName, 'man_running'))
+        STDParams.resizeFactors = [1/4, 1/4, 1];
+    else
+        STDParams.resizeFactors = [1/2, 1/2, 1];
+    end
     
     vidStd = generateStdVideo3DFunc(vidMatrixOrig, STDParams);
     vidMatrix = vidStd;
@@ -85,17 +97,32 @@ end
 [totalMask, maskPyr, detailEnhancementPyr] = maskGenerationFunc(...
     vidMatrix, MaskParams, CCLFParams);
 
-%% test 
-
-vidMasked = vidMatrixOrig .* safeResize(totalMask, size(vidMatrixOrig));
-implay(vidMasked);
-maintainFitToWindow();
-
 finishTime = datetime('now');
 disp(['Done ' datestr(finishTime,'HH:MM:SS')]);
 
 runDuration = finishTime - startTime;
 disp(['Took ' datestr(runDuration,'HH:MM:SS')]);
+
+resizedMask = safeResize(totalMask, size(vidMatrixOrig));
+
+%% performance evaluation
+
+if(strcmp(vidFileName, 'man_running'))
+    groundTruth = readVideoFromFile([root, '\resources\', vidFileName, '_gt.avi'], true);
+    
+    thresholds = 80:99;
+    [precisions, recalls, ious] = getEvaluationMetrics(resizedMask, ...
+        groundTruth, thresholds, 'prc');
+    evaluationPlot = plotEvaluationMetrics(thresholds, precisions, recalls, ious);
+end
+
+%% result display
+
+vidMasked = vidMatrixOrig .* resizedMask;
+implay(vidMasked);
+maintainFitToWindow();
+
+%% parameter saving
 
 if (dumpMovies)
     warning('off');
@@ -120,8 +147,11 @@ if (dumpMovies)
     writeVideoToFile(totalMask, 'movie_total_mask', [root,'\results\iterativeDetection\maskGeneration']);
     writeVideoToFile(vidMasked, 'movie_masked', [root,'\results\iterativeDetection']);
     
-    saveParams([root,'\results\iterativeDetection'],STDMethod, STDParams ... 
-        ,CCLFParams, MaskParams, runDuration);
-    save([root,'\results\iterativeDetection\params.mat'], 'STDMethod', 'STDParams' ... 
-        ,'CCLFParams', 'MaskParams', 'runDuration');
+    saveParams([root,'\results\iterativeDetection'], vidFileName, STDMethod, ...
+        STDParams ,CCLFParams, MaskParams, runDuration);
+    save([root,'\results\iterativeDetection\params.mat'], 'vidFileName', ...
+        'STDMethod', 'STDParams' ,'CCLFParams', 'MaskParams', 'runDuration');
+     if(strcmp(vidFileName, 'man_running'))
+        saveas(evaluationPlot, [root,'\results\iterativeDetection\eval_plots.png']);
+    end
 end

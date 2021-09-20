@@ -30,8 +30,8 @@ for k = 1:nScales
     %     Co = conv3FFT(vidS, L);
     
     %0 elev handling
-    L = BuildGabor3D(0, 0);
-    Co = conv3FFT(vidS, L);
+    L = gpuArray(BuildGabor3D(0, 0));
+    Co = gather(conv3FFT(vidS, L));
     CpArr(:,:,:,end) = max(Co,0);
     CnArr(:,:,:,end) = max(-Co,0);
     
@@ -56,13 +56,13 @@ for k = 1:nScales
 %     CnOriSum = sumButIndexPowerNormed(CnArr, totalOrientationNumber, 2);
     CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
     CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
-    Cp = CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor;
-    Cn = CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor;
+    Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor);
+    Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor);
 
     [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, activationThreshold, FacilitationLength, alpha);
     elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
-    vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactor).^m1;
-    vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactor).^m1;
+    vidOriTot_p = vidOriTot_p+(gather(LF_p)*elevationNormFactor).^m1;
+    vidOriTot_n = vidOriTot_n+(gather(LF_n)*elevationNormFactor).^m1;
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)

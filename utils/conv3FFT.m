@@ -23,7 +23,7 @@ function [outVol] = conv3FFT(inVol,inKer)
 % Check if both inputs are real numbers
 realInput = isreal(inVol) && isreal(inKer);
 % Check the precision of the input volume
-if strcmp(class(inVol),'double'),
+if strcmp(class(inVol),'double')
     indDb=1;
 else
     indDb=0;
@@ -35,7 +35,7 @@ inKerSize=size(inKer);
 inKerSide=max(size(inKer));
 % Fourrier tranform of the volume and inKer.
 extr(1:3)={0};
-for iDim=(1:3),
+for iDim=(1:3)
     inVol=fft(inVol,inVolSide+inKerSide-1,iDim);
     inKer=fft(inKer,inVolSide+inKerSide-1,iDim);
     extr{iDim}=ceil((inKerSize(iDim)-1)/2)+(1:inVolSize(iDim));
@@ -43,17 +43,17 @@ end
 % Multiplication of the Fourrier tranforms
 conv_FFT=inVol.*inKer;
 % Inverse Fourrier Transform of the convolution
-for iDim=(1:3),
+for iDim=(1:3)
     conv_FFT=ifft(conv_FFT,[],iDim);
 end
 % Crop the side of the image in relation to the size of the kernel
 convinVol=conv_FFT(extr{:});
 % limit the results
-if realInput,
+if realInput
     convinVol=real(convinVol);
 end
 % Format the output into single precision if needed
-if indDb,
+if indDb
     outVol=convinVol;
 else
     outVol=single(convinVol);
