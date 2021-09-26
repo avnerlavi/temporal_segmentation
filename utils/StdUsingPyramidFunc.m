@@ -1,11 +1,9 @@
 function [vidPyr] = StdUsingPyramidFunc(vidIn, params)
 
-vidResized = safeResize(vidIn, params.resizeFactors .* size(vidIn));
-    
-pyrLevel = 0;
-
-vidPyr = zeros([ceil(size(vidResized,1)/2^pyrLevel)...
-    , ceil(size(vidResized,2)/2^pyrLevel), size(vidResized,3)]);
+dims = params.resizeFactors .* size(vidIn);
+vidResized = safeResize(vidIn, dims);
+vidPyr = zeros([size(vidResized, 1), size(vidResized, 2)...
+    , size(vidResized, 3) + params.segmentLength]);
 
 for i = ceil(params.segmentLength/2) : size(vidResized,3) - ceil(params.segmentLength/2)
     temp = GenerateStdImagePyramid2(...
@@ -15,7 +13,7 @@ for i = ceil(params.segmentLength/2) : size(vidResized,3) - ceil(params.segmentL
     vidPyr(:,:,i) = temp{end};
 end
 
-vidPyr = vidPyr(:,:,ceil(params.segmentLength/2):size(vidIn,3) - ceil(params.segmentLength/2));
+vidPyr = vidPyr(:,:,ceil(params.segmentLength/2):end - ceil(params.segmentLength/2));
 vidPyr = minMaxNorm(vidPyr);
 end
 

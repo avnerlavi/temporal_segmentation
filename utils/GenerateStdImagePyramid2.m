@@ -9,13 +9,10 @@ seq_middle = ceil(size(Iseq,3)./2);
 for i=2:N+1
     Ip = BlurredPyramid{i-1};
     BlurredPyramid{i} = impyramid(Ip, 'reduce');
-%     n = floor(FiltSize./(i-1));
-%     if(mod(n,2) == 0)
-%         n = n + 1;
-%     end
-    middleFrameStd = stdfilt(Ip(:, :, seq_middle),ones(FiltSize));
-    temporalSegmentStd = std(stdfilt(Ip, ones(FiltSize)),0,3);
-    StdPyramid{i} = middleFrameStd - temporalSegmentStd;
+    spatialVar = stdfilt(Ip,ones(FiltSize));
+    temporalMedian = median(spatialVar, 3);
+    temporalStd = std(spatialVar, 0, 3);
+    StdPyramid{i} = temporalMedian - temporalStd;
 end
 
 ResizedImage = zeros(size(StdPyramid{2}));
@@ -26,8 +23,3 @@ for i = 2:N+1
 end
 StdPyramid{N+2} = ResizedImage;
 end
-
-% function Inorm = Norm(I)
-%     I = I - min(I(:));
-%     Inorm = I./max(I(:));
-% end
