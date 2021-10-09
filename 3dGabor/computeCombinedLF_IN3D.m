@@ -1,10 +1,10 @@
 function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
-    , nElevations, elHalfAngle, nScales, activationThreshold, baseFacilitationLength ...
+    , nElevations, elHalfAngle, nScales, percentileThreshold, baseFacilitationLength ...
     , alpha, m1, m2, normQ)
 
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
-vidIn = PadVideoReplicate(vidIn,2*nScales);
+vidIn = PadVideoReplicate(vidIn,2*baseFacilitationLength);
 
 vidScaleTot = zeros(size(vidIn));
 Elevations = linspace(0,elHalfAngle,nElevations);
@@ -59,7 +59,7 @@ for k = 1:nScales
     Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor);
     Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor);
 
-    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, activationThreshold, FacilitationLength, alpha);
+    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, percentileThreshold, FacilitationLength, alpha);
     elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
     vidOriTot_p = vidOriTot_p+(gather(LF_p)*elevationNormFactor).^m1;
     vidOriTot_n = vidOriTot_n+(gather(LF_n)*elevationNormFactor).^m1;
@@ -73,7 +73,7 @@ for k = 1:nScales
             Cp = gpuArray(CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor);
             Cn = gpuArray(CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor);
             
-            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), activationThreshold, FacilitationLength, alpha);
+            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), percentileThreshold, FacilitationLength, alpha);
             
             elevationStart = Elevations(j) - Elevations(1)/2;
             elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
@@ -99,7 +99,7 @@ end
 
 vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
 
-vidScaleTot = stripVideo(vidScaleTot, 2*nScales);
+vidScaleTot = stripVideo(vidScaleTot, 2*baseFacilitationLength);
 vidScaleTot = vidScaleTot/max(abs(vidScaleTot(:)));
 
 close(w);

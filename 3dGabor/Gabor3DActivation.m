@@ -1,11 +1,11 @@
-function [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuth, Elevation, activationThreshold ...
+function [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuth, Elevation, percentileThreshold ...
     , FacilitationLength, alpha)
 % threshold = activationThreshold * max(abs(Co(3:end-2,3:end-2,3:end-2)), [], 'all');
 % Co(abs(Co) < threshold) = 0;
-Cp_threshold = activationThreshold * max(Cp(3:end-2,3:end-2,3:end-2), [], 'all');
-Cn_threshold = activationThreshold * max(Cn(3:end-2,3:end-2,3:end-2), [], 'all');
-% Cp(Cp < Cp_threshold) = 0;
-% Cn(Cn < Cn_threshold) = 0;
+Cp_threshold = prctile(Cp(9:end-8,9:end-8,9:end-8), percentileThreshold, 'all');%activationThreshold * max(Cp(3:end-2,3:end-2,3:end-2), [], 'all');
+Cn_threshold = prctile(Cn(9:end-8,9:end-8,9:end-8), percentileThreshold, 'all');%activationThreshold * max(Cn(3:end-2,3:end-2,3:end-2), [], 'all');
+Cp(Cp < Cp_threshold) = 0;
+Cn(Cn < Cn_threshold) = 0;
 
 [LF_p ,NR_p] = LFsc3D(Cp, Azimuth, Elevation, FacilitationLength);
 [LF_n ,NR_n] = LFsc3D(Cn, Azimuth, Elevation ,FacilitationLength);

@@ -31,7 +31,7 @@ MaskParams.gaussianMaxVal = 1/4;
 
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
-CCLFParams.activationThreshold = 0.3;
+CCLFParams.percentileThreshold = 95;
 CCLFParams.elevationHalfAngle = 60;
 CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 7;
@@ -107,14 +107,12 @@ resizedMask = safeResize(totalMask, size(vidMatrixOrig));
 
 %% performance evaluation
 
-if(strcmp(vidFileName, 'man_running'))
-    groundTruth = readVideoFromFile([root, '\resources\', vidFileName, '_gt.avi'], true);
-    
-    thresholds = 80:99;
-    [precisions, recalls, ious] = getEvaluationMetrics(resizedMask, ...
-        groundTruth, thresholds, 'prc');
-    evaluationPlot = plotEvaluationMetrics(thresholds, precisions, recalls, ious);
-end
+groundTruth = readVideoFromFile([root, '\resources\', vidFileName, '_gt.avi'], true);
+
+thresholds = 80:99;
+[precisions, recalls, ious] = getEvaluationMetrics(resizedMask, ...
+    groundTruth, thresholds, 'prc');
+evaluationPlot = plotEvaluationMetrics(thresholds, precisions, recalls, ious);
 
 %% result display
 
@@ -151,7 +149,5 @@ if (dumpMovies)
         STDParams ,CCLFParams, MaskParams, runDuration);
     save([root,'\results\iterativeDetection\params.mat'], 'vidFileName', ...
         'STDMethod', 'STDParams' ,'CCLFParams', 'MaskParams', 'runDuration');
-     if(strcmp(vidFileName, 'man_running'))
-        saveas(evaluationPlot, [root,'\results\iterativeDetection\eval_plots.png']);
-    end
+    saveas(evaluationPlot, [root,'\results\iterativeDetection\eval_plots.png']);
 end
