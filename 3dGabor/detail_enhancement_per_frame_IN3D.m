@@ -6,8 +6,8 @@ addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
 elevationHalfAngle = [0, 90];
-resizeFactors = [1/2, 1/2, 1/2];
-inFileDir = [root ,'/resources/front2.mp4'];
+resizeFactors = [1/4, 1/4, 1/4];
+inFileDir = [root ,'/resources/ultrasound_1_cropped.avi'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
