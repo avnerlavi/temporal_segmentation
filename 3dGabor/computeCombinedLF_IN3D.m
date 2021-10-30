@@ -57,7 +57,7 @@ for k = 1:nScales %main loop
     facilitationLengths = computeEllipsoidRadius(elevations, primaryFL, secondaryFL);
     if(minAngle == 0) %0 elev handling
         [LF_n, LF_p] = Gabor3DActivation(vidS, 0, 0, activationThreshold, primaryFL, alpha);
-        vidOriTot_n = vidOriTot_n+(LF_n*elevationNorm0Factor).^m1;
+       vidOriTot_n = vidOriTot_n+(LF_n*elevationNorm0Factor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNorm0Factor).^m1;
     end
     for i = 1:length(azimuths)
