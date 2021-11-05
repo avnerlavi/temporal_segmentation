@@ -3,7 +3,8 @@ nElevations = 7;
 nAzimuths = 8;
 nScales = 4;
 zeros_vec = 1:(nElevations-1)*nAzimuths+1:((nElevations-1)*nAzimuths+1)*nScales;
-
+LF_n = 1- LF_n;
+LF_p = 1- LF_p;
 LF_n_tensor = LF_n;
 LF_p_tensor = LF_p;
 LF_n_tensor(zeros_vec)=[];
