@@ -1,7 +1,6 @@
-function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
+function [vidScaleTot, vidScalesPyr,threshold_data] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
     , nElevations, elHalfAngle, eccentricity, nScales, activationThreshold, baseFacilitationLengths ...
     , alpha, m1, m2, normQ)
-
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
 vidIn = PadVideoReplicate(vidIn,2*nScales);
@@ -49,6 +48,8 @@ azimuths = azimuths(1:end-1);
 totalOrientationNumber = length(azimuths) * length(elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
+threshold_data = zeros(5,totalIterationNumber/2);
+
 for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
     vidOriTot_n = zeros(size(vidS));
@@ -66,7 +67,7 @@ for k = 1:nScales
     end
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            currOrientationIndex = i * length(elevations) + j;
+            currOrientationIndex = (i-1) * length(elevations) + j;
             L = BuildGabor3D(azimuths(i), elevations(j));
             Co = convn(vidS, L,'same');
             CpArr(:,:,:,currOrientationIndex) = max(Co,0);
@@ -88,7 +89,8 @@ for k = 1:nScales
         Cp = CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor;
         Cn = CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor;
         
-        [LF_n, LF_p] = Gabor3DActivation(Cp,Cn, 0, 0, activationThreshold, primaryFL, alpha);
+        [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(Cp,Cn, 0, 0, activationThreshold, primaryFL, alpha);
+        threshold_data(:,k*totalOrientationNumber) = [1/k,threshold_data_local];
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNorm0Factor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNorm0Factor).^m1;
     end
@@ -101,8 +103,9 @@ for k = 1:nScales
             Cp = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
             Cn = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor;
             
-            [LF_n, LF_p] = Gabor3DActivation(Cp,Cn, azimuths(i), elevations(j), ...
+            [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(Cp,Cn, azimuths(i), elevations(j), ...
                 activationThreshold, facilitationLengths(j), alpha);
+            threshold_data(:,(k-1)*totalOrientationNumber+currOrientationIndex) = [1/k,threshold_data_local];
             %combining angles
             vidOriTot_p = vidOriTot_p+(LF_p*elevationNormFactors(j)).^m1;
             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactors(j)).^m1;
