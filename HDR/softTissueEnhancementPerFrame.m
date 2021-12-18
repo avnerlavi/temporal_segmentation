@@ -1,7 +1,4 @@
-function [ImageOut,W] = softTissueEnhancementPerFrame(ImageIn)
-c1 = 1/2;
-c2 = 1/2;
-V = 0.38;
+function [ImageOut,W] = softTissueEnhancementPerFrame(ImageIn,c1,c2,V)
 W_high = 4*c1*(ImageIn-V).*(max(ImageIn,[],'all')-ImageIn);
 W_high = W_high./(max(ImageIn,[],'all')-V).^2;
 

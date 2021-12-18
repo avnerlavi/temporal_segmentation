@@ -28,9 +28,8 @@ CCLFParams.elevationNum = 7;
 CCLFParams.eccentricity = sqrt(1);
 CCLFParams.activationThreshold = 0.03; %for running man - 0.3
 CCLFParams.facilitationLengths = [10, 5];
-CCLFParams.alpha = 0;
+CCLFParams.alpha = 0.5;
 CCLFParams.m1 = 1;
-CCLFParams.m2 = 2;
 CCLFParams.m2 = 2;
 CCLFParams.normQ = 2;
 
@@ -55,7 +54,7 @@ minVideoValue = min(detail_enhanced(:));
 maxVideoValue = max(detail_enhanced(:));
 implay(vidOut);
 maintainFitToWindow();
-beta = 1;
+beta = 1.5;
 gain = 1;
 
 if(baby)

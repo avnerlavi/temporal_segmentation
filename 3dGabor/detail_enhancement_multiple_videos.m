@@ -12,7 +12,7 @@ video_names = {'arm-movements-712-716.mp4', ...
     'heartbeat-309-312.mp4', ...
     'jumping.mp4', ...
     'ultrasound_1_cropped.avi'};
-beta = 1;
+beta = 1.5;
 gain = 1;
 DE_params = struct;
 DE_params.numOfScales = 4;
@@ -22,7 +22,7 @@ DE_params.elevationNum = 7;
 DE_params.eccentricity = sqrt(1);
 DE_params.activationThreshold = 0.03; %for running man - 0.3
 DE_params.facilitationLengths = [10, 5];
-DE_params.alpha = 0;
+DE_params.alpha = 0.5;
 DE_params.m1 = 1;
 DE_params.m2 = 2;
 DE_params.m2 = 2;
