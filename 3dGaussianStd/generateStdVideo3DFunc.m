@@ -20,7 +20,7 @@ vid_std = ...
     Params.normQ ...
     );
 
-vid_std_squared = sign(vid_std).*(vid_std.^2);
-vidOut = minMaxNorm(vid_std_squared);
+vid_std_magnified = sign(vid_std).*(abs(vid_std).^Params.powerFactor);
+vidOut = minMaxNorm(vid_std_magnified);
 end
 

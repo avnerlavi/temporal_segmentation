@@ -1,4 +1,4 @@
-function StdPyramid = GenerateStdImagePyramid2(Iseq,N)
+function StdPyramid = GenerateStdImagePyramid2(Iseq, N, gamma)
 FiltSize = 5;
 StdPyramid = cell(1,N+2);
 BlurredPyramid = cell(1,N+1);
@@ -16,7 +16,6 @@ for i=2:N+1
 end
 
 ResizedImage = zeros(size(StdPyramid{2}));
-gamma = 2;
 for i = 2:N+1
     temp = imresize(StdPyramid{i}, size(StdPyramid{2}));
     ResizedImage = ResizedImage + ((abs(temp).^gamma) .* sign(temp)) ./ 2.^(i);

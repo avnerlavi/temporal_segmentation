@@ -1,4 +1,4 @@
-%% initilization
+%% initialization
 startTime = datetime('now');
 dumpMovies = true;
 
@@ -57,6 +57,7 @@ if(strcmp(STDMethod, 'Pyr'))
     end
     STDParams.segmentLength = 9;
     STDParams.pyramidLevel = 5;
+    STDParams.gamma = 2;
     
     vidStd = StdUsingPyramidFunc(vidMatrixOrig, STDParams);
     vidMatrix = vidStd;
@@ -74,6 +75,7 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.m1 = 2;
     STDParams.m2 = 2;
     STDParams.normQ = 2;
+    STDParams.powerFactor = 2;
     if(strcmp(vidFileName, 'man_running'))
         STDParams.resizeFactors = [1/4, 1/4, 1];
     else
