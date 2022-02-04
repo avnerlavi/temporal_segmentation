@@ -1,16 +1,14 @@
 function [LF_n, LF_p,threshold_data] = Gabor3DActivation(Cp, Cn, Azimuth, Elevation, ...
-    CpSupport, CnSupport, activationThreshold, supportThreshold, FacilitationLength, alpha)
+    CpSupport, CnSupport, activationThreshold, FacilitationLength, alpha)
 
-CpOriginalSupport = Cp > supportThreshold;
-CnOriginalSupport = Cn > supportThreshold;
+threshold_p = activationThreshold(1);
+threshold_n = activationThreshold(2);
 
-threshold_p = activationThreshold * max(Cp(8:end-7,8:end-7,8:end-7), [], 'all');
-threshold_n = activationThreshold * max(Cn(8:end-7,8:end-7,8:end-7), [], 'all');
+CpOriginalSupport = Cp > threshold_p;
+CnOriginalSupport = Cn > threshold_n;
 
-mask_p = abs(Cp) > threshold_p;
-mask_n = abs(Cn) > threshold_n;
-Cp(~mask_p) = 0;
-Cn(~mask_n) = 0;
+Cp(~CpOriginalSupport) = 0;
+Cn(~CnOriginalSupport) = 0;
 
 LF_p_mask = LFsc3D_binarized(CpSupport, Azimuth, Elevation, FacilitationLength, 'erode');
 LF_n_mask = LFsc3D_binarized(CnSupport, Azimuth, Elevation ,FacilitationLength, 'erode');
@@ -26,6 +24,12 @@ LF_n = LF_n .* LF_n_mask + NR_n .* (1 - LF_n_mask);
 
 % threshold_p = activationThreshold * max(LF_p(8:end-7,8:end-7,8:end-7), [], 'all');
 % threshold_n = activationThreshold * max(LF_n(8:end-7,8:end-7,8:end-7), [], 'all');
+
+LF_p_orig = LF_p;
+LF_n_orig = LF_n;
+
+LF_p(abs(LF_p) < threshold_p) = NR_p(abs(LF_p) < threshold_p);
+LF_n(abs(LF_n) < threshold_n) = NR_n(abs(LF_n) < threshold_n);
 
 threshold_data = [Azimuth,Elevation];
 threshold_data(end,4) = mean(double(abs(LF_p) > threshold_p),'all');
