@@ -64,6 +64,8 @@ for k = 1:nScales
         Co = convn(vidS, L,'same');
         CpArr(:,:,:,end) = max(Co,0);
         CnArr(:,:,:,end) = max(-Co,0);
+        progressCounter = progressCounter + 1;
+        waitbar(progressCounter / (3*totalIterationNumber), w);
     end
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
@@ -74,18 +76,20 @@ for k = 1:nScales
             CnArr(:,:,:,currOrientationIndex) = max(-Co,0);
             
             progressCounter = progressCounter + 1;
-            waitbar(progressCounter / totalIterationNumber, w);
+            waitbar(progressCounter / (3*totalIterationNumber), w);
         end
     end
     
     CpTotalPowerSum = sum(abs(CpArr).^normQ, 4);
     CnTotalPowerSum = sum(abs(CnArr).^normQ, 4);
-    
+    waitbar(progressCounter / (3*totalIterationNumber), w,['finished contrast computation']);
     if(minAngle == 0) %0 elev handling
         CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, end)).^normQ).^(1/normQ);
         CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, end)).^normQ).^(1/normQ);
         CpArr(:,:,:, end) = CpArr(:,:,:, end) ./ CpNormFactor;
         CnArr(:,:,:, end) = CnArr(:,:,:, end) ./ CnNormFactor;
+        progressCounter = progressCounter + 1;
+        waitbar(progressCounter / (3*totalIterationNumber), w);
     end
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
@@ -95,9 +99,11 @@ for k = 1:nScales
             
             CpArr(:,:,:, currOrientationIndex) = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
             CnArr(:,:,:, currOrientationIndex) = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor; 
+            progressCounter = progressCounter + 1;
+            waitbar(progressCounter / (3*totalIterationNumber), w);
         end
     end
-    
+    waitbar(progressCounter / (3*totalIterationNumber), w,['finished normalizing']);
     %%threshold
     totalActivationThreshold_p = activationThreshold * max(CpArr(8:end-7,8:end-7,8:end-7,:), [], 'all');
     totalActivationThreshold_n = activationThreshold * max(CnArr(8:end-7,8:end-7,8:end-7,:), [], 'all');
@@ -111,6 +117,8 @@ for k = 1:nScales
         threshold_data(:,k*totalOrientationNumber) = [1/k,threshold_data_local];
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNorm0Factor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNorm0Factor).^m1;
+        progressCounter = progressCounter + 1;
+        waitbar(progressCounter / (3*totalIterationNumber), w);
     end
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
@@ -127,7 +135,7 @@ for k = 1:nScales
             vidOriTot_n = vidOriTot_n+(LF_n*elevationNormFactors(j)).^m1;
             %waitbar handling
             progressCounter = progressCounter + 1;
-            waitbar(progressCounter / totalIterationNumber, w);
+            waitbar(progressCounter / (3*totalIterationNumber), w);
         end
     end
     
