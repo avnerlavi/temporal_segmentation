@@ -15,16 +15,9 @@ LF_n_mask = LFsc3D_binarized(CnSupport, Azimuth, Elevation ,FacilitationLength, 
 
 [LF_p ,NR_p] = LFsc3D(Cp, Azimuth, Elevation, FacilitationLength);
 [LF_n ,NR_n] = LFsc3D(Cn, Azimuth, Elevation ,FacilitationLength);
-% 
-% LF_p_threshold = activationThreshold * max(abs(LF_p(3:end-2,3:end-2,3:end-2)), [], 'all');
-% LF_n_threshold = activationThreshold * max(abs(LF_n(3:end-2,3:end-2,3:end-2)), [], 'all');
-% LF_p(LF_p < LF_p_threshold) = 0;
-% LF_n(LF_n < LF_n_threshold) = 0;
 
 % LF_p_mask = (LF_p_mask - CpOriginalSupport) > 0;
 % LF_n_mask = (LF_n_mask - CnOriginalSupport) > 0;
-% LF_p_mask = convn(double(LF_p_mask),ones([3,3,3])/27,'same'); 
-% LF_n_mask = convn(double(LF_n_mask),ones([3,3,3])/27,'same');
 
 LF_p = LF_p .* LF_p_mask + NR_p .* (1 - LF_p_mask);
 LF_n = LF_n .* LF_n_mask + NR_n .* (1 - LF_n_mask);

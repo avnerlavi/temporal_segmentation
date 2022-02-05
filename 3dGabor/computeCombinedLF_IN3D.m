@@ -76,10 +76,10 @@ for k = 1:nScales
     totalActivationThreshold = [totalActivationThreshold_p, totalActivationThreshold_n];
     
     %0 elev handling
-        CpSupportArr(:,:,:,end) = CpArr(:,:,:, end) > totalActivationThreshold_p;
-        CnSupportArr(:,:,:,end) = CnArr(:,:,:, end) > totalActivationThreshold_n;
-        CpSupportArr(:,:,:,end) = LFsc3D_binarized(CpSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
-        CnSupportArr(:,:,:,end) = LFsc3D_binarized(CnSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
+    CpSupportArr(:,:,:,end) = CpArr(:,:,:, end) > totalActivationThreshold_p;
+    CnSupportArr(:,:,:,end) = CnArr(:,:,:, end) > totalActivationThreshold_n;
+    CpSupportArr(:,:,:,end) = LFsc3D_binarized(CpSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
+    CnSupportArr(:,:,:,end) = LFsc3D_binarized(CnSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
@@ -97,27 +97,27 @@ for k = 1:nScales
     CnTotalSupport = any(CnSupportArr, 4);
 
     %0 elev handling
-    Cp = gpuArray(CpArr(:,:,:, end));
-    Cn = gpuArray(CnArr(:,:,:, end));
+    Cp = CpArr(:,:,:, end);
+    Cn = CnArr(:,:,:, end);
     
     [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, CpTotalSupport, CnTotalSupport, ...
         totalActivationThreshold, FacilitationLength, alpha);
     
-    vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
-    vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+    vidOriTot_p = vidOriTot_p+(LF_p).^m1;
+    vidOriTot_n = vidOriTot_n+(LF_n).^m1;
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
-            Cp = gpuArray(CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor);
-            Cn = gpuArray(CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor);
+            Cp = CpArr(:,:,:, currOrientationIndex);
+            Cn = CnArr(:,:,:, currOrientationIndex);
                
             [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), ...
                  CpTotalSupport, CnTotalSupport, totalActivationThreshold, FacilitationLength, alpha);
 
             %combining angles
-            vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
-            vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+            vidOriTot_p = vidOriTot_p+(LF_p).^m1;
+            vidOriTot_n = vidOriTot_n+(LF_n).^m1;
 
             %waitbar handling
             progressCounter = progressCounter + 1;
