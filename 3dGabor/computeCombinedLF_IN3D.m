@@ -1,5 +1,5 @@
 function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
-    , nElevations, elHalfAngle, nScales, activationThreshold, supportThreshold, baseFacilitationLength ...
+    , nElevations, elHalfAngle, nScales, activationThreshold, baseFacilitationLength ...
     , alpha, m1, m2, normQ)
 
 w = waitbar(0, 'starting per-resolution LF computation');
@@ -60,11 +60,6 @@ for k = 1:nScales
     CpArr(:,:,:, end) = CpArr(:,:,:, end) ./ CpNormFactor;
     CnArr(:,:,:, end) = CnArr(:,:,:, end) ./ CnNormFactor;
     
-    CpSupportArr(:,:,:,end) = CpArr(:,:,:, totalOrientationNumber) > supportThreshold;
-    CnSupportArr(:,:,:,end) = CnArr(:,:,:, totalOrientationNumber) > supportThreshold;
-    CpSupportArr(:,:,:,end) = LFsc3D_binarized(CpSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
-    CnSupportArr(:,:,:,end) = LFsc3D_binarized(CnSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
-
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
@@ -73,9 +68,24 @@ for k = 1:nScales
                         
             CpArr(:,:,:, currOrientationIndex) = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
             CnArr(:,:,:, currOrientationIndex) = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor;
-            
-            CpSupportArr(:,:,:,currOrientationIndex) = CpArr(:,:,:,currOrientationIndex) > supportThreshold;
-            CnSupportArr(:,:,:,currOrientationIndex) = CnArr(:,:,:,currOrientationIndex) > supportThreshold;
+        end
+    end
+    
+    totalActivationThreshold_p = activationThreshold * max(CpArr(8:end-7,8:end-7,8:end-7,:), [], 'all');
+    totalActivationThreshold_n = activationThreshold * max(CnArr(8:end-7,8:end-7,8:end-7,:), [], 'all');
+    totalActivationThreshold = [totalActivationThreshold_p, totalActivationThreshold_n];
+    
+    %0 elev handling
+        CpSupportArr(:,:,:,end) = CpArr(:,:,:, end) > totalActivationThreshold_p;
+        CnSupportArr(:,:,:,end) = CnArr(:,:,:, end) > totalActivationThreshold_n;
+        CpSupportArr(:,:,:,end) = LFsc3D_binarized(CpSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
+        CnSupportArr(:,:,:,end) = LFsc3D_binarized(CnSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
+    
+    for i = 1:length(Azimuths)
+        for j = 1:length(Elevations)
+            currOrientationIndex = (i-1) * length(Elevations) + j;
+            CpSupportArr(:,:,:,currOrientationIndex) = CpArr(:,:,:, currOrientationIndex) > totalActivationThreshold_p;
+            CnSupportArr(:,:,:,currOrientationIndex) = CnArr(:,:,:, currOrientationIndex) > totalActivationThreshold_n;
             CpSupportArr(:,:,:,currOrientationIndex) = ...
                 LFsc3D_binarized(CpSupportArr(:,:,:,currOrientationIndex), Azimuths(i), Elevations(j), FacilitationLength, 'dilate');
             CnSupportArr(:,:,:,currOrientationIndex) = ...
@@ -91,7 +101,7 @@ for k = 1:nScales
     Cn = gpuArray(CnArr(:,:,:, end));
     
     [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, CpTotalSupport, CnTotalSupport, ...
-        activationThreshold, supportThreshold, FacilitationLength, alpha);
+        totalActivationThreshold, FacilitationLength, alpha);
     
     vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
     vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
@@ -103,7 +113,7 @@ for k = 1:nScales
             Cn = gpuArray(CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor);
                
             [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), ...
-                 CpTotalSupport, CnTotalSupport, activationThreshold, supportThreshold, FacilitationLength, alpha);
+                 CpTotalSupport, CnTotalSupport, totalActivationThreshold, FacilitationLength, alpha);
 
             %combining angles
             vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
