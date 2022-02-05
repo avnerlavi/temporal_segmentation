@@ -31,7 +31,8 @@ MaskParams.gaussianMaxVal = 1/4;
 
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
-CCLFParams.percentileThreshold = 95;
+CCLFParams.activationThreshold = 0.3;
+CCLFParams.supportThreshold = 0.01;
 CCLFParams.elevationHalfAngle = 60;
 CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 7;

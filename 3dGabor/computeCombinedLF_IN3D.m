@@ -1,5 +1,5 @@
 function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
-    , nElevations, elHalfAngle, nScales, percentileThreshold, baseFacilitationLength ...
+    , nElevations, elHalfAngle, nScales, activationThreshold, supportThreshold, baseFacilitationLength ...
     , alpha, m1, m2, normQ)
 
 w = waitbar(0, 'starting per-resolution LF computation');
@@ -23,17 +23,20 @@ for k = 1:nScales
     
     CnArr = zeros([size(vidS), totalOrientationNumber]);
     CpArr = zeros([size(vidS), totalOrientationNumber]);
-    
+    CnSupportArr = false([size(vidS), totalOrientationNumber]);
+    CpSupportArr = false([size(vidS), totalOrientationNumber]);
+
     FacilitationLength = max(3, baseFacilitationLength/k);
-    
-    %     L = BuildGabor3D(Azimuth, Elevation);
-    %     Co = conv3FFT(vidS, L);
     
     %0 elev handling
     L = gpuArray(BuildGabor3D(0, 0));
     Co = gather(conv3FFT(vidS, L));
     CpArr(:,:,:,end) = max(Co,0);
     CnArr(:,:,:,end) = max(-Co,0);
+%     CpSupportArr(:,:,:,end) = CpArr(:,:,:,end) > supportThreshold;
+%     CnSupportArr(:,:,:,end) = CnArr(:,:,:,end) > supportThreshold;
+%     CpSupportArr(:,:,:,end) = LFsc3D_binarized(CpSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
+%     CnSupportArr(:,:,:,end) = LFsc3D_binarized(CnSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
@@ -50,39 +53,66 @@ for k = 1:nScales
     
     CpTotalPowerSum = sum(abs(CpArr).^normQ, 4);
     CnTotalPowerSum = sum(abs(CnArr).^normQ, 4);
-
-    %0 elev handling
-%     CpOriSum = sumButIndexPowerNormed(CpArr, totalOrientationNumber, 2);
-%     CnOriSum = sumButIndexPowerNormed(CnArr, totalOrientationNumber, 2);
-    CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
-    CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
-    Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor);
-    Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor);
-
-    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, percentileThreshold, FacilitationLength, alpha);
-    elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
-    vidOriTot_p = vidOriTot_p+(gather(LF_p)*elevationNormFactor).^m1;
-    vidOriTot_n = vidOriTot_n+(gather(LF_n)*elevationNormFactor).^m1;
     
+    %0 elev handling
+    CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, end)).^normQ).^(1/normQ);
+    CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, end)).^normQ).^(1/normQ);
+    CpArr(:,:,:, end) = CpArr(:,:,:, end) ./ CpNormFactor;
+    CnArr(:,:,:, end) = CnArr(:,:,:, end) ./ CnNormFactor;
+    
+    CpSupportArr(:,:,:,end) = CpArr(:,:,:, totalOrientationNumber) > supportThreshold;
+    CnSupportArr(:,:,:,end) = CnArr(:,:,:, totalOrientationNumber) > supportThreshold;
+    CpSupportArr(:,:,:,end) = LFsc3D_binarized(CpSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
+    CnSupportArr(:,:,:,end) = LFsc3D_binarized(CnSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
+
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
             CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
             CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
+                        
+            CpArr(:,:,:, currOrientationIndex) = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
+            CnArr(:,:,:, currOrientationIndex) = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor;
+            
+            CpSupportArr(:,:,:,currOrientationIndex) = CpArr(:,:,:,currOrientationIndex) > supportThreshold;
+            CnSupportArr(:,:,:,currOrientationIndex) = CnArr(:,:,:,currOrientationIndex) > supportThreshold;
+            CpSupportArr(:,:,:,currOrientationIndex) = ...
+                LFsc3D_binarized(CpSupportArr(:,:,:,currOrientationIndex), Azimuths(i), Elevations(j), FacilitationLength, 'dilate');
+            CnSupportArr(:,:,:,currOrientationIndex) = ...
+                LFsc3D_binarized(CnSupportArr(:,:,:,currOrientationIndex), Azimuths(i), Elevations(j), FacilitationLength, 'dilate');
+        end
+    end
 
+    CpTotalSupport = any(CpSupportArr, 4);
+    CnTotalSupport = any(CnSupportArr, 4);
+
+    %0 elev handling
+    Cp = gpuArray(CpArr(:,:,:, end));
+    Cn = gpuArray(CnArr(:,:,:, end));
+    
+    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, CpTotalSupport, CnTotalSupport, ...
+        activationThreshold, supportThreshold, FacilitationLength, alpha);
+    
+    vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
+    vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+    
+    for i = 1:length(Azimuths)
+        for j = 1:length(Elevations)
+            currOrientationIndex = (i-1) * length(Elevations) + j;
             Cp = gpuArray(CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor);
             Cn = gpuArray(CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor);
-            
-            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), percentileThreshold, FacilitationLength, alpha);
-            
-            elevationStart = Elevations(j) - Elevations(1)/2;
-            elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
-            elevationNormFactor = 1;%cosd(elevationStart) - cosd(elevationEnd);
-            vidOriTot_p = vidOriTot_p+(gather(LF_p)*elevationNormFactor).^m1;
-            vidOriTot_n = vidOriTot_n+(gather(LF_n)*elevationNormFactor).^m1;
-            
+               
+            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), ...
+                 CpTotalSupport, CnTotalSupport, activationThreshold, supportThreshold, FacilitationLength, alpha);
+
+            %combining angles
+            vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
+            vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+
+            %waitbar handling
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
+
         end
     end
     
