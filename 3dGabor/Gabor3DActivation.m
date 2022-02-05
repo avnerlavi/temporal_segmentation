@@ -16,8 +16,8 @@ LF_n_mask = LFsc3D_binarized(CnSupport, Azimuth, Elevation ,FacilitationLength, 
 [LF_p ,NR_p] = LFsc3D(Cp, Azimuth, Elevation, FacilitationLength);
 [LF_n ,NR_n] = LFsc3D(Cn, Azimuth, Elevation ,FacilitationLength);
 
-LF_p_mask = (LF_p_mask - CpOriginalSupport) > 0;
-LF_n_mask = (LF_n_mask - CnOriginalSupport) > 0;
+% LF_p_mask = (LF_p_mask - CpOriginalSupport) > 0;
+% LF_n_mask = (LF_n_mask - CnOriginalSupport) > 0;
 % LF_p_mask = convn(double(LF_p_mask),ones([3,3,3])/27,'same'); 
 % LF_n_mask = convn(double(LF_n_mask),ones([3,3,3])/27,'same');
 
