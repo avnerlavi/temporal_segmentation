@@ -112,7 +112,11 @@ for k = 1:nScales
         for j = 1:length(elevations)
             currOrientationIndex = (i-1) * length(elevations) + j;
             [Cp,Cn] = calcGaborResponse(vidS, azimuths(i), elevations(j));
-            [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(Cp,Cn, azimuths(i), elevations(j), ...
+            CpNormFactor = 1 + (CpTotalPowerSum - Cp.^normQ).^(1/normQ);
+            CnNormFactor = 1 + (CnTotalPowerSum - Cn.^normQ).^(1/normQ);
+            CpNormed = Cp ./ CpNormFactor;
+            CnNormed = Cn ./ CnNormFactor;
+            [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(CpNormed,CnNormed, azimuths(i), elevations(j), ...
                 totalActivationThreshold, facilitationLengths(j), alpha);
             threshold_data(:,(k-1)*totalOrientationNumber+currOrientationIndex) = [1/k,threshold_data_local];
             %combining angles
