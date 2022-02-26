@@ -49,7 +49,7 @@ for i = 1:length(video_names)
     if(any(DE_params.elevationHalfAngle==0))
         num_orientations = DE_params.azimuthNum*(DE_params.elevationNum-1)+1;
     end
-    req_memory = ceil(numel(vid_matrix)*prod(DE_params.resizeFactors))*8*num_orientations;
+    req_memory = ceil(numel(vid_matrix)*prod(DE_params.resizeFactors))*8;
     upper_size_limit = 5*10^9;
     chunk_size = 2.5*10^9;
     if(req_memory > upper_size_limit)

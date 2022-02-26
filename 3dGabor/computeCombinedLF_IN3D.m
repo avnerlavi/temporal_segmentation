@@ -54,8 +54,8 @@ for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
     vidOriTot_n = zeros(size(vidS));
     vidOriTot_p = zeros(size(vidS));
-%    CnArr = zeros([size(vidS), totalOrientationNumber]);
-%    CpArr = zeros([size(vidS), totalOrientationNumber]);
+    %    CnArr = zeros([size(vidS), totalOrientationNumber]);
+    %    CpArr = zeros([size(vidS), totalOrientationNumber]);
     primaryFL = max(3, maxFacilitationLength/k);
     secondaryFL = max(3, minFacilitationLength/k);
     facilitationLengths = computeEllipsoidRadius(elevations, primaryFL, secondaryFL);
@@ -103,7 +103,11 @@ for k = 1:nScales
     
     if(minAngle == 0) %0 elev handling
         [Cp,Cn] = calcGaborResponse(vidS, 0,0);
-        [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(Cp,Cn, 0, 0, totalActivationThreshold, primaryFL, alpha);
+        CpNormFactor = 1 + (CpTotalPowerSum - Cp.^normQ).^(1/normQ);
+        CnNormFactor = 1 + (CnTotalPowerSum - Cn.^normQ).^(1/normQ);
+        CpNormed = Cp ./ CpNormFactor;
+        CnNormed = Cn ./ CnNormFactor;
+        [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(CpNormed,CnNormed, 0, 0, totalActivationThreshold, primaryFL, alpha);
         threshold_data(:,k*totalOrientationNumber) = [1/k,threshold_data_local];
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNorm0Factor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNorm0Factor).^m1;
