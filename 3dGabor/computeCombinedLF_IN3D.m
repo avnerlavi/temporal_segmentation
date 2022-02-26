@@ -52,10 +52,9 @@ threshold_data = zeros(5,totalIterationNumber/2);
 
 for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
+    vidS = gpuArray(vidS);
     vidOriTot_n = zeros(size(vidS));
     vidOriTot_p = zeros(size(vidS));
-    %    CnArr = zeros([size(vidS), totalOrientationNumber]);
-    %    CpArr = zeros([size(vidS), totalOrientationNumber]);
     primaryFL = max(3, maxFacilitationLength/k);
     secondaryFL = max(3, minFacilitationLength/k);
     facilitationLengths = computeEllipsoidRadius(elevations, primaryFL, secondaryFL);
@@ -135,7 +134,7 @@ for k = 1:nScales
     vidOriTot_p = vidOriTot_p.^(1/m1);
     vidOriTot_n = vidOriTot_n.^(1/m1);
     
-    vidScaled = imresize3(vidOriTot_p.^m2 - vidOriTot_n.^m2,size(vidIn));
+    vidScaled = imresize3(gather(vidOriTot_p.^m2 - vidOriTot_n.^m2),size(vidIn));
     vidScaled = vidScaled/(k^m2);
     vidScalesPyr{k} = vidScaled;
     vidScaleTot = vidScaleTot + vidScaled;
@@ -148,6 +147,6 @@ vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
 %removing margins
 vidScaleTot = stripVideo(vidScaleTot, 2*nScales);
 vidScaleTot = vidScaleTot/max(abs(vidScaleTot(:)));
-
+vidScaleTot = gather(vidScaleTot);
 close(w);
 end

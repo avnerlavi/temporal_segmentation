@@ -6,10 +6,10 @@ addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
 elevationHalfAngle = [0, 90];
-resizeFactors = [1/4, 1/4, 1/4];
+resizeFactors = [1/3, 1/3, 1/3];
 %"F:\Matlab\docs\temporal_segmentation\resources\ultrasound_1_cropped.avi"
 %material_from_ynon_19_1_22/edited/eye_2_c_c/0156_0246.mp4
-inFileDir = [root ,'/resources/ultrasound_1_cropped.avi'];
+inFileDir = [root ,'/resources/material_from_ynon_19_1_22/edited/eye_2_c_c/0156_0246.mp4'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
