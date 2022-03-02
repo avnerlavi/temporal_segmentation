@@ -29,4 +29,9 @@ ylim([0, 1]);
 ylabel('precision');
 
 plotHandle = get(groot,'CurrentFigure');
+[maxIoU, maxIoUIndex] = max(ious);
+cursorMode = datacursormode(plotHandle);
+hDatatip = cursorMode.createDatatip(iouPlot);
+pos = [thresholds(maxIoUIndex) maxIoU 0];
+set(hDatatip, 'Position', pos); 
 end
