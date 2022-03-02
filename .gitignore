@@ -1,6 +1,7 @@
 */*.avi
 results/
 results-*/
+archived-results-*
 *.asv
 
 resources/
