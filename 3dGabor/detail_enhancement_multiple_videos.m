@@ -2,18 +2,19 @@ disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 explicit_filenames = false;
-video_in_folder = [root ,'/resources/material_from_ynon_19_1_22/edited/eye_2_c_c/'];
-video_out_folder = [root ,'/results/material_from_ynon_19_1_22_results/eye_2_c_c/'];
+video_in_folder = [root ,'/resources/material_from_ynon_19_1_22/filtered/heart_malformation/'];
+video_out_folder = [root ,'/results/material_from_ynon_19_1_22_filterred_results/heart_malformation/'];
 if(explicit_filenames)
-    video_names = {'arm-movements-712-716.mp4', ...
-        'front.mp4', ...
-        'front2.mp4', ...
-        'general_movement3.mp4', ...
-        'general-movement-130-134.mp4', ...
-        'general-movement-648-657.mp4', ...
-        'heartbeat-309-312.mp4', ...
-        'jumping.mp4', ...
-        'ultrasound_1_cropped.avi'};
+%     video_names = {'arm-movements-712-716.mp4', ...
+%         'front.mp4', ...
+%         'front2.mp4', ...
+%         'general_movement3.mp4', ...
+%         'general-movement-130-134.mp4', ...
+%         'general-movement-648-657.mp4', ...
+%         'heartbeat-309-312.mp4', ...
+%         'jumping.mp4', ...
+%         'ultrasound_1_cropped.avi'};
+video_names = {};
 else
     listing = dir(video_in_folder);
     for i = 1:length(listing)
@@ -43,15 +44,17 @@ for i = 1:length(video_names)
     disp(['started on ',video_names{i},' vid:',num2str(i),'\',num2str(length(video_names))...
         ,' ', datestr(datetime('now'),'HH:MM:SS')]);
     in_file_dir = [video_in_folder,video_names{i}];
-    vid_matrix = readVideoFromFile(in_file_dir, false);
-    DE_params.resizeFactors = target_height/size(vid_matrix,1)*[1, 1, 1];
-    num_orientations = DE_params.azimuthNum*DE_params.elevationNum;
-    if(any(DE_params.elevationHalfAngle==0))
-        num_orientations = DE_params.azimuthNum*(DE_params.elevationNum-1)+1;
-    end
-    req_memory = ceil(numel(vid_matrix)*prod(DE_params.resizeFactors))*8;
-    upper_size_limit = 5*10^9;
-    chunk_size = 2.5*10^9;
+    inVid = VideoReader(in_file_dir);
+    %vid_matrix = readVideoFromFile(in_file_dir, false);
+    DE_params.resizeFactors = target_height/inVid.Height*[1, 1, 1];
+%     num_orientations = DE_params.azimuthNum*DE_params.elevationNum;
+%     if(any(DE_params.elevationHalfAngle==0))
+%         num_orientations = DE_params.azimuthNum*(DE_params.elevationNum-1)+1;
+%     end
+    vid_size = inVid.Height*inVid.Width*inVid.Duration*inVid.FrameRate;
+    req_memory = ceil(vid_size*(prod(DE_params.resizeFactors)+1))*8;
+    upper_size_limit = 7.5*10^9;
+    chunk_size = 7.5*10^9;
     if(req_memory > upper_size_limit)
         disp('video too big - splitting to chunks:')
         num_chunks = ceil(req_memory/chunk_size);
@@ -59,7 +62,7 @@ for i = 1:length(video_names)
             disp(['chunk:',num2str(j),'\',num2str(num_chunks),...
                 ' of vid:',num2str(i),'\',num2str(length(video_names))...
                 ,' ' , datestr(datetime('now'),'HH:MM:SS')]);
-            chunk = vid_matrix(:,:,round((j-1)*end/num_chunks)+1:round(j*end/num_chunks));
+            chunk = readVideoFromFile(in_file_dir, false,[round((j-1)*inVid.Duration*inVid.FrameRate/num_chunks)+1,round(j*inVid.Duration*inVid.FrameRate/num_chunks)]);
             [vid_matrix_resized,activation] = detailEnhancement3Dfunc(chunk,DE_params,false);
             video_combined = additiveCombination(vid_matrix_resized, activation, beta, gain);
             [~,t_c] = compareVids(vid_matrix_resized,video_combined,'verbose',false);
@@ -81,11 +84,12 @@ for i = 1:length(video_names)
             saveParams([video_out_folder,'\',video_names{i}(1:end-4),'_chunk_',num2str(j)], ...
                 in_file_dir, DE_params, ...
                 minVideoValue, maxVideoValue,beta,gain);
-            clear t_c t_n vid_matrix_resized activation
+            clear t_c t_n vid_matrix_resized activation chunk
             memory
         end
         
     else
+        vid_matrix = readVideoFromFile(in_file_dir, false);
         [vid_matrix_resized,activation] = detailEnhancement3Dfunc(vid_matrix,DE_params,false);
         video_combined = additiveCombination(vid_matrix_resized, activation, beta, gain);
         [~,t_c] = compareVids(vid_matrix_resized,video_combined,'verbose',false);
@@ -107,7 +111,7 @@ for i = 1:length(video_names)
         saveParams([video_out_folder,'\',video_names{i}(1:end-4)], ...
             in_file_dir, DE_params, ...
             minVideoValue, maxVideoValue,beta,gain);
-        clear t_c t_n vid_matrix_resized activation
+        clear t_c t_n vid_matrix_resized activation vid_matrix
         memory
     end
     

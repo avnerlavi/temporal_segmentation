@@ -1,16 +1,23 @@
-function vid_matrix = readVideoFromFile(file_path,isBinary)
+function vid_matrix = readVideoFromFile(file_path,isBinary,frame_range)
 
     InVid = VideoReader(file_path);
-    numFrames = ceil(InVid.FrameRate*InVid.Duration);
-
+    
+    if exist('frame_range','var')
+        InVid.CurrentTime = frame_range(1)/InVid.FrameRate;
+        end_time = frame_range(2)/InVid.FrameRate;
+        numFrames = frame_range(2) - frame_range(1);
+    else
+        end_time = InVid.Duration;
+        numFrames = ceil(InVid.FrameRate*InVid.Duration);
+    end
     if isBinary
         vid_matrix = false(InVid.Height, InVid.Width, numFrames);
     else
         vid_matrix = zeros(InVid.Height, InVid.Width, numFrames);
     end
-
+    
     n = 1;
-    while hasFrame(InVid)
+    while InVid.CurrentTime < end_time
         frame = rgb2gray(readFrame(InVid));
         if(isBinary)
             frame = imbinarize(frame);
