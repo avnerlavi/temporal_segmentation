@@ -16,9 +16,9 @@ if(numel(Shape)~=0)
 else
     S = max(ceil(Sigma));
     S = sqrt(S/2);
-    x = -2*S:3*S;
-    y = -2*S:3*S;
-    z = -2*S:3*S;
+    x = -3*S:3*S;
+    y = -3*S:3*S;
+    z = -3*S:3*S;
 end
 [X,Y,Z] = meshgrid(x,y,z);
 shape = size(X);

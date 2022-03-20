@@ -19,11 +19,11 @@ else
     error('Invalid parameter length, elHalfAngle needs to be of length 1 or 2');
 end
 if(length(baseFacilitationLengths) == 2)
-    minFacilitationLength = baseFacilitationLengths(1);
-    maxFacilitationLength = baseFacilitationLengths(2);
+    spatialFacilitationLength = baseFacilitationLengths(1);
+    temporalFacilitationLength = baseFacilitationLengths(2);
 elseif(length(baseFacilitationLengths) == 1)
-    minFacilitationLength = baseFacilitationLengths;
-    maxFacilitationLength = baseFacilitationLengths;
+    spatialFacilitationLength = baseFacilitationLengths;
+    temporalFacilitationLength = baseFacilitationLengths;
 else
     error('Invalid parameter length, baseFacilitationLengths needs to be of length 1 or 2');
 end
@@ -56,9 +56,9 @@ for k = 1:nScales
     vidOriTot_p = zeros(size(vidS));
     %    CnArr = zeros([size(vidS), totalOrientationNumber]);
     %    CpArr = zeros([size(vidS), totalOrientationNumber]);
-    primaryFL = max(3, maxFacilitationLength/k);
-    secondaryFL = max(3, minFacilitationLength/k);
-    facilitationLengths = computeEllipsoidRadius(elevations, primaryFL, secondaryFL);
+    temporalFL = max(3, temporalFacilitationLength/k);
+    spatialFL = max(3, spatialFacilitationLength/k);
+    facilitationLengths = computeEllipsoidRadius(elevations, temporalFL, spatialFL);
     if(minAngle == 0) %0 elev handling
         [Cp,Cn] = calcGaborResponse(vidS, 0, 0);
         CpTotalPowerSum = Cp.^normQ;
@@ -107,7 +107,7 @@ for k = 1:nScales
         CnNormFactor = 1 + (CnTotalPowerSum - Cn.^normQ).^(1/normQ);
         CpNormed = Cp ./ CpNormFactor;
         CnNormed = Cn ./ CnNormFactor;
-        [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(CpNormed,CnNormed, 0, 0, totalActivationThreshold, primaryFL, alpha);
+        [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(CpNormed,CnNormed, 0, 0, totalActivationThreshold, temporalFL, alpha);
         threshold_data(:,k*totalOrientationNumber) = [1/k,threshold_data_local];
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNorm0Factor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNorm0Factor).^m1;

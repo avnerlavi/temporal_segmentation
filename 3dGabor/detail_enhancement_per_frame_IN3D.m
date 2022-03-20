@@ -5,8 +5,8 @@ root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
-elevationHalfAngle = [0, 90];
-resizeFactors = [1/4, 1/4, 1/4];
+elevationHalfAngle = [0, 77];
+resizeFactors = [0.2793, 0.2793, 0.15];
 %"F:\Matlab\docs\temporal_segmentation\resources\ultrasound_1_cropped.avi"
 %material_from_ynon_19_1_22/edited/eye_2_c_c/0156_0246.mp4
 %"\material_from_ynon_19_1_22\edited\heart_malformation\1159_1338.mp4"
@@ -24,10 +24,10 @@ end
 vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
     
 CCLFParams = struct;
-CCLFParams.numOfScales = 4;
+CCLFParams.numOfScales = 3;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
-CCLFParams.azimuthNum = 8;
-CCLFParams.elevationNum = 7;
+CCLFParams.azimuthNum = 16;
+CCLFParams.elevationNum = 15;
 CCLFParams.eccentricity = sqrt(1);
 CCLFParams.activationThreshold = 0.12; %for running man - 0.3
 CCLFParams.facilitationLengths = [10, 5];
@@ -57,7 +57,7 @@ minVideoValue = min(detail_enhanced(:));
 maxVideoValue = max(detail_enhanced(:));
 implay(vidOut);
 maintainFitToWindow();
-beta = 1.5;
+beta = 3;
 gain = 1;
 
 if(baby)
