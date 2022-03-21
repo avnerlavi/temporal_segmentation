@@ -26,9 +26,6 @@ for k = 1:nScales
     
     FacilitationLength = max(3, baseFacilitationLength/k);
     
-    %     L = BuildGabor3D(Azimuth, Elevation);
-    %     Co = conv3FFT(vidS, L);
-    
     %0 elev handling
     L = gpuArray(BuildGabor3D(0, 0));
     Co = gather(conv3FFT(vidS, L));
@@ -52,17 +49,14 @@ for k = 1:nScales
     CnTotalPowerSum = sum(abs(CnArr).^normQ, 4);
 
     %0 elev handling
-%     CpOriSum = sumButIndexPowerNormed(CpArr, totalOrientationNumber, 2);
-%     CnOriSum = sumButIndexPowerNormed(CnArr, totalOrientationNumber, 2);
     CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
     CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
     Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor);
     Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor);
 
     [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, percentileThreshold, FacilitationLength, alpha);
-    elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
-    vidOriTot_p = vidOriTot_p+(gather(LF_p)*elevationNormFactor).^m1;
-    vidOriTot_n = vidOriTot_n+(gather(LF_n)*elevationNormFactor).^m1;
+    vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
+    vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
@@ -75,11 +69,8 @@ for k = 1:nScales
             
             [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), percentileThreshold, FacilitationLength, alpha);
             
-            elevationStart = Elevations(j) - Elevations(1)/2;
-            elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
-            elevationNormFactor = 1;%cosd(elevationStart) - cosd(elevationEnd);
-            vidOriTot_p = vidOriTot_p+(gather(LF_p)*elevationNormFactor).^m1;
-            vidOriTot_n = vidOriTot_n+(gather(LF_n)*elevationNormFactor).^m1;
+            vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
+            vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
             
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
