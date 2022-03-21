@@ -15,7 +15,7 @@ ylim([0, 1]);
 ylabel('recall');
 
 subplot(2,2,3);
-plot(thresholds, ious);
+iouPlot = plot(thresholds, ious);
 xlim([min(thresholds), max(thresholds)]);
 xlabel('threshold');
 ylim([0, 1]);
