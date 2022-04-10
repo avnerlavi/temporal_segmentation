@@ -18,6 +18,7 @@ totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
 for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
+    paddingSize = floor(2 * baseFacilitationLength / k);
     vidOriTot_n = zeros(size(vidS));
     vidOriTot_p = zeros(size(vidS));
     
@@ -54,7 +55,7 @@ for k = 1:nScales
     Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor);
     Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor);
 
-    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, percentileThreshold, FacilitationLength, alpha);
+    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, paddingSize, percentileThreshold, FacilitationLength, alpha);
     vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
     vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
     
@@ -67,7 +68,7 @@ for k = 1:nScales
             Cp = gpuArray(CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor);
             Cn = gpuArray(CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor);
             
-            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), percentileThreshold, FacilitationLength, alpha);
+            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), paddingSize, percentileThreshold, FacilitationLength, alpha);
             
             vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
             vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
