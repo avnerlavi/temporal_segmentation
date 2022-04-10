@@ -1,5 +1,5 @@
 function [vidScaleTot] = computeCombinedStd_IN3D(vidIn, nAzimuths, nElevations ...
-    , elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2, normQ)
+    , elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2, normQ, snapshotDir)
 vidIn = PadVideoReplicate(vidIn,2*nScales);
 vidScaleTot = zeros(size(vidIn));
 Elevations = linspace(0,elHalfAngle,nElevations);
@@ -13,7 +13,7 @@ progressCounter = 0;
 totalOrientationNumber = length(Azimuths) * length(Elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
-for k = nScales:-1:1
+for k = 1:nScales
     vidS = safeResize(vidIn,1/k * size(vidIn));
     spatialStd = gpuArray(Gaussian3dStd(vidS,Gshort));
     vidOriSTDDiffs = zeros([size(vidS), totalOrientationNumber]);
@@ -21,6 +21,11 @@ for k = nScales:-1:1
     %0 elev handling
     temporalStd = Std3DActivation(spatialStd, sigmaTemporal, 0, 0);
     vidOriSTDDiffs(:,:,:,end) = gather(minMaxNorm(spatialStd) - minMaxNorm(temporalStd));
+    
+    if k == 1
+        saveSnapshots(gather(spatialStd), snapshotDir, 'spatial_std');
+        saveSnapshots(gather(temporalStd), snapshotDir, 'temporal_std');
+    end
 
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
@@ -50,6 +55,10 @@ for k = nScales:-1:1
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);   
         end
+    end
+    
+    if k == 1 || k == 2
+        saveSnapshots(vidOriSTDDiffs(:, :, :, end), snapshotDir, ['extracted_feature_k_', num2str(k)], [60/k, 120/k]);
     end
     
     vidStdDiff = sum(vidOriSTDDiffs.^m1, 4).^(1/m1);

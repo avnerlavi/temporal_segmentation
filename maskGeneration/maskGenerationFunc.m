@@ -7,7 +7,7 @@ totalMask = ones(size(vidIn));
 detailEnhancementPyr = cell(1,maskParams.iterationNumber);
 maskPyr = cell(1,maskParams.iterationNumber);
 
-for i=maskParams.iterationNumber:-1:1
+for i = maskParams.iterationNumber:-1:1
     %% detail enhancement
     
     cclfParams.resizeFactors = maskParams.baseResizeFactors * ((i-1)*maskParams.resizeIncrement + 1);

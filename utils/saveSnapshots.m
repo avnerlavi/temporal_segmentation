@@ -1,4 +1,4 @@
-function saveSnapshots(vidIn, fileDir, frames)
+function saveSnapshots(vidIn, fileDir, fileName, frames)
 if fileDir(end) ~= '\'
     fileDir = [fileDir, '\'];
 end
@@ -27,7 +27,7 @@ for i=1:length(frames)
     colormap gray;
     set(gca,'position',[0.05 0.05 0.82 0.9]);
     [cdata, ~] = getframe(hFig);
-    imwrite(cdata, [fileDir,'\frame',num2str(frames(i)),'.jpg']);
+    imwrite(cdata, [fileDir, fileName, '_frame', num2str(frames(i)) ,'.jpg']);
     close(hFig);
 end   
 
