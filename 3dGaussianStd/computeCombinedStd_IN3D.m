@@ -20,7 +20,7 @@ for k = nScales:-1:1
 
     %0 elev handling
     temporalStd = Std3DActivation(spatialStd, sigmaTemporal, 0, 0);
-    vidOriSTDDiffs(:,:,:,end) = gather(spatialStd - temporalStd);
+    vidOriSTDDiffs(:,:,:,end) = gather(minMaxNorm(spatialStd) - minMaxNorm(temporalStd));
 
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
