@@ -1,10 +1,15 @@
 function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
     , nElevations, elHalfAngle, nScales, percentileThreshold, baseFacilitationLength ...
-    , alpha, m1, m2, normQ)
+    , alpha, m1, m2, normQ, snapshotDir)
 
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
-vidIn = PadVideoReplicate(vidIn,2*baseFacilitationLength);
+basePaddingSize = 2 * baseFacilitationLength;
+vidIn = PadVideoReplicate(vidIn,basePaddingSize);
+
+if strcmp(snapshotDir, '') == false
+    saveSnapshots(vidIn, snapshotDir, 'padded_input', [60 + basePaddingSize, 120 + basePaddingSize]);
+end
 
 vidScaleTot = zeros(size(vidIn));
 Elevations = linspace(0,elHalfAngle,nElevations);
@@ -18,7 +23,9 @@ totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
 for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
-    paddingSize = floor(2 * baseFacilitationLength / k);
+    relativePaddingSize = floor(basePaddingSize / k);
+    frames = [60/k + relativePaddingSize, 120/k + relativePaddingSize];
+
     vidOriTot_n = zeros(size(vidS));
     vidOriTot_p = zeros(size(vidS));
     
@@ -32,6 +39,13 @@ for k = 1:nScales
     Co = gather(conv3FFT(vidS, L));
     CpArr(:,:,:,end) = max(Co,0);
     CnArr(:,:,:,end) = max(-Co,0);
+    
+    if k == 1 && strcmp(snapshotDir, '') == false
+        saveSnapshots(CpArr(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cp_before_norm', frames);
+        saveSnapshots(CnArr(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cn_before_norm', frames);
+    end
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
@@ -54,11 +68,21 @@ for k = 1:nScales
     CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
     Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor);
     Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor);
+    
+    if k == 1 && strcmp(snapshotDir, '') == false
+        saveSnapshots(gather(Cp(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cp_after_norm', frames);
+        saveSnapshots(gather(Cn(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cn_after_norm', frames);
+    end
 
-    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, paddingSize, percentileThreshold, FacilitationLength, alpha);
+    tempSnapshotDir = '';
+    if k == 1
+        tempSnapshotDir = snapshotDir;
+    end
+    
+    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, relativePaddingSize, percentileThreshold, FacilitationLength, alpha, tempSnapshotDir, frames);
     vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
     vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
-    
+ 
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
@@ -68,7 +92,7 @@ for k = 1:nScales
             Cp = gpuArray(CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor);
             Cn = gpuArray(CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor);
             
-            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), paddingSize, percentileThreshold, FacilitationLength, alpha);
+            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), relativePaddingSize, percentileThreshold, FacilitationLength, alpha, '', frames);
             
             vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
             vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
@@ -80,8 +104,9 @@ for k = 1:nScales
     
     vidOriTot_p = vidOriTot_p.^(1/m1);
     vidOriTot_n = vidOriTot_n.^(1/m1);
-    
-    vidScaled = imresize3(vidOriTot_p.^m2 - vidOriTot_n.^m2,size(vidIn));
+    vidOriTotDiff = vidOriTot_p - vidOriTot_n;
+    vidOriTotDiffRaised = sign(vidOriTotDiff).*((abs(vidOriTotDiff)).^m2);
+    vidScaled = imresize3(vidOriTotDiffRaised, size(vidIn));
     vidScaled = vidScaled/(k^m2);
     vidScalesPyr{k} = vidScaled;
     vidScaleTot = vidScaleTot + vidScaled;

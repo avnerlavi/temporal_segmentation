@@ -26,7 +26,5 @@ vid_std = ...
 vid_std_magnified = sign(vid_std).*(abs(vid_std).^Params.powerFactor);
 vidOut = minMaxNorm(vid_std_magnified);
 
-saveSnapshots(vidOut, Params.snapshotDir, 'output_feature_video');
-
 end
 

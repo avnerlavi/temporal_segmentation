@@ -102,6 +102,8 @@ else
     error('invalid stdMethod value');
 end
 
+saveSnapshots(vidMatrix, STDParams.snapshotDir, 'output_feature_video');
+
 %% object detection
 
 [totalMask, maskPyr, detailEnhancementPyr] = maskGenerationFunc(...
@@ -114,6 +116,8 @@ runDuration = finishTime - startTime;
 disp(['Took ' datestr(runDuration,'HH:MM:SS')]);
 
 resizedMask = safeResize(totalMask, size(vidMatrixOrig));
+saveSnapshots(resizedMask, snapshotDir, 'output_mask');
+
 
 %% performance evaluation
 
@@ -127,6 +131,8 @@ evaluationPlot = plotEvaluationMetrics(thresholds, precisions, recalls, ious);
 %% result display
 
 vidMasked = vidMatrixOrig .* resizedMask;
+saveSnapshots(vidMasked, snapshotDir, 'masked_input');
+
 implay(vidMasked);
 maintainFitToWindow();
 

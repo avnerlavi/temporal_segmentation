@@ -1,4 +1,8 @@
 function saveSnapshots(vidIn, fileDir, fileName, frames)
+if isempty(fileDir)
+    return
+end
+
 if fileDir(end) ~= '\'
     fileDir = [fileDir, '\'];
 end
