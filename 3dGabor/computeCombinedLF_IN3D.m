@@ -2,6 +2,7 @@ function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths .
     , nElevations, elHalfAngle, nScales, percentileThreshold, baseFacilitationLength ...
     , alpha, m1, m2, normQ, snapshotDir)
 
+%% initialization
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
 basePaddingSize = 2 * baseFacilitationLength;
@@ -22,6 +23,7 @@ totalOrientationNumber = length(Azimuths) * length(Elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
 for k = 1:nScales
+%% setting original contrast values
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
     relativePaddingSize = floor(basePaddingSize / k);
     frames = [60/k + relativePaddingSize, 120/k + relativePaddingSize];
@@ -60,14 +62,34 @@ for k = 1:nScales
         end
     end
     
+%% contrast normalization
     CpTotalPowerSum = sum(abs(CpArr).^normQ, 4);
     CnTotalPowerSum = sum(abs(CnArr).^normQ, 4);
 
     %0 elev handling
     CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
     CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
-    Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor);
-    Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor);
+    CpNormed = CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor;
+    CnNormed = CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor;
+    CpArr(:,:,:, totalOrientationNumber) = CpNormed;
+    CnArr(:,:,:, totalOrientationNumber) = CnNormed;
+    
+    for i = 1:length(Azimuths)
+        for j = 1:length(Elevations)
+            currOrientationIndex = (i-1) * length(Elevations) + j;
+            CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
+            CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
+            CpNormed = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
+            CnNormed = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor;
+            CpArr(:,:,:, currOrientationIndex) = CpNormed;
+            CnArr(:,:,:, currOrientationIndex) = CnNormed;
+        end
+    end
+    
+%% lateral facilitation
+    %0 elev handling
+    Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber));
+    Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber));
     
     if k == 1 && strcmp(snapshotDir, '') == false
         saveSnapshots(gather(Cp(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cp_after_norm', frames);
@@ -86,11 +108,9 @@ for k = 1:nScales
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
-            CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
-            CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
 
-            Cp = gpuArray(CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor);
-            Cn = gpuArray(CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor);
+            Cp = gpuArray(CpArr(:,:,:, currOrientationIndex));
+            Cn = gpuArray(CnArr(:,:,:, currOrientationIndex));
             
             [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), relativePaddingSize, percentileThreshold, FacilitationLength, alpha, '', frames);
             
@@ -102,6 +122,7 @@ for k = 1:nScales
         end
     end
     
+%% per scale aggregation
     vidOriTot_p = vidOriTot_p.^(1/m1);
     vidOriTot_n = vidOriTot_n.^(1/m1);
     vidOriTotDiff = vidOriTot_p - vidOriTot_n;
@@ -114,6 +135,7 @@ for k = 1:nScales
     waitbar(progressCounter / totalIterationNumber, w, ['finished scale ', num2str(k)]);
 end
 
+%% inter-scale aggregation
 vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
 
 vidScaleTot = stripVideo(vidScaleTot, 2*baseFacilitationLength);
