@@ -1,12 +1,13 @@
 function [vidScaleTot] = computeCombinedStd_IN3D(vidIn, nAzimuths, nElevations ...
     , elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2, normQ, snapshotDir)
-vidIn = PadVideoReplicate(vidIn,2*nScales);
+basePaddingSize = 2 * nScales;
+vidIn = PadVideoReplicate(vidIn, basePaddingSize);
 vidScaleTot = zeros(size(vidIn));
-Elevations = linspace(0,elHalfAngle,nElevations);
+Elevations = linspace(0, elHalfAngle, nElevations);
 Elevations = Elevations(2:end);
-Azimuths = linspace(0,360,nAzimuths+1);
+Azimuths = linspace(0, 360, nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-Gshort = Gaussian3D([0,0],0,sigmaSpatial,[]);
+Gshort = Gaussian3D([0,0], 0, sigmaSpatial, []);
 
 w = waitbar(0, 'starting per-resolution STD computation');
 progressCounter = 0;
@@ -14,6 +15,7 @@ totalOrientationNumber = length(Azimuths) * length(Elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
 for k = 1:nScales
+    relativePaddingSize = basePaddingSize / k;
     vidS = safeResize(vidIn,1/k * size(vidIn));
     spatialStd = gpuArray(Gaussian3dStd(vidS,Gshort));
     vidOriSTDDiffs = zeros([size(vidS), totalOrientationNumber]);
@@ -23,8 +25,12 @@ for k = 1:nScales
     vidOriSTDDiffs(:,:,:,end) = gather(minMaxNorm(spatialStd) - minMaxNorm(temporalStd));
     
     if k == 1
-        saveSnapshots(gather(spatialStd), snapshotDir, 'spatial_std');
-        saveSnapshots(gather(temporalStd), snapshotDir, 'temporal_std');
+        saveSnapshots(gather(spatialStd(relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize)), snapshotDir, 'spatial_std');
+        saveSnapshots(gather(temporalStd(relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize)), snapshotDir, 'temporal_std');
     end
 
     for i = 1:length(Azimuths)
@@ -58,10 +64,21 @@ for k = 1:nScales
     end
     
     if k == 1 || k == 2
-        saveSnapshots(vidOriSTDDiffs(:, :, :, end), snapshotDir, ['extracted_feature_k_', num2str(k)], [60/k, 120/k]);
+        saveSnapshots(vidOriSTDDiffs(relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, end), snapshotDir, ...
+            ['extracted_feature_k_', num2str(k)], [60/k, 120/k]);
     end
     
     vidStdDiff = sum(vidOriSTDDiffs.^m1, 4).^(1/m1);
+    
+    if k == 1
+        saveSnapshots(vidStdDiff(relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize), snapshotDir, ...
+            ['extracted_feature_ori_summed_k_', num2str(k)], [60/k, 120/k]);
+    end
+    
     reset(gpuDevice(1));
     vidScaled = (imresize3(vidStdDiff,size(vidIn))).^m2;
     vidScaled = vidScaled/(k^m2);
