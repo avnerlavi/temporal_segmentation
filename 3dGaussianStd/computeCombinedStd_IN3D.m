@@ -63,16 +63,15 @@ for k = 1:nScales
         end
     end
     
+    vidStdDiff = sum(vidOriSTDDiffs.^m1 .* sign(vidOriSTDDiffs), 4);
+    vidStdDiff = sign(vidStdDiff) .* abs(vidStdDiff).^(1/m1);
+    
     if k == 1 || k == 2
         saveSnapshots(vidOriSTDDiffs(relativePaddingSize+1:end-relativePaddingSize, ...
             relativePaddingSize+1:end-relativePaddingSize, ...
             relativePaddingSize+1:end-relativePaddingSize, end), snapshotDir, ...
             ['extracted_feature_k_', num2str(k)], [60/k, 120/k]);
-    end
-    
-    vidStdDiff = sum(vidOriSTDDiffs.^m1, 4).^(1/m1);
-    
-    if k == 1
+        
         saveSnapshots(vidStdDiff(relativePaddingSize+1:end-relativePaddingSize, ...
             relativePaddingSize+1:end-relativePaddingSize, ...
             relativePaddingSize+1:end-relativePaddingSize), snapshotDir, ...

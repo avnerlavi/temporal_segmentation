@@ -126,6 +126,12 @@ for k = 1:nScales
     vidOriTot_p = vidOriTot_p.^(1/m1);
     vidOriTot_n = vidOriTot_n.^(1/m1);
     vidOriTotDiff = vidOriTot_p - vidOriTot_n;
+    
+    if k == 1 && strcmp(snapshotDir, '') == false
+        saveSnapshots(gather(vidOriTotDiff(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), ...
+            snapshotDir, ['orientation_summed_diff_k_', num2str(k)], frames);
+    end
+    
     vidOriTotDiffRaised = sign(vidOriTotDiff).*((abs(vidOriTotDiff)).^m2);
     vidScaled = imresize3(vidOriTotDiffRaised, size(vidIn));
     vidScaled = vidScaled/(k^m2);
