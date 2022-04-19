@@ -1,4 +1,4 @@
-function [minVideoValue,maxVideoValue] = SaveResults(input_video,response,enhaced_video,save_dir)
+function [minVideoValue,maxVideoValue] = saveResults(input_video,response,enhaced_video,save_dir)
 
 [~,comparison_clipped] = compareVids(input_video,enhaced_video,'verbose',false);
 [~,conparison_normed] = compareVids(input_video,minMaxNorm(enhaced_video),'verbose',false);

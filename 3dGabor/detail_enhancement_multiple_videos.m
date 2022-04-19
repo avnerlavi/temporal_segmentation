@@ -82,7 +82,7 @@ for i = 1:length(video_names)
         [vid_matrix_resized,activation] = detailEnhancement3Dfunc(vid_matrix,DE_params,false);
         video_combined = additiveCombination(vid_matrix_resized, activation, beta, gain);
         save_dir = [video_out_folder,video_names{i}(1:end-4)];
-        [minVideoValue,maxVideoValue] = SaveResults(vid_matrix_resized,activation,video_combined,save_dir);
+        [minVideoValue,maxVideoValue] = saveResults(vid_matrix_resized,activation,video_combined,save_dir);
         saveParams(save_dir,in_file_dir, DE_params, minVideoValue, maxVideoValue,beta,gain);
         clear vid_matrix_resized activation vid_matrix
     end
