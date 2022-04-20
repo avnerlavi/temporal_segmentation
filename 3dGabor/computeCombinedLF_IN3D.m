@@ -99,8 +99,10 @@ for k = 1:nScales
         end
     end
     
-    totalActivationThreshold_p = activationThreshold * max(CpArr(8:end-7,8:end-7,8:end-7,:), [], 'all');
-    totalActivationThreshold_n = activationThreshold * max(CnArr(8:end-7,8:end-7,8:end-7,:), [], 'all');
+    totalActivationThreshold_p = activationThreshold * max(CpArr(relativePaddingSize+1:end-relativePaddingSize, ...
+        relativePaddingSize+1:end-relativePaddingSize, relativePaddingSize+1:end-relativePaddingSize,:), [], 'all');
+    totalActivationThreshold_n = activationThreshold * max(CnArr(relativePaddingSize+1:end-relativePaddingSize, ...
+        relativePaddingSize+1:end-relativePaddingSize,relativePaddingSize+1:end-relativePaddingSize,:), [], 'all');
     totalActivationThreshold = [totalActivationThreshold_p, totalActivationThreshold_n];
     
     %0 elev handling
@@ -126,8 +128,8 @@ for k = 1:nScales
     
 %% lateral facilitation
     %0 elev handling
-    Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber));
-    Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber));
+    Cp = CpArr(:,:,:, totalOrientationNumber);
+    Cn = CnArr(:,:,:, totalOrientationNumber);
     
     tempSnapshotDir = '';
     if k == 1
@@ -137,20 +139,20 @@ for k = 1:nScales
     [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, relativePaddingSize, CpTotalSupport, CnTotalSupport, ...
         totalActivationThreshold, FacilitationLength, alpha, tempSnapshotDir, frames);
     
-    vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
-    vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+    vidOriTot_p = vidOriTot_p+(LF_p).^m1;
+    vidOriTot_n = vidOriTot_n+(LF_n).^m1;
  
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
-            Cp = gpuArray(CpArr(:,:,:, currOrientationIndex));
-            Cn = gpuArray(CnArr(:,:,:, currOrientationIndex));
+            Cp = CpArr(:,:,:, currOrientationIndex);
+            Cn = CnArr(:,:,:, currOrientationIndex);
             
-            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), ...
+            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), relativePaddingSize, ...
                  CpTotalSupport, CnTotalSupport, totalActivationThreshold, FacilitationLength, alpha, '', frames);
             
-            vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
-            vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+            vidOriTot_p = vidOriTot_p+(LF_p).^m1;
+            vidOriTot_n = vidOriTot_n+(LF_n).^m1;
             
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
@@ -164,7 +166,7 @@ for k = 1:nScales
     vidOriTotDiff = vidOriTot_p - vidOriTot_n;
     
     if k == 1 || k == 2 && strcmp(snapshotDir, '') == false
-        saveSnapshots(gather(vidOriTotDiff(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), ...
+        saveSnapshots(vidOriTotDiff(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :), ...
             snapshotDir, ['orientation_summed_diff_k_', num2str(k)], frames);
     end
     
