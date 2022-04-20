@@ -24,7 +24,7 @@ for i = maskParams.iterationNumber:-1:1
     saveSnapshots(detailEnhanced, cclfParams.snapshotDir, 'detail_enhancement_output', ...
         snapshotFrames);
 %     detailEnhanced = detailEnhancement3Dfunc(vidIn,cclfParams,false);
-    detailEnhanced = minMaxNorm(abs(detailEnhanced));
+    detailEnhanced = minMaxNorm(detailEnhanced);
 %     detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
     detailEnhancementPyr{i} = detailEnhanced;
     

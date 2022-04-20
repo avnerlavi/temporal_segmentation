@@ -9,11 +9,13 @@ function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth ...
     vidTrimmed(boundryMask == 1) = vidIn(boundryMask == 1);
     vidTrimmed = minMaxNorm(vidTrimmed);
 
-    thresholdCC = prctile(vidTrimmed(boundryMaskWidth+1 : end-boundryMaskWidth...
+    cutoffThreshold = prctile(vidTrimmed(boundryMaskWidth+1 : end-boundryMaskWidth...
             ,boundryMaskWidth+1 : end-boundryMaskWidth...
             ,boundryMaskWidth+1 : end-boundryMaskWidth), percentileThreshold, 'all');
         
-    vidThresholded = vidTrimmed > thresholdCC;
+%     vidThresholded = vidTrimmed > thresholdCC;
+    vidThresholded = vidTrimmed < cutoffThreshold;
+    vidThresholded(boundryMask == 0) = 0;
     saveSnapshots(vidThresholded, snapshotDir, 'thresholded', snapshotFrames);
     CC = bwconncomp(vidThresholded);
     numOfPixels = cellfun(@numel,CC.PixelIdxList);

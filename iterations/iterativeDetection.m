@@ -24,7 +24,7 @@ MaskParams.baseResizeFactors = ...
 MaskParams.resizeIncrement = 0.5;
 MaskParams.iterationNumber = ...
     ((MaskParams.initialReduction - 1) / MaskParams.resizeIncrement) + 1;
-MaskParams.percentileThreshold = 95;
+MaskParams.percentileThreshold = 5;
 MaskParams.thresholdAreaOfCC = 0.1;
 MaskParams.alpha = 0.125;
 MaskParams.gaussianSigma = 4;
