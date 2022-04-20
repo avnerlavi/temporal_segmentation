@@ -26,6 +26,9 @@ LF_n = max(0,LF_n-alpha*NR_n) .* (Cn > Cn_threshold);
 if (strcmp(snapshotDir, '') == false)
     saveSnapshots(gather(LF_p(padding + 1:end-padding, padding + 1:end-padding, :)), snapshotDir, ['LF_p', '_az_', num2str(Azimuth), '_el_', num2str(Elevation)], snapshotFrames);
     saveSnapshots(gather(LF_n(padding + 1:end-padding, padding + 1:end-padding, :)), snapshotDir, ['LF_n', '_az_', num2str(Azimuth), '_el_', num2str(Elevation)], snapshotFrames);
+    
+    saveSnapshots(gather(NR_p(padding + 1:end-padding, padding + 1:end-padding, :)), snapshotDir, ['NR_p', '_az_', num2str(Azimuth), '_el_', num2str(Elevation)], snapshotFrames);
+    saveSnapshots(gather(NR_n(padding + 1:end-padding, padding + 1:end-padding, :)), snapshotDir, ['NR_n', '_az_', num2str(Azimuth), '_el_', num2str(Elevation)], snapshotFrames);
 end
 
 end

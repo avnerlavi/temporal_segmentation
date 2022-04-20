@@ -74,6 +74,13 @@ for k = 1:nScales
     CpArr(:,:,:, totalOrientationNumber) = CpNormed;
     CnArr(:,:,:, totalOrientationNumber) = CnNormed;
     
+    if k == 1 && strcmp(snapshotDir, '') == false
+        saveSnapshots(CpArr(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cp_after_norm', frames);
+        saveSnapshots(CnArr(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cn_after_norm', frames);
+    end
+    
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
@@ -91,11 +98,6 @@ for k = 1:nScales
     Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber));
     Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber));
     
-    if k == 1 && strcmp(snapshotDir, '') == false
-        saveSnapshots(gather(Cp(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cp_after_norm', frames);
-        saveSnapshots(gather(Cn(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cn_after_norm', frames);
-    end
-
     tempSnapshotDir = '';
     if k == 1
         tempSnapshotDir = snapshotDir;
@@ -127,7 +129,7 @@ for k = 1:nScales
     vidOriTot_n = vidOriTot_n.^(1/m1);
     vidOriTotDiff = vidOriTot_p - vidOriTot_n;
     
-    if k == 1 && strcmp(snapshotDir, '') == false
+    if k == 1 || k == 2 && strcmp(snapshotDir, '') == false
         saveSnapshots(gather(vidOriTotDiff(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), ...
             snapshotDir, ['orientation_summed_diff_k_', num2str(k)], frames);
     end

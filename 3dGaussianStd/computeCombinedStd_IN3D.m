@@ -63,8 +63,8 @@ for k = 1:nScales
         end
     end
     
-    vidStdDiff = sum(vidOriSTDDiffs.^m1 .* sign(vidOriSTDDiffs), 4);
-    vidStdDiff = sign(vidStdDiff) .* abs(vidStdDiff).^(1/m1);
+    vidStdDiff = sum((vidOriSTDDiffs.^m1) .* sign(vidOriSTDDiffs), 4);
+    vidStdDiff = sign(vidStdDiff) .* (abs(vidStdDiff).^(1/m1));
     
     if k == 1 || k == 2
         saveSnapshots(vidOriSTDDiffs(relativePaddingSize+1:end-relativePaddingSize, ...
