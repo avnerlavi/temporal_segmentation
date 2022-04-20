@@ -10,9 +10,11 @@ addpath(genpath([root,'/maskGeneration']));
 addpath(genpath([root,'/evaluation']));
 
 vidFileName = 'man_running';
+snapshotDir = [root, '\results\iterativeDetection\snapshots'];
 
 STDMethod = '3D';
 STDParams = struct;
+STDParams.snapshotDir = [snapshotDir, '\extraction'];
 
 MaskParams = struct;
 MaskParams.initialReduction = 3;
@@ -28,6 +30,7 @@ MaskParams.alpha = 0.125;
 MaskParams.gaussianSigma = 4;
 MaskParams.gaussianShape = 13;
 MaskParams.gaussianMaxVal = 1/4;
+MaskParams.snapshotDir = [snapshotDir, '\detection'];
 
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
@@ -41,6 +44,7 @@ CCLFParams.m1 = 2;
 CCLFParams.m2 = 1;
 CCLFParams.normQ = 2;
 CCLFParams.resizeFactors = MaskParams.baseResizeFactors;
+CCLFParams.snapshotDir = [snapshotDir, '\facilitation'];
 
 %% image loading / STD preprocessing
 
@@ -49,6 +53,7 @@ disp(['Start ', datestr(startTime, 'HH:MM:SS')]);
 if(strcmp(STDMethod, 'Pyr'))
     inFileDir = [root,'\resources\', vidFileName, '.avi'];
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
+    saveSnapshots(vidMatrixOrig, snapshotDir, 'original_input');
     
     if(strcmp(vidFileName, 'man_running'))
         STDParams.resizeFactors = [1/4, 1/4, 1];
@@ -65,7 +70,8 @@ if(strcmp(STDMethod, 'Pyr'))
 elseif(strcmp(STDMethod, '3D'))
     inFileDir = [root,'\resources\', vidFileName, '.avi'];
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
-    
+    saveSnapshots(vidMatrixOrig, snapshotDir, 'original_input');
+
     STDParams.numOfScales = 4;
     STDParams.elevationHalfAngle = 60;
     STDParams.azimuthNum = 4;
@@ -90,9 +96,13 @@ elseif(strcmp(STDMethod, 'None'))
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
     vidMatrix = vidMatrixOrig;
     
+    saveSnapshots(vidMatrixOrig, snapshotDir, 'original_input');
+    
 else
     error('invalid stdMethod value');
 end
+
+saveSnapshots(vidMatrix, STDParams.snapshotDir, 'output_feature_video');
 
 %% object detection
 
@@ -106,6 +116,8 @@ runDuration = finishTime - startTime;
 disp(['Took ' datestr(runDuration,'HH:MM:SS')]);
 
 resizedMask = safeResize(totalMask, size(vidMatrixOrig));
+saveSnapshots(resizedMask, snapshotDir, 'output_mask');
+
 
 %% performance evaluation
 
@@ -119,6 +131,8 @@ evaluationPlot = plotEvaluationMetrics(thresholds, precisions, recalls, ious);
 %% result display
 
 vidMasked = vidMatrixOrig .* resizedMask;
+saveSnapshots(vidMasked, snapshotDir, 'masked_input');
+
 implay(vidMasked);
 maintainFitToWindow();
 

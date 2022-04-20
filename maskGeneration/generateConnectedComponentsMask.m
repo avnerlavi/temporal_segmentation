@@ -1,5 +1,5 @@
 function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth ...
-    , percentileThreshold, thresholdAreaOfCC, maskBlurFilt)
+    , percentileThreshold, thresholdAreaOfCC, maskBlurFilt, snapshotDir, snapshotFrames)
     vidTrimmed = zeros(size(vidIn));
     boundryMask = zeros(size(vidIn));
     boundryMask(boundryMaskWidth+1 : end-boundryMaskWidth...
@@ -14,6 +14,7 @@ function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth ...
             ,boundryMaskWidth+1 : end-boundryMaskWidth), percentileThreshold, 'all');
         
     vidThresholded = vidTrimmed > thresholdCC;
+    saveSnapshots(vidThresholded, snapshotDir, 'thresholded', snapshotFrames);
     CC = bwconncomp(vidThresholded);
     numOfPixels = cellfun(@numel,CC.PixelIdxList);
     largestCCArea = max(numOfPixels);
@@ -25,6 +26,8 @@ function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth ...
         vidCC(CC.PixelIdxList{largestCCIdx(j)}) = 1;
     end
     vidCC = minMaxNorm(vidCC);
+    saveSnapshots(vidCC, snapshotDir, 'connected_components_binary', snapshotFrames);
+
     %% create mask 
     ccMask = conv3FFT(vidCC, maskBlurFilt);
 end

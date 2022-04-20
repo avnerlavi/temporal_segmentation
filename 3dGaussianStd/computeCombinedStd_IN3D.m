@@ -1,43 +1,42 @@
 function [vidScaleTot] = computeCombinedStd_IN3D(vidIn, nAzimuths, nElevations ...
-    , elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2, normQ)
-vidIn = PadVideoReplicate(vidIn,2*nScales);
+    , elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2, normQ, snapshotDir)
+basePaddingSize = 2 * nScales;
+vidIn = PadVideoReplicate(vidIn, basePaddingSize);
 vidScaleTot = zeros(size(vidIn));
-Elevations = linspace(0,elHalfAngle,nElevations);
+Elevations = linspace(0, elHalfAngle, nElevations);
 Elevations = Elevations(2:end);
-Azimuths = linspace(0,360,nAzimuths+1);
+Azimuths = linspace(0, 360, nAzimuths+1);
 Azimuths = Azimuths(1:end-1);
-Gshort = Gaussian3D([0,0],0,sigmaSpatial,[]);
+Gshort = Gaussian3D([0,0], 0, sigmaSpatial, []);
 
 w = waitbar(0, 'starting per-resolution STD computation');
 progressCounter = 0;
 totalOrientationNumber = length(Azimuths) * length(Elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
-for k = nScales:-1:1
+for k = 1:nScales
+    relativePaddingSize = basePaddingSize / k;
     vidS = safeResize(vidIn,1/k * size(vidIn));
     spatialStd = gpuArray(Gaussian3dStd(vidS,Gshort));
-%     vidOriTot = zeros(size(vidS));
     vidOriSTDDiffs = zeros([size(vidS), totalOrientationNumber]);
 
     %0 elev handling
     temporalStd = Std3DActivation(spatialStd, sigmaTemporal, 0, 0);
-%     elevationNormFactor = 1;%1 - cosd(Elevations(1)/2);
-%     vidOriTot = vidOriTot + stdOut;%(stdOut*elevationNormFactor).^m1;
-    vidOriSTDDiffs(:,:,:,end) = gather(spatialStd - temporalStd);
+    vidOriSTDDiffs(:,:,:,end) = gather(minMaxNorm(spatialStd) - minMaxNorm(temporalStd));
+    
+    if k == 1
+        saveSnapshots(gather(spatialStd(relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize)), snapshotDir, 'spatial_std');
+        saveSnapshots(gather(temporalStd(relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize)), snapshotDir, 'temporal_std');
+    end
 
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
-%             Gshort = Gaussian3D([Azimuths(i), Elevations(j)],0,sigmaSpatial,[]);
-%             vidStd = gpuArray(Gaussian3dStd(vidS, Gshort));
-
             temporalStd = Std3DActivation(spatialStd, sigmaTemporal, Azimuths(i), Elevations(j));
-            
-%             elevationStart = Elevations(j) - Elevations(1)/2;
-%             elevationEnd = min(Elevations(j) + Elevations(1)/2, Elevations(end));
-%             elevationNormFactor = 1;%cosd(elevationStart) - cosd(elevationEnd);
-%             currVidOri = elevationNormFactor.*(stdOut.^m1);
-%             vidOriTot = vidOriTot + stdOut;%min(vidOriTot, currVidOri);
             vidOriSTDDiffs(:,:,:,currOrientationIndex) = gather(spatialStd - temporalStd);
             
             progressCounter = progressCounter + 1;
@@ -64,10 +63,22 @@ for k = nScales:-1:1
         end
     end
     
-    vidStdDiff = sum(vidOriSTDDiffs.^m1, 4).^(1/m1);
+    vidStdDiff = sum(vidOriSTDDiffs.^m1 .* sign(vidOriSTDDiffs), 4);
+    vidStdDiff = sign(vidStdDiff) .* abs(vidStdDiff).^(1/m1);
+    
+    if k == 1 || k == 2
+        saveSnapshots(vidOriSTDDiffs(relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, end), snapshotDir, ...
+            ['extracted_feature_k_', num2str(k)], [60/k, 120/k]);
+        
+        saveSnapshots(vidStdDiff(relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize, ...
+            relativePaddingSize+1:end-relativePaddingSize), snapshotDir, ...
+            ['extracted_feature_ori_summed_k_', num2str(k)], [60/k, 120/k]);
+    end
+    
     reset(gpuDevice(1));
-%     vidOriTot = vidOriTot.^(1/m1);
-%     vidStdDiff = vidStd - vidOriTot;
     vidScaled = (imresize3(vidStdDiff,size(vidIn))).^m2;
     vidScaled = vidScaled/(k^m2);
     vidScaleTot = vidScaleTot + vidScaled;

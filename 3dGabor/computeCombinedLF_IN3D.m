@@ -1,10 +1,16 @@
 function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
     , nElevations, elHalfAngle, nScales, activationThreshold, baseFacilitationLength ...
-    , alpha, m1, m2, normQ)
+    , alpha, m1, m2, normQ, snapshotDir)
 
+%% initialization
 w = waitbar(0, 'starting per-resolution LF computation');
 progressCounter = 0;
-vidIn = PadVideoReplicate(vidIn,2*baseFacilitationLength);
+basePaddingSize = 2 * baseFacilitationLength;
+vidIn = PadVideoReplicate(vidIn,basePaddingSize);
+
+if strcmp(snapshotDir, '') == false
+    saveSnapshots(vidIn, snapshotDir, 'padded_input', [60 + basePaddingSize, 120 + basePaddingSize]);
+end
 
 vidScaleTot = zeros(size(vidIn));
 Elevations = linspace(0,elHalfAngle,nElevations);
@@ -17,7 +23,11 @@ totalOrientationNumber = length(Azimuths) * length(Elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
 for k = 1:nScales
+%% setting original contrast values
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
+    relativePaddingSize = floor(basePaddingSize / k);
+    frames = [60/k + relativePaddingSize, 120/k + relativePaddingSize];
+
     vidOriTot_n = zeros(size(vidS));
     vidOriTot_p = zeros(size(vidS));
     
@@ -38,6 +48,13 @@ for k = 1:nScales
 %     CpSupportArr(:,:,:,end) = LFsc3D_binarized(CpSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
 %     CnSupportArr(:,:,:,end) = LFsc3D_binarized(CnSupportArr(:,:,:,end), 0, 0, FacilitationLength, 'dilate');
     
+    if k == 1 && strcmp(snapshotDir, '') == false
+        saveSnapshots(CpArr(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cp_before_norm', frames);
+        saveSnapshots(CnArr(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cn_before_norm', frames);
+    end
+    
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
@@ -51,23 +68,34 @@ for k = 1:nScales
         end
     end
     
+%% contrast normalization
     CpTotalPowerSum = sum(abs(CpArr).^normQ, 4);
     CnTotalPowerSum = sum(abs(CnArr).^normQ, 4);
     
     %0 elev handling
-    CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, end)).^normQ).^(1/normQ);
-    CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, end)).^normQ).^(1/normQ);
-    CpArr(:,:,:, end) = CpArr(:,:,:, end) ./ CpNormFactor;
-    CnArr(:,:,:, end) = CnArr(:,:,:, end) ./ CnNormFactor;
+    CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
+    CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
+    CpNormed = CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor;
+    CnNormed = CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor;
+    CpArr(:,:,:, totalOrientationNumber) = CpNormed;
+    CnArr(:,:,:, totalOrientationNumber) = CnNormed;
+    
+    if k == 1 && strcmp(snapshotDir, '') == false
+        saveSnapshots(CpArr(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cp_after_norm', frames);
+        saveSnapshots(CnArr(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cn_after_norm', frames);
+    end
     
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
             CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
             CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
-                        
-            CpArr(:,:,:, currOrientationIndex) = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
-            CnArr(:,:,:, currOrientationIndex) = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor;
+            CpNormed = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
+            CnNormed = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor;
+            CpArr(:,:,:, currOrientationIndex) = CpNormed;
+            CnArr(:,:,:, currOrientationIndex) = CnNormed;
         end
     end
     
@@ -92,44 +120,56 @@ for k = 1:nScales
                 LFsc3D_binarized(CnSupportArr(:,:,:,currOrientationIndex), Azimuths(i), Elevations(j), FacilitationLength, 'dilate');
         end
     end
-
+    
     CpTotalSupport = any(CpSupportArr, 4);
     CnTotalSupport = any(CnSupportArr, 4);
-
+    
+%% lateral facilitation
     %0 elev handling
-    Cp = CpArr(:,:,:, end);
-    Cn = CnArr(:,:,:, end);
+    Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber));
+    Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber));
     
-    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, CpTotalSupport, CnTotalSupport, ...
-        totalActivationThreshold, FacilitationLength, alpha);
+    tempSnapshotDir = '';
+    if k == 1
+        tempSnapshotDir = snapshotDir;
+    end
     
-    vidOriTot_p = vidOriTot_p+(LF_p).^m1;
-    vidOriTot_n = vidOriTot_n+(LF_n).^m1;
+    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, relativePaddingSize, CpTotalSupport, CnTotalSupport, ...
+        totalActivationThreshold, FacilitationLength, alpha, tempSnapshotDir, frames);
     
+    vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
+    vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+ 
     for i = 1:length(Azimuths)
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
-            Cp = CpArr(:,:,:, currOrientationIndex);
-            Cn = CnArr(:,:,:, currOrientationIndex);
-               
+            Cp = gpuArray(CpArr(:,:,:, currOrientationIndex));
+            Cn = gpuArray(CnArr(:,:,:, currOrientationIndex));
+            
             [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), ...
-                 CpTotalSupport, CnTotalSupport, totalActivationThreshold, FacilitationLength, alpha);
-
-            %combining angles
-            vidOriTot_p = vidOriTot_p+(LF_p).^m1;
-            vidOriTot_n = vidOriTot_n+(LF_n).^m1;
-
-            %waitbar handling
+                 CpTotalSupport, CnTotalSupport, totalActivationThreshold, FacilitationLength, alpha, '', frames);
+            
+            vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
+            vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+            
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
 
         end
     end
     
+%% per scale aggregation
     vidOriTot_p = vidOriTot_p.^(1/m1);
     vidOriTot_n = vidOriTot_n.^(1/m1);
+    vidOriTotDiff = vidOriTot_p - vidOriTot_n;
     
-    vidScaled = imresize3(vidOriTot_p.^m2 - vidOriTot_n.^m2,size(vidIn));
+    if k == 1 || k == 2 && strcmp(snapshotDir, '') == false
+        saveSnapshots(gather(vidOriTotDiff(relativePaddingSize + 1:end-relativePaddingSize, relativePaddingSize + 1:end-relativePaddingSize, :)), ...
+            snapshotDir, ['orientation_summed_diff_k_', num2str(k)], frames);
+    end
+    
+    vidOriTotDiffRaised = sign(vidOriTotDiff).*((abs(vidOriTotDiff)).^m2);
+    vidScaled = imresize3(vidOriTotDiffRaised, size(vidIn));
     vidScaled = vidScaled/(k^m2);
     vidScalesPyr{k} = vidScaled;
     vidScaleTot = vidScaleTot + vidScaled;
@@ -137,6 +177,7 @@ for k = 1:nScales
     waitbar(progressCounter / totalIterationNumber, w, ['finished scale ', num2str(k)]);
 end
 
+%% inter-scale aggregation
 vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
 
 vidScaleTot = stripVideo(vidScaleTot, 2*baseFacilitationLength);
