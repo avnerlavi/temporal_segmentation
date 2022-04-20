@@ -1,4 +1,4 @@
-function [vidScaleTot, vidScalesPyr] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
+function [aggregatedTotalResponse, aggregatedOrientations] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
     , nElevations, elHalfAngle, nScales, percentileThreshold, baseFacilitationLength ...
     , alpha, m1, m2, normQ, snapshotDir)
 
@@ -12,119 +12,137 @@ if strcmp(snapshotDir, '') == false
     saveSnapshots(vidIn, snapshotDir, 'padded_input', [60 + basePaddingSize, 120 + basePaddingSize]);
 end
 
-vidScaleTot = zeros(size(vidIn));
-Elevations = linspace(0,elHalfAngle,nElevations);
-Elevations = Elevations(2:end);
-Azimuths = linspace(0,360,nAzimuths+1);
-Azimuths = Azimuths(1:end-1);
-vidScalesPyr = cell(nScales);
+aggregatedTotalResponse = zeros(size(vidIn));
+elevations = linspace(0,elHalfAngle,nElevations);
+elevations = elevations(2:end);
+azimuths = linspace(0,360,nAzimuths+1);
+azimuths = azimuths(1:end-1);
+aggregatedOrientations = cell(nScales);
 
-totalOrientationNumber = length(Azimuths) * length(Elevations) + 1;
+totalOrientationNumber = length(azimuths) * length(elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
 for k = 1:nScales
-%% setting original contrast values
-    vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
+    %% total contrast power norm caclculation
+    vidScaled = gpuArray(imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true));
     relativePaddingSize = floor(basePaddingSize / k);
-    frames = [60/k + relativePaddingSize, 120/k + relativePaddingSize];
-
-    vidOriTot_n = zeros(size(vidS));
-    vidOriTot_p = zeros(size(vidS));
-    
-    CnArr = zeros([size(vidS), totalOrientationNumber]);
-    CpArr = zeros([size(vidS), totalOrientationNumber]);
-    
-    FacilitationLength = max(3, baseFacilitationLength/k);
+    frames = [60/k + relativePaddingSize, 120/k + relativePaddingSize];    
+    facilitationLength = max(3, baseFacilitationLength/k);
     
     %0 elev handling
-    L = gpuArray(BuildGabor3D(0, 0));
-    Co = gather(conv3FFT(vidS, L));
-    CpArr(:,:,:,end) = max(Co,0);
-    CnArr(:,:,:,end) = max(-Co,0);
+    [cp, cn] = calculateGaborResponse(vidScaled, 0, 0);
+    cpTotalPowerSum = cp.^normQ;
+    cnTotalPowerSum = cn.^normQ;
     
     if k == 1 && strcmp(snapshotDir, '') == false
-        saveSnapshots(CpArr(relativePaddingSize + 1:end-relativePaddingSize, ...
-            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cp_before_norm', frames);
-        saveSnapshots(CnArr(relativePaddingSize + 1:end-relativePaddingSize, ...
-            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cn_before_norm', frames);
+        saveSnapshots(gather(cp(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cp_before_norm', frames);
+        saveSnapshots(gather(cn(relativePaddingSize + 1:end-relativePaddingSize, ...
+            relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cn_before_norm', frames);
     end
     
-    for i = 1:length(Azimuths)
-        for j = 1:length(Elevations)
-            currOrientationIndex = (i-1) * length(Elevations) + j;
-            L = gpuArray(BuildGabor3D(Azimuths(i), Elevations(j)));
-            Co = gather(conv3FFT(vidS, L));
-            CpArr(:,:,:,currOrientationIndex) = max(Co,0);
-            CnArr(:,:,:,currOrientationIndex) = max(-Co,0);
+    progressCounter = progressCounter + 1;
+    waitbar(progressCounter / totalIterationNumber, w);
+    
+    for i = 1:length(azimuths)
+        for j = 1:length(elevations)
+            [cp, cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j));
+            cpTotalPowerSum = cpTotalPowerSum + cp.^normQ;
+            cnTotalPowerSum = cnTotalPowerSum + cn.^normQ;
             
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
         end
     end
     
-%% contrast normalization
-    CpTotalPowerSum = sum(abs(CpArr).^normQ, 4);
-    CnTotalPowerSum = sum(abs(CnArr).^normQ, 4);
-
-    %0 elev handling
-    CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
-    CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, totalOrientationNumber)).^normQ).^(1/normQ);
-    CpNormed = CpArr(:,:,:, totalOrientationNumber) ./ CpNormFactor;
-    CnNormed = CnArr(:,:,:, totalOrientationNumber) ./ CnNormFactor;
-    CpArr(:,:,:, totalOrientationNumber) = CpNormed;
-    CnArr(:,:,:, totalOrientationNumber) = CnNormed;
+%     %% total activation threshold calculation
+% 
+%     [cp,cn] = calculateGaborResponse(vidScaled, 0, 0);
+%     cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
+%     cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
+%     cpNormed = cp ./ cpNormFactor;
+%     cnNormed = cn ./ cnNormFactor;
+%     
+%     if k == 1 && strcmp(snapshotDir, '') == false
+%         saveSnapshots(gather(cpNormed(relativePaddingSize + 1:end-relativePaddingSize, ...
+%             relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cp_after_norm', frames);
+%         saveSnapshots(gather(cnNormed(relativePaddingSize + 1:end-relativePaddingSize, ...
+%             relativePaddingSize + 1:end-relativePaddingSize, :)), snapshotDir, 'Cn_after_norm', frames);
+%     end
+%     
+%     totalActivationThreshold_p = max(cpNormed(relativePaddingSize+1:end-relativePaddingSize, ...
+%         relativePaddingSize+1:end-relativePaddingSize, ...
+%         relativePaddingSize+1:end-relativePaddingSize),[],'all');
+%     totalActivationThreshold_n = max(cnNormed(relativePaddingSize+1:end-relativePaddingSize, ...
+%         relativePaddingSize+1:end-relativePaddingSize, ...
+%         relativePaddingSize+1:end-relativePaddingSize),[],'all');
+%     
+%     progressCounter = progressCounter + 1;
+%     waitbar(progressCounter / totalIterationNumber, w);
+%     
+%     for i = 1:length(azimuths)
+%         for j = 1:length(elevations)
+%             [cp,cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j));
+%             cnNormFactor = 1 + (cnTotalPowerSum - abs(cn).^normQ).^(1/normQ);
+%             cpNormFactor = 1 + (cpTotalPowerSum - abs(cp).^normQ).^(1/normQ);
+%             cpNormed = cp ./ cpNormFactor;
+%             cnNormed = cn ./ cnNormFactor;
+%             totalActivationThreshold_p = max(max(cpNormed(relativePaddingSize+1:end-relativePaddingSize, ...
+%                 relativePaddingSize+1:end-relativePaddingSize, ...
+%                 relativePaddingSize+1:end-relativePaddingSize)), totalActivationThreshold_p);
+%             totalActivationThreshold_n = max(max(cnNormed(relativePaddingSize+1:end-relativePaddingSize, ...
+%                 relativePaddingSize+1:end-relativePaddingSize, ...
+%                 relativePaddingSize+1:end-relativePaddingSize)), totalActivationThreshold_n);
+%             
+%             progressCounter = progressCounter + 1;
+%             waitbar(progressCounter / totalIterationNumber, w);
+%         end
+%     end
+%     
+%     totalActivationThreshold_p = activationThreshold * totalActivationThreshold_p;
+%     totalActivationThreshold_n = activationThreshold * totalActivationThreshold_n;
+%     totalActivationThreshold = [totalActivationThreshold_p, totalActivationThreshold_n];
     
-    if k == 1 && strcmp(snapshotDir, '') == false
-        saveSnapshots(CpArr(relativePaddingSize + 1:end-relativePaddingSize, ...
-            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cp_after_norm', frames);
-        saveSnapshots(CnArr(relativePaddingSize + 1:end-relativePaddingSize, ...
-            relativePaddingSize + 1:end-relativePaddingSize, :, end), snapshotDir, 'Cn_after_norm', frames);
-    end
-    
-    for i = 1:length(Azimuths)
-        for j = 1:length(Elevations)
-            currOrientationIndex = (i-1) * length(Elevations) + j;
-            CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
-            CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
-            CpNormed = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
-            CnNormed = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor;
-            CpArr(:,:,:, currOrientationIndex) = CpNormed;
-            CnArr(:,:,:, currOrientationIndex) = CnNormed;
-        end
-    end
-    
-%% lateral facilitation
-    %0 elev handling
-    Cp = gpuArray(CpArr(:,:,:, totalOrientationNumber));
-    Cn = gpuArray(CnArr(:,:,:, totalOrientationNumber));
-    
+    %% lateral facilitation    
     tempSnapshotDir = '';
     if k == 1
         tempSnapshotDir = snapshotDir;
     end
-    
-    [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, 0, 0, relativePaddingSize, percentileThreshold, FacilitationLength, alpha, tempSnapshotDir, frames);
-    vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
-    vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
- 
-    for i = 1:length(Azimuths)
-        for j = 1:length(Elevations)
-            currOrientationIndex = (i-1) * length(Elevations) + j;
 
-            Cp = gpuArray(CpArr(:,:,:, currOrientationIndex));
-            Cn = gpuArray(CnArr(:,:,:, currOrientationIndex));
-            
-            [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuths(i), Elevations(j), relativePaddingSize, percentileThreshold, FacilitationLength, alpha, '', frames);
-            
-            vidOriTot_p = vidOriTot_p+(gather(LF_p)).^m1;
-            vidOriTot_n = vidOriTot_n+(gather(LF_n)).^m1;
+    %0 elev handling
+    [cp,cn] = calculateGaborResponse(vidScaled, 0,0);
+    cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
+    cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
+    cpNormed = cp ./ cpNormFactor;
+    cnNormed = cn ./ cnNormFactor;    
+    [lf_n, lf_p] = Gabor3DActivation(cpNormed,cnNormed, 0, 0, relativePaddingSize, ...
+        percentileThreshold, facilitationLength, alpha, tempSnapshotDir, frames);
+    
+    vidOriTot_n = lf_n.^m1;
+    vidOriTot_p = lf_p.^m1;
+                
+    progressCounter = progressCounter + 1;
+    waitbar(progressCounter / totalIterationNumber, w);
+ 
+    for i = 1:length(azimuths)
+        for j = 1:length(elevations)
+            [cp,cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j));
+            cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
+            cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
+            cpNormed = cp ./ cpNormFactor;
+            cnNormed = cn ./ cnNormFactor;
+            [lf_n, lf_p] = Gabor3DActivation(cpNormed, cnNormed, azimuths(i), elevations(j), relativePaddingSize, ...
+                percentileThreshold, facilitationLength, alpha, '', frames);
+
+            vidOriTot_p = vidOriTot_p+lf_p.^m1;
+            vidOriTot_n = vidOriTot_n+lf_n.^m1;
             
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
         end
     end
     
-%% per scale aggregation
+    %% per scale aggregation
     vidOriTot_p = vidOriTot_p.^(1/m1);
     vidOriTot_n = vidOriTot_n.^(1/m1);
     vidOriTotDiff = vidOriTot_p - vidOriTot_n;
@@ -134,20 +152,20 @@ for k = 1:nScales
             snapshotDir, ['orientation_summed_diff_k_', num2str(k)], frames);
     end
     
-    vidOriTotDiffRaised = sign(vidOriTotDiff).*((abs(vidOriTotDiff)).^m2);
-    vidScaled = imresize3(vidOriTotDiffRaised, size(vidIn));
-    vidScaled = vidScaled/(k^m2);
-    vidScalesPyr{k} = vidScaled;
-    vidScaleTot = vidScaleTot + vidScaled;
+    vidOriTotDiffRaised = gather(sign(vidOriTotDiff).*((abs(vidOriTotDiff)).^m2));
+    aggregatedOrientationsResponse = imresize3(vidOriTotDiffRaised, size(vidIn));    
+    aggregatedOrientationsResponse = aggregatedOrientationsResponse/(k^m2);
+    aggregatedOrientations{k} = aggregatedOrientationsResponse;
+    aggregatedTotalResponse = aggregatedTotalResponse + aggregatedOrientationsResponse;
     
     waitbar(progressCounter / totalIterationNumber, w, ['finished scale ', num2str(k)]);
 end
 
 %% inter-scale aggregation
-vidScaleTot = sign(vidScaleTot).*abs(vidScaleTot).^(1/m2);
+aggregatedTotalResponse = sign(aggregatedTotalResponse).*abs(aggregatedTotalResponse).^(1/m2);
 
-vidScaleTot = stripVideo(vidScaleTot, 2*baseFacilitationLength);
-vidScaleTot = vidScaleTot/max(abs(vidScaleTot(:)));
+aggregatedTotalResponse = stripVideo(aggregatedTotalResponse, 2*baseFacilitationLength);
+aggregatedTotalResponse = aggregatedTotalResponse/max(abs(aggregatedTotalResponse(:)));
 
 close(w);
 end
