@@ -18,7 +18,6 @@ total_iteration_number = 3 * nScales * total_orientations_number;
 
 threshold_data = zeros(5,total_iteration_number/3);
 
-
 for k = 1:nScales
     vid_in_scaled = safeResize(vid_in , [1/k, 1/k, 1/k] .* size(vid_in));
     vid_ori_n = zeros(size(vid_in_scaled));

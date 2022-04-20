@@ -37,7 +37,7 @@ for i=1:length(parser.Results.additionalAzimuthData)
     elseif(length(variable_data)==1)
         variable_data = variable_data*ones(size(angles_data,1),1);
     else
-        error('All additional Azimuth data need to have the same number of entries as elevations, or be a constant.')
+        error('All additional Azimuth data need to have the same number of entries as azimuths, or be a constant.')
     end
     angles_data.(parser.Results.additionalAzimuthNames{i}) = variable_data(:);
 end
