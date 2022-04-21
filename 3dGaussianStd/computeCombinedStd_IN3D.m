@@ -37,7 +37,7 @@ for k = 1:nScales
         for j = 1:length(Elevations)
             currOrientationIndex = (i-1) * length(Elevations) + j;
             temporalStd = Std3DActivation(spatialStd, sigmaTemporal, Azimuths(i), Elevations(j));
-            vidOriSTDDiffs(:,:,:,currOrientationIndex) = gather(spatialStd - temporalStd);
+            vidOriSTDDiffs(:,:,:,currOrientationIndex) = gather(minMaxNorm(spatialStd) - minMaxNorm(temporalStd));
             
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);   
