@@ -6,9 +6,9 @@ addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
 elevationHalfAngle = [0, 90];
-resizeFactors = [1/2, 1/2, 1/2];
-%"F:\Matlab\docs\temporal_segmentation\resources\material_from_ynon_19_1_22\edited\eye_2_c_c\0156_0246.mp4"
-inFileDir = [root ,'/resources/material_from_ynon_19_1_22/edited/eye_2_c_c/0156_0246.mp4'];
+resizeFactors = [0.5, 0.5, 0.3];
+%"F:\Matlab\docs\temporal_segmentation\resources\ultrasound_1_cropped.avi"
+inFileDir = [root ,'/resources/material_from_ynon_19_1_22/filtered/heart_malformation/1018_1029.mp4'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -22,7 +22,7 @@ end
 vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
     
 CCLFParams = struct;
-CCLFParams.numOfScales = 4;
+CCLFParams.numOfScales = 3;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 7;
@@ -55,7 +55,7 @@ minVideoValue = min(detail_enhanced(:));
 maxVideoValue = max(detail_enhanced(:));
 implay(vidOut);
 maintainFitToWindow();
-beta = 1.5;
+beta = 2;
 gain = 1;
 
 if(baby)

@@ -1,22 +1,24 @@
 function [Gaussian] = Gaussian3D(AzElDir,XYOrientation,Sigma,Shape)
-S = max(ceil(Sigma));
+
 Shape = ceil(Shape);
 if(numel(Shape)~=0)
     if(numel(Shape)==1)
-    x = -(Shape-1)/2:(Shape-1)/2;
-    y = -(Shape-1)/2:(Shape-1)/2;
-    z = -(Shape-1)/2:(Shape-1)/2;
+        x = -(Shape-1)/2:(Shape-1)/2;
+        y = -(Shape-1)/2:(Shape-1)/2;
+        z = -(Shape-1)/2:(Shape-1)/2;
     elseif(numel(Shape)==3)
-    x = -(Shape(1)-1)/2:(Shape(1)-1)/2;
-    y = -(Shape(2)-1)/2:(Shape(2)-1)/2;
-    z = -(Shape(3)-1)/2:(Shape(3)-1)/2;
+        x = -(Shape(1)-1)/2:(Shape(1)-1)/2;
+        y = -(Shape(2)-1)/2:(Shape(2)-1)/2;
+        z = -(Shape(3)-1)/2:(Shape(3)-1)/2;
     else
         error('Shape size invalid (1 or 3)')
     end
 else
-x = -3*S:3*S;
-y = -3*S:3*S;
-z = -3*S:3*S;
+    S = max(ceil(Sigma));
+    S = sqrt(S/2);
+    x = -3*S:3*S;
+    y = -3*S:3*S;
+    z = -3*S:3*S;
 end
 [X,Y,Z] = meshgrid(x,y,z);
 shape = size(X);
@@ -39,7 +41,7 @@ R = B*C*D;
 SigmaMat = diag(Sigma);
 expArg = (R'*inv(SigmaMat)*R*r');
 expArg = sum(r'.*expArg,1);
-Gaussian = exp(-expArg); 
+Gaussian = exp(-expArg);
 
 %Gaussian = Gaussian./max(abs(Gaussian),[],'all');
 Gaussian = Gaussian./sum(abs(Gaussian),'all');

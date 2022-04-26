@@ -19,11 +19,11 @@ else
     error('Invalid parameter length, elHalfAngle needs to be of length 1 or 2');
 end
 if(length(baseFacilitationLengths) == 2)
-    minFacilitationLength = baseFacilitationLengths(1);
-    maxFacilitationLength = baseFacilitationLengths(2);
+    spatialFacilitationLength = baseFacilitationLengths(1);
+    temporalFacilitationLength = baseFacilitationLengths(2);
 elseif(length(baseFacilitationLengths) == 1)
-    minFacilitationLength = baseFacilitationLengths;
-    maxFacilitationLength = baseFacilitationLengths;
+    spatialFacilitationLength = baseFacilitationLengths;
+    temporalFacilitationLength = baseFacilitationLengths;
 else
     error('Invalid parameter length, baseFacilitationLengths needs to be of length 1 or 2');
 end
@@ -54,60 +54,60 @@ for k = 1:nScales
     vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
     vidOriTot_n = zeros(size(vidS));
     vidOriTot_p = zeros(size(vidS));
-    CnArr = zeros([size(vidS), totalOrientationNumber]);
-    CpArr = zeros([size(vidS), totalOrientationNumber]);
-    primaryFL = max(3, maxFacilitationLength/k);
-    secondaryFL = max(3, minFacilitationLength/k);
-    facilitationLengths = computeEllipsoidRadius(elevations, primaryFL, secondaryFL);
+    %    CnArr = zeros([size(vidS), totalOrientationNumber]);
+    %    CpArr = zeros([size(vidS), totalOrientationNumber]);
+    temporalFL = max(3, temporalFacilitationLength/k);
+    spatialFL = max(3, spatialFacilitationLength/k);
+    facilitationLengths = computeEllipsoidRadius(elevations, temporalFL, spatialFL);
     if(minAngle == 0) %0 elev handling
-        L = BuildGabor3D(0, 0);
-        Co = convn(vidS, L,'same');
-        CpArr(:,:,:,end) = max(Co,0);
-        CnArr(:,:,:,end) = max(-Co,0);
+        [Cp,Cn] = calcGaborResponse(vidS, 0, 0);
+        CpTotalPowerSum = Cp.^normQ;
+        CnTotalPowerSum = Cn.^normQ;
     end
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            currOrientationIndex = (i-1) * length(elevations) + j;
-            L = BuildGabor3D(azimuths(i), elevations(j));
-            Co = convn(vidS, L,'same');
-            CpArr(:,:,:,currOrientationIndex) = max(Co,0);
-            CnArr(:,:,:,currOrientationIndex) = max(-Co,0);
-            
+            [Cp,Cn] = calcGaborResponse(vidS, azimuths(i), elevations(j));
+            CpTotalPowerSum = CpTotalPowerSum + Cp.^normQ;
+            CnTotalPowerSum = CnTotalPowerSum + Cn.^normQ;
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
         end
     end
     
-    CpTotalPowerSum = sum(abs(CpArr).^normQ, 4);
-    CnTotalPowerSum = sum(abs(CnArr).^normQ, 4);
     
     if(minAngle == 0) %0 elev handling
-        CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, end)).^normQ).^(1/normQ);
-        CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, end)).^normQ).^(1/normQ);
-        CpArr(:,:,:, end) = CpArr(:,:,:, end) ./ CpNormFactor;
-        CnArr(:,:,:, end) = CnArr(:,:,:, end) ./ CnNormFactor;
+        [Cp,Cn] = calcGaborResponse(vidS, 0, 0);
+        CpNormFactor = 1 + (CpTotalPowerSum - Cp.^normQ).^(1/normQ);
+        CnNormFactor = 1 + (CnTotalPowerSum - Cn.^normQ).^(1/normQ);
+        CpNormed = Cp ./ CpNormFactor;
+        CnNormed = Cn ./ CnNormFactor;
+        totalActivationThreshold_p = max(CpNormed(8:end-7,8:end-7,8:end-7),[],'all');
+        totalActivationThreshold_n = max(CnNormed(8:end-7,8:end-7,8:end-7),[],'all');
     end
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            currOrientationIndex = (i-1) * length(elevations) + j;
-            CnNormFactor = 1 + (CnTotalPowerSum - abs(CnArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
-            CpNormFactor = 1 + (CpTotalPowerSum - abs(CpArr(:,:,:, currOrientationIndex)).^normQ).^(1/normQ);
-            
-            CpArr(:,:,:, currOrientationIndex) = CpArr(:,:,:, currOrientationIndex) ./ CpNormFactor;
-            CnArr(:,:,:, currOrientationIndex) = CnArr(:,:,:, currOrientationIndex) ./ CnNormFactor; 
+            [Cp,Cn] = calcGaborResponse(vidS, azimuths(i), elevations(j));
+            CnNormFactor = 1 + (CnTotalPowerSum - abs(Cn).^normQ).^(1/normQ);
+            CpNormFactor = 1 + (CpTotalPowerSum - abs(Cp).^normQ).^(1/normQ);
+            CpNormed = Cp ./ CpNormFactor;
+            CnNormed = Cn ./ CnNormFactor;
+            totalActivationThreshold_p = max(max(CpNormed(8:end-7,8:end-7,8:end-7),[],'all'),totalActivationThreshold_p);
+            totalActivationThreshold_n = max(max(CnNormed(8:end-7,8:end-7,8:end-7),[],'all'),totalActivationThreshold_n);
         end
     end
     
     %%threshold
-    totalActivationThreshold_p = activationThreshold * max(CpArr(8:end-7,8:end-7,8:end-7,:), [], 'all');
-    totalActivationThreshold_n = activationThreshold * max(CnArr(8:end-7,8:end-7,8:end-7,:), [], 'all');
+    totalActivationThreshold_p = activationThreshold * totalActivationThreshold_p;
+    totalActivationThreshold_n = activationThreshold * totalActivationThreshold_n;
     totalActivationThreshold = [totalActivationThreshold_p, totalActivationThreshold_n ];
     
     if(minAngle == 0) %0 elev handling
-        Cp = CpArr(:,:,:, totalOrientationNumber);
-        Cn = CnArr(:,:,:, totalOrientationNumber);
-        
-        [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(Cp,Cn, 0, 0, totalActivationThreshold, primaryFL, alpha);
+        [Cp,Cn] = calcGaborResponse(vidS, 0,0);
+        CpNormFactor = 1 + (CpTotalPowerSum - Cp.^normQ).^(1/normQ);
+        CnNormFactor = 1 + (CnTotalPowerSum - Cn.^normQ).^(1/normQ);
+        CpNormed = Cp ./ CpNormFactor;
+        CnNormed = Cn ./ CnNormFactor;
+        [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(CpNormed,CnNormed, 0, 0, totalActivationThreshold, temporalFL, alpha);
         threshold_data(:,k*totalOrientationNumber) = [1/k,threshold_data_local];
         vidOriTot_n = vidOriTot_n+(LF_n*elevationNorm0Factor).^m1;
         vidOriTot_p = vidOriTot_p+(LF_p*elevationNorm0Factor).^m1;
@@ -115,11 +115,12 @@ for k = 1:nScales
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
             currOrientationIndex = (i-1) * length(elevations) + j;
-
-            Cp = CpArr(:,:,:, currOrientationIndex);
-            Cn = CnArr(:,:,:, currOrientationIndex);
-            
-            [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(Cp,Cn, azimuths(i), elevations(j), ...
+            [Cp,Cn] = calcGaborResponse(vidS, azimuths(i), elevations(j));
+            CpNormFactor = 1 + (CpTotalPowerSum - Cp.^normQ).^(1/normQ);
+            CnNormFactor = 1 + (CnTotalPowerSum - Cn.^normQ).^(1/normQ);
+            CpNormed = Cp ./ CpNormFactor;
+            CnNormed = Cn ./ CnNormFactor;
+            [LF_n, LF_p,threshold_data_local] = Gabor3DActivation(CpNormed,CnNormed, azimuths(i), elevations(j), ...
                 totalActivationThreshold, facilitationLengths(j), alpha);
             threshold_data(:,(k-1)*totalOrientationNumber+currOrientationIndex) = [1/k,threshold_data_local];
             %combining angles
