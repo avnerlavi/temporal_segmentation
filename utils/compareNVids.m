@@ -10,7 +10,7 @@ parse(parser, vid_list, varargin{:});
 vid_size = [0,0,0];
 for i = 1:length(vid_list)
     if(isstring(vid_list{i}) || ischar(vid_list{i}))
-        vid_list{i} = readVideoFromFile(parser.Results.vid1raw, false);
+        vid_list{i} = readVideoFromFile(vid_list{i}, false);
     end
     vid_size = [max(vid_size(1),size(vid_list{i},1)),...
         max(vid_size(2),size(vid_list{i},2)),...
