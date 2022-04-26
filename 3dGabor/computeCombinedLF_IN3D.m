@@ -51,7 +51,8 @@ totalIterationNumber = 2 * nScales * totalOrientationNumber;
 threshold_data = zeros(5,totalIterationNumber/2);
 
 for k = 1:nScales
-    vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
+    %vidS = imresize3(vidIn,[1/k, 1/k, 1/k] .* size(vidIn),'Antialiasing',true);
+    vidS = safeResize(vidIn,[1/k, 1/k, 1/k] .* size(vidIn));
     vidOriTot_n = zeros(size(vidS));
     vidOriTot_p = zeros(size(vidS));
     %    CnArr = zeros([size(vidS), totalOrientationNumber]);
