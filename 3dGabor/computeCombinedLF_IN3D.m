@@ -16,7 +16,7 @@ azimuths = azimuths(1:end-1);
 totalOrientationNumber = length(azimuths) * length(elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
-aggregatedOrientations = cell(nScales);
+aggregatedOrientations = cell(1, nScales);
 
 for k = 1:nScales
     vidScaled = gpuArray(imresize3(vidIn, [1/k, 1/k, 1/k] .* size(vidIn), 'Antialiasing', true));
