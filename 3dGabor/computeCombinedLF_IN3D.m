@@ -100,37 +100,58 @@ for k = 1:nScales
     
     %% lateral facilitation    
     tempSnapshotDir = '';
-    if k == 1
-        tempSnapshotDir = snapshotDir;
-    end
 
     %0 elev handling
-    [cp,cn] = calculateGaborResponse(vidScaled, 0,0);
+    [cp, cn] = calculateGaborResponse(vidScaled, 0,0);
     cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
     cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
     cpNormed = cp ./ cpNormFactor;
     cnNormed = cn ./ cnNormFactor;    
-    [lf_n, lf_p] = Gabor3DActivation(cpNormed,cnNormed, 0, 0, relativePaddingSize, ...
+    
+    if k == 1
+        tempSnapshotDir = snapshotDir;
+    end
+    
+    saveSnapshots(gather(cpNormed(relativePaddingSize + 1:end-relativePaddingSize, ...
+    	relativePaddingSize + 1:end-relativePaddingSize, :)), tempSnapshotDir, 'Cp_after_norm_az_0_el_0', frames);
+	saveSnapshots(gather(cnNormed(relativePaddingSize + 1:end-relativePaddingSize, ...
+        relativePaddingSize + 1:end-relativePaddingSize, :)), tempSnapshotDir, 'Cn_after_norm_az_0_el_0', frames);
+            
+    [lf_p, lf_n] = Gabor3DActivation(cpNormed,cnNormed, 0, 0, relativePaddingSize, ...
         percentileThreshold, facilitationLength, alpha, tempSnapshotDir, frames);
     
     vidOriTot_n = lf_n.^m1;
     vidOriTot_p = lf_p.^m1;
-                
+    
+    tempSnapshotDir = '';
+    
     progressCounter = progressCounter + 1;
     waitbar(progressCounter / totalIterationNumber, w);
  
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            [cp,cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j));
+            [cp, cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j));
             cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
             cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
             cpNormed = cp ./ cpNormFactor;
             cnNormed = cn ./ cnNormFactor;
-            [lf_n, lf_p] = Gabor3DActivation(cpNormed, cnNormed, azimuths(i), elevations(j), relativePaddingSize, ...
-                percentileThreshold, facilitationLength, alpha, '', frames);
+            
+            if azimuths(i) == 90 && j == length(elevations) && k == 1
+                tempSnapshotDir = snapshotDir;
+            end
+            
+            saveSnapshots(gather(cpNormed(relativePaddingSize + 1:end-relativePaddingSize, ...
+                relativePaddingSize + 1:end-relativePaddingSize, :)), tempSnapshotDir, ['Cp_after_norm_az_', num2str(azimuths(i)), '_el_', num2str(elevations(j))], frames);
+            saveSnapshots(gather(cnNormed(relativePaddingSize + 1:end-relativePaddingSize, ...
+            	relativePaddingSize + 1:end-relativePaddingSize, :)), tempSnapshotDir, ['Cn_after_norm_az_', num2str(azimuths(i)), '_el_', num2str(elevations(j))], frames);
+            
+            [lf_p, lf_n] = Gabor3DActivation(cpNormed, cnNormed, azimuths(i), elevations(j), relativePaddingSize, ...
+                percentileThreshold, facilitationLength, alpha, tempSnapshotDir, frames);
 
             vidOriTot_p = vidOriTot_p+lf_p.^m1;
             vidOriTot_n = vidOriTot_n+lf_n.^m1;
+            
+            tempSnapshotDir = '';
             
             progressCounter = progressCounter + 1;
             waitbar(progressCounter / totalIterationNumber, w);
