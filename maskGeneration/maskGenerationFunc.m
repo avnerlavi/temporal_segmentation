@@ -12,25 +12,27 @@ for i = maskParams.iterationNumber:-1:1
     
     cclfParams.resizeFactors = maskParams.baseResizeFactors * ((i-1)*maskParams.resizeIncrement + 1);
     
+    tempSnapshotDir = '';
+    cclfParams.snapshotDir = '';
+    if i == maskParams.iterationNumber
+        cclfParams.snapshotDir = facilitationSnapshotDir;
     tempSnapshotDir = maskParams.snapshotDir;
-    snapshotFrames = [60 / cclfParams.resizeFactors(3), 120 / cclfParams.resizeFactors(3)];
-    if i < maskParams.iterationNumber
-        cclfParams.snapshotDir = '';
-        tempSnapshotDir = '';
     end
+    
+    snapshotFrames = [60 * cclfParams.resizeFactors(3), 120 * cclfParams.resizeFactors(3)];
     
     vidMasked = vidIn .* safeResize(totalMask,size(vidIn));
     detailEnhanced = detailEnhancement3Dfunc(vidMasked,cclfParams,false);
-    saveSnapshots(detailEnhanced, cclfParams.snapshotDir, 'detail_enhancement_output', ...
-        snapshotFrames);
 %     detailEnhanced = detailEnhancement3Dfunc(vidIn,cclfParams,false);
+    saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_scale_', num2str(i)], ...
+        snapshotFrames);
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
 %     detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
     detailEnhancementPyr{i} = detailEnhanced;
     
     %% connected components 
     
-    maskBlurFilt = Gaussian3DIso(i, 3*i + 1 - mod(i, 2));
+    maskBlurFilt = Gaussian3DIso(i, maskParams.gaussianShape);
     maskBlurFilt = minMaxNorm(maskBlurFilt) * maskParams.gaussianMaxVal;
 
     currMask = generateConnectedComponentsMask(detailEnhanced, boundryMaskWidth ...
