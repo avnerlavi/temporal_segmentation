@@ -6,8 +6,9 @@ boundryMaskWidth = ceil(cclfParams.facilitationLength/4);
 totalMask = ones(size(vidIn));
 detailEnhancementPyr = cell(1,maskParams.iterationNumber);
 maskPyr = cell(1,maskParams.iterationNumber);
+facilitationSnapshotDir = cclfParams.snapshotDir;
 
-for i = maskParams.iterationNumber:-1:1
+for i = 1:maskParams.iterationNumber
     %% detail enhancement
     
     cclfParams.resizeFactors = maskParams.baseResizeFactors * ((i-1)*maskParams.resizeIncrement + 1);
@@ -16,7 +17,7 @@ for i = maskParams.iterationNumber:-1:1
     cclfParams.snapshotDir = '';
     if i == maskParams.iterationNumber
         cclfParams.snapshotDir = facilitationSnapshotDir;
-    tempSnapshotDir = maskParams.snapshotDir;
+        tempSnapshotDir = maskParams.snapshotDir;
     end
     
     snapshotFrames = [60 * cclfParams.resizeFactors(3), 120 * cclfParams.resizeFactors(3)];
