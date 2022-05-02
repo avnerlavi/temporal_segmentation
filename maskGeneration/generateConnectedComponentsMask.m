@@ -23,7 +23,7 @@ function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth ...
     numOfCC2keep = length(largestCCIdx);
     vidCC = zeros(size(vidTrimmed));
     for j = 1:numOfCC2keep
-        vidCC(CC.PixelIdxList{largestCCIdx(j)}) = 1;
+        vidCC(CC.PixelIdxList{largestCCIdx(j)}) = numOfPixels(largestCCIdx(j)) / largestCCArea;
     end
     vidCC = minMaxNorm(vidCC);
     saveSnapshots(vidCC, snapshotDir, 'connected_components_binary', snapshotFrames);
