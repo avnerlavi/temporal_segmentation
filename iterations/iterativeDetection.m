@@ -34,6 +34,7 @@ MaskParams.snapshotDir = [snapshotDir, '\detection'];
 
 CCLFParams = struct;
 CCLFParams.numOfScales = 4;
+CCLFParams.thresholdFraction = 0.3;
 CCLFParams.percentileThreshold = 95;
 CCLFParams.elevationHalfAngle = 60;
 CCLFParams.azimuthNum = 8;

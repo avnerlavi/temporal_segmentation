@@ -1,5 +1,5 @@
 function [aggregatedTotalResponse, aggregatedOrientations] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
-    , nElevations, elHalfAngle, nScales, percentileThreshold, baseFacilitationLength ...
+    , nElevations, elHalfAngle, nScales, thresholdFraction, percentileThreshold, baseFacilitationLength ...
     , alpha, m1, m2, normQ, snapshotDir)
 
 %% initialization
@@ -94,9 +94,8 @@ for k = 1:nScales
         end
     end
     
-    activationThreshold = 0.3;
-    totalActivationThreshold_p = activationThreshold * totalActivationThreshold_p;
-    totalActivationThreshold_n = activationThreshold * totalActivationThreshold_n;
+    totalActivationThreshold_p = thresholdFraction * totalActivationThreshold_p;
+    totalActivationThreshold_n = thresholdFraction * totalActivationThreshold_n;
     totalActivationThreshold = [totalActivationThreshold_p, totalActivationThreshold_n];
     
     %% lateral facilitation    
