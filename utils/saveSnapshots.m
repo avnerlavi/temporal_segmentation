@@ -19,7 +19,7 @@ otherdims = repmat({':'}, 1, ndims(vidIn)-1);
 images = cell(1, length(frames));
 for i=1:length(frames)
     if (frames(i) > frameCount)
-        disp(['frame ', frames(i), ' is out of range']);
+        disp(['frame ', num2str(frames(i)), ' is out of range']);
         return;
     end
     

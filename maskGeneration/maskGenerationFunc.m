@@ -28,6 +28,8 @@ for i = 1:maskParams.iterationNumber
     saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_scale_', num2str(i)], ...
         snapshotFrames);
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
+    saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_abs_normed_scale_', num2str(i)], ...
+        snapshotFrames);
 %     detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
     detailEnhancementPyr{i} = detailEnhanced;
     
