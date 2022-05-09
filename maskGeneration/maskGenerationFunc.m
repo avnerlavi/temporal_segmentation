@@ -7,29 +7,26 @@ totalMask = ones(size(vidIn));
 detailEnhancementPyr = cell(1,maskParams.iterationNumber);
 maskPyr = cell(1,maskParams.iterationNumber);
 facilitationSnapshotDir = cclfParams.snapshotDir;
+baseSnapshotFrames = [60, 120];
 
 for i = 1:maskParams.iterationNumber
     %% detail enhancement
     
     cclfParams.resizeFactors = maskParams.baseResizeFactors * ((i-1)*maskParams.resizeIncrement + 1);
     
-    tempSnapshotDir = '';
-    cclfParams.snapshotDir = '';
-    if i == maskParams.iterationNumber
-        cclfParams.snapshotDir = facilitationSnapshotDir;
-        tempSnapshotDir = maskParams.snapshotDir;
-    end
+    cclfParams.snapshotDir = [facilitationSnapshotDir, '/scale_', num2str(i)];
+    tempSnapshotDir = [maskParams.snapshotDir, '/scale_', num2str(i)];
     
-    snapshotFrames = [60 * cclfParams.resizeFactors(3), 120 * cclfParams.resizeFactors(3)];
+    relativeSnapshotFrames = floor(baseSnapshotFrames .* cclfParams.resizeFactors(3));
     
-    vidMasked = vidIn .* safeResize(totalMask,size(vidIn));
-    detailEnhanced = detailEnhancement3Dfunc(vidMasked,cclfParams,false);
+    vidMasked = vidIn .* safeResize(totalMask, size(vidIn));
+    detailEnhanced = detailEnhancement3Dfunc(vidMasked, cclfParams, relativeSnapshotFrames, false);
 %     detailEnhanced = detailEnhancement3Dfunc(vidIn,cclfParams,false);
     saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_scale_', num2str(i)], ...
-        snapshotFrames);
+        relativeSnapshotFrames);
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
     saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_abs_normed_scale_', num2str(i)], ...
-        snapshotFrames);
+        relativeSnapshotFrames);
 %     detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
     detailEnhancementPyr{i} = detailEnhanced;
     
@@ -40,11 +37,10 @@ for i = 1:maskParams.iterationNumber
 
     currMask = generateConnectedComponentsMask(detailEnhanced, boundryMaskWidth ...
         , maskParams.percentileThreshold, maskParams.thresholdAreaOfCC, maskBlurFilt, ...
-        tempSnapshotDir, snapshotFrames);
+        tempSnapshotDir, relativeSnapshotFrames);
     currMask = safeResize(currMask,size(vidIn));
     
-    saveSnapshots(currMask, tempSnapshotDir, 'connected_components_blurred', snapshotFrames);
-
+    saveSnapshots(currMask, tempSnapshotDir, 'connected_components_blurred', baseSnapshotFrames);
     
     maskPyr{i} = currMask;
     totalMask = maskParams.alpha * currMask + (1 - maskParams.alpha) * totalMask;

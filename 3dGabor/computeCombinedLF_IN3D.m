@@ -1,6 +1,6 @@
 function [aggregatedTotalResponse, aggregatedOrientations] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
     , nElevations, elHalfAngle, nScales, thresholdFraction, percentileThreshold, baseFacilitationLength ...
-    , alpha, m1, m2, normQ, snapshotDir)
+    , alpha, m1, m2, normQ, snapshotDir, snapshotFrames)
 
 %% initialization
 w = waitbar(0, 'starting per-resolution LF computation');
@@ -21,7 +21,7 @@ aggregatedOrientations = cell(1, nScales);
 for k = 1:nScales
     vidScaled = gpuArray(imresize3(vidIn, [1/k, 1/k, 1/k] .* size(vidIn), 'Antialiasing', true));
     relativePaddingSize = floor(basePaddingSize / k);
-    frames = [60/k + relativePaddingSize, 120/k + relativePaddingSize];    
+    frames = floor(snapshotFrames/k + relativePaddingSize);    
     facilitationLength = max(3, baseFacilitationLength/k);
     
     %% total contrast power norm caclculation

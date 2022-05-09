@@ -1,6 +1,7 @@
 %% initialization
 startTime = datetime('now');
 dumpMovies = true;
+warning('off', 'MATLAB:MKDIR:DirectoryExists');
 
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
