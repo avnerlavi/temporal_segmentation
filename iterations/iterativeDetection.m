@@ -133,7 +133,10 @@ evaluationPlot = plotEvaluationMetrics(thresholds, precisions, recalls, ious);
 %% result display
 
 vidMasked = vidMatrixOrig .* resizedMask;
-saveSnapshots(vidMasked, snapshotDir, 'masked_input');
+
+frames = 10:10:180;
+saveSnapshots(resizedMask, [snapshotDir, '\output'], 'output_mask', frames, 'Output Mask');
+saveSnapshots(vidMasked, [snapshotDir, '\masked_input'], 'masked_input', frames, 'Masked Input');
 
 implay(vidMasked);
 maintainFitToWindow();

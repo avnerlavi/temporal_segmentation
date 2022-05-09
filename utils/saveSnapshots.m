@@ -1,4 +1,4 @@
-function saveSnapshots(vidIn, fileDir, fileName, frames)
+function saveSnapshots(vidIn, fileDir, fileName, frames, frameTitle)
 if isempty(fileDir)
     return
 end
@@ -27,6 +27,9 @@ for i=1:length(frames)
     hFig = figure;
     set(hFig, 'color', 'white');
     imagesc(frame);
+    if exist('frameTitle', 'var')
+        title([frameTitle, ', Frame ', num2str(i)]);
+    end
     axis off;
     colorbar;
     colormap gray;
