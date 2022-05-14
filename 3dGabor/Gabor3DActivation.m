@@ -2,7 +2,6 @@ function [LF_p, LF_n] = Gabor3DActivation(Cp, Cn, Azimuth, Elevation, padding, p
     , FacilitationLength, alpha, snapshotDir, snapshotFrames, totalActivationThreshold)
 % threshold = activationThreshold * max(abs(Co(3:end-2,3:end-2,3:end-2)), [], 'all');
 % Co(abs(Co) < threshold) = 0;
-my_sig = @(x, a) exp(a*x) ./ (1 + exp(a*x));
 
 % Cp_threshold = prctile(Cp(padding + 1:end-padding,padding + 1:end-padding,padding + 1:end-padding), percentileThreshold, 'all');%activationThreshold * max(Cp(3:end-2,3:end-2,3:end-2), [], 'all');
 % Cn_threshold = prctile(Cn(padding + 1:end-padding,padding + 1:end-padding,padding + 1:end-padding), percentileThreshold, 'all');%activationThreshold * max(Cn(3:end-2,3:end-2,3:end-2), [], 'all');
