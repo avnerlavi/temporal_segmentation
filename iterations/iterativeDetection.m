@@ -78,8 +78,8 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.elevationHalfAngle = 60;
     STDParams.azimuthNum = 4;
     STDParams.elevationNum = 4;
-    STDParams.sigmaSpatial = [3, 3, 0.1];
-    STDParams.sigmaTemporal = [0.1, 0.1, 7];
+    STDParams.spatialVar = [3, 3, 0.1];
+    STDParams.temporalVar = [0.1, 0.1, 7];
     STDParams.m1 = 2;
     STDParams.m2 = 2;
     STDParams.normQ = 2;

@@ -16,18 +16,19 @@ for i = 1:maskParams.iterationNumber
     
     cclfParams.snapshotDir = [facilitationSnapshotDir, '/scale_', num2str(i)];
     tempSnapshotDir = [maskParams.snapshotDir, '/scale_', num2str(i)];
-    
     relativeSnapshotFrames = floor(baseSnapshotFrames .* cclfParams.resizeFactors(3));
     
-    vidMasked = vidIn .* safeResize(totalMask, size(vidIn));
-    detailEnhanced = detailEnhancement3Dfunc(vidMasked, cclfParams, relativeSnapshotFrames, false);
-%     detailEnhanced = detailEnhancement3Dfunc(vidIn,cclfParams,false);
+%     vidMasked = vidIn .* safeResize(totalMask, size(vidIn));
+%     detailEnhanced = detailEnhancement3Dfunc(vidMasked, cclfParams, relativeSnapshotFrames, false);
+    detailEnhanced = detailEnhancement3Dfunc(vidIn, cclfParams, relativeSnapshotFrames, false);
     saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_scale_', num2str(i)], ...
         relativeSnapshotFrames);
+    
     detailEnhanced = minMaxNorm(abs(detailEnhanced));
     saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_abs_normed_scale_', num2str(i)], ...
         relativeSnapshotFrames);
-%     detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
+    
+    detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
     detailEnhancementPyr{i} = detailEnhanced;
     
     %% connected components 

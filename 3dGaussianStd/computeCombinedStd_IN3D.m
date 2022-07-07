@@ -1,5 +1,5 @@
 function [aggregatedTotalResponse] = computeCombinedStd_IN3D(vidIn, nAzimuths, nElevations ...
-    , elHalfAngle, nScales, sigmaSpatial ,sigmaTemporal ,m1, m2, normQ, snapshotDir)
+    , elHalfAngle, nScales, spatialVar ,temporalVar ,m1, m2, normQ, snapshotDir)
 %% initialization
 w = waitbar(0, 'starting per-resolution STD computation');
 progressCounter = 0;
@@ -14,7 +14,7 @@ azimuths = azimuths(1:end-1);
 totalOrientationNumber = length(azimuths) * length(elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
-Gshort = Gaussian3D([0,0], 0, sigmaSpatial, []);
+Gshort = Gaussian3D([0,0], 0, spatialVar, []);
 
 for k = 1:nScales
     vidScaled = gpuArray(safeResize(vidIn, 1/k * size(vidIn)));
@@ -24,7 +24,7 @@ for k = 1:nScales
 
     %% total STD difference power norm caclculation
     %0 elev handling
-    temporalStd = Std3DActivation(spatialStd, sigmaTemporal, 0, 0);
+    temporalStd = Std3DActivation(spatialStd, temporalVar, 0, 0);
     stdDiff = max(minMaxNorm(spatialStd) - minMaxNorm(temporalStd), 0);
     stdTotalPowerSum = abs(stdDiff).^normQ;
     
@@ -40,7 +40,7 @@ for k = 1:nScales
 
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            temporalStd = Std3DActivation(spatialStd, sigmaTemporal, azimuths(i), elevations(j));
+            temporalStd = Std3DActivation(spatialStd, temporalVar, azimuths(i), elevations(j));
             stdDiff = max(minMaxNorm(spatialStd) - minMaxNorm(temporalStd), 0);
             stdTotalPowerSum = stdTotalPowerSum + abs(stdDiff).^normQ;
             
@@ -51,7 +51,7 @@ for k = 1:nScales
 
     %% STD difference normalization
     %0 elev handling
-    temporalStd = Std3DActivation(spatialStd, sigmaTemporal, 0, 0);
+    temporalStd = Std3DActivation(spatialStd, temporalVar, 0, 0);
     stdDiff = max(minMaxNorm(spatialStd) - minMaxNorm(temporalStd), 0);
     stdDiffNormFactor = 1 + (stdTotalPowerSum - abs(stdDiff).^normQ).^(1/normQ);
     stdDiffNormed = stdDiff ./ stdDiffNormFactor;
@@ -69,7 +69,7 @@ for k = 1:nScales
             
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            temporalStd = Std3DActivation(spatialStd, sigmaTemporal, azimuths(i), elevations(j));
+            temporalStd = Std3DActivation(spatialStd, temporalVar, azimuths(i), elevations(j));
             stdDiff = max(minMaxNorm(spatialStd) - minMaxNorm(temporalStd), 0);
             stdDiffNormFactor = 1 + (stdTotalPowerSum - abs(stdDiff).^normQ).^(1/normQ);
             stdDiffNormed = stdDiff ./ stdDiffNormFactor;
