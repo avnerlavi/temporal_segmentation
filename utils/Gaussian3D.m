@@ -1,5 +1,5 @@
-function [Gaussian] = Gaussian3D(AzElDir,XYOrientation,Sigma,Shape)
-S = max(ceil(Sigma));
+function [Gaussian] = Gaussian3D(AzElDir, XYOrientation, Variance, Shape)
+S = max(ceil(sqrt(Variance)));
 Shape = ceil(Shape);
 if(numel(Shape)~=0)
     if(numel(Shape)==1)
@@ -36,7 +36,7 @@ B = [cosd(XY),sind(XY) ,0       ;
     -sind(XY),cosd(XY) ,0       ;
     0        ,0        ,1       ];
 R = B*C*D;
-SigmaMat = diag(Sigma);
+SigmaMat = diag(Variance);
 expArg = (R'*inv(SigmaMat)*R*r');
 expArg = sum(r'.*expArg,1);
 Gaussian = exp(-expArg); 
