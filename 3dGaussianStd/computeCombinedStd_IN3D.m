@@ -24,8 +24,7 @@ for k = 1:nScales
 
     %% total STD difference power norm caclculation
     %0 elev handling
-    temporalStd = Std3DActivation(spatialStd, temporalVar, 0, 0);
-    stdDiff = max(minMaxNorm(spatialStd) - minMaxNorm(temporalStd), 0);
+    [stdDiff, temporalStd] = computeStdDiffFeature(spatialStd, temporalVar, 0, 0);
     stdTotalPowerSum = abs(stdDiff).^normQ;
     
     if k == 1 || k == 2
@@ -40,8 +39,7 @@ for k = 1:nScales
 
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            temporalStd = Std3DActivation(spatialStd, temporalVar, azimuths(i), elevations(j));
-            stdDiff = max(minMaxNorm(spatialStd) - minMaxNorm(temporalStd), 0);
+            stdDiff = computeStdDiffFeature(spatialStd, temporalVar, azimuths(i), elevations(j));
             stdTotalPowerSum = stdTotalPowerSum + abs(stdDiff).^normQ;
             
             progressCounter = progressCounter + 1;
@@ -51,8 +49,7 @@ for k = 1:nScales
 
     %% STD difference normalization
     %0 elev handling
-    temporalStd = Std3DActivation(spatialStd, temporalVar, 0, 0);
-    stdDiff = max(minMaxNorm(spatialStd) - minMaxNorm(temporalStd), 0);
+    stdDiff = computeStdDiffFeature(spatialStd, temporalVar, 0, 0);
     stdDiffNormFactor = 1 + (stdTotalPowerSum - abs(stdDiff).^normQ).^(1/normQ);
     stdDiffNormed = stdDiff ./ stdDiffNormFactor;
     stdDiffOriTot = sign(stdDiffNormed) .* (abs(stdDiffNormed).^m1);
@@ -69,8 +66,7 @@ for k = 1:nScales
             
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            temporalStd = Std3DActivation(spatialStd, temporalVar, azimuths(i), elevations(j));
-            stdDiff = max(minMaxNorm(spatialStd) - minMaxNorm(temporalStd), 0);
+            stdDiff = computeStdDiffFeature(spatialStd, temporalVar, azimuths(i), elevations(j));
             stdDiffNormFactor = 1 + (stdTotalPowerSum - abs(stdDiff).^normQ).^(1/normQ);
             stdDiffNormed = stdDiff ./ stdDiffNormFactor;
             stdDiffOriTot = stdDiffOriTot + sign(stdDiffNormed) .* (abs(stdDiffNormed).^m1);
