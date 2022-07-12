@@ -33,7 +33,7 @@ for i = 1:maskParams.iterationNumber
     
     %% connected components 
     
-    maskBlurFilt = Gaussian3DIso(i, maskParams.gaussianShape);
+    maskBlurFilt = Gaussian3DIso(0.5*i, maskParams.gaussianShape);
     maskBlurFilt = minMaxNorm(maskBlurFilt) * maskParams.gaussianMaxVal;
 
     currMask = generateConnectedComponentsMask(detailEnhanced, boundryMaskWidth ...

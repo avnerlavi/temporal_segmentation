@@ -38,7 +38,7 @@ B = [cosd(XY),sind(XY) ,0       ;
 R = B*C*D;
 SigmaMat = diag(Variance);
 expArg = (R'*inv(SigmaMat)*R*r');
-expArg = sum(r'.*expArg,1);
+expArg = 0.5*sum(r'.*expArg,1);
 Gaussian = exp(-expArg); 
 
 %Gaussian = Gaussian./max(abs(Gaussian),[],'all');
