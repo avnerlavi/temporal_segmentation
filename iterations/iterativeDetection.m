@@ -39,7 +39,7 @@ CCLFParams.percentileThreshold = 95;
 CCLFParams.elevationHalfAngle = 60;
 CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 7;
-CCLFParams.facilitationLength = 16;
+CCLFParams.facilitationLength = 5;
 CCLFParams.alpha = 0;
 CCLFParams.m1 = 2;
 CCLFParams.m2 = 1;
@@ -57,9 +57,9 @@ if(strcmp(STDMethod, 'Pyr'))
     saveSnapshots(vidMatrixOrig, snapshotDir, 'original_input');
     
     if(strcmp(vidFileName, 'man_running'))
-        STDParams.resizeFactors = [1/4, 1/4, 1];
+        STDParams.resizeFactors = [1/3, 1/3, 1];
     else
-        STDParams.resizeFactors = [1/2, 1/2, 1];
+        STDParams.resizeFactors = [2/3, 2/3, 1];
     end
     STDParams.segmentLength = 9;
     STDParams.pyramidLevel = 5;
@@ -84,9 +84,9 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.normQ = 2;
     STDParams.powerFactor = 2;
     if(strcmp(vidFileName, 'man_running'))
-        STDParams.resizeFactors = [1/4, 1/4, 1];
+        STDParams.resizeFactors = [1/3, 1/3, 1];
     else
-        STDParams.resizeFactors = [1/2, 1/2, 1];
+        STDParams.resizeFactors = [2/3, 2/3, 1];
     end
     
     vidStd = generateStdVideo3DFunc(vidMatrixOrig, STDParams);
