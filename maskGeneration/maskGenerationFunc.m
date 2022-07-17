@@ -37,9 +37,9 @@ for i = 1:maskParams.iterationNumber
     maskBlurFilt = minMaxNorm(maskBlurFilt) * maskParams.gaussianMaxVal;
 
     currMask = generateConnectedComponentsMask(detailEnhanced, boundryMaskWidth ...
-        , maskParams.percentileThreshold, maskParams.thresholdAreaOfCC, maskBlurFilt, ...
-        tempSnapshotDir, relativeSnapshotFrames);
-    currMask = safeResize(currMask,size(vidIn));
+        , maskParams.cutoffPercentage, maskParams.percentileThreshold, ...
+        maskParams.thresholdAreaOfCC, maskBlurFilt, tempSnapshotDir, relativeSnapshotFrames);
+%     currMask = safeResize(currMask,size(vidIn));
     
     saveSnapshots(currMask, tempSnapshotDir, 'connected_components_blurred', baseSnapshotFrames);
     

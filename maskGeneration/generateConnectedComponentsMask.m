@@ -1,4 +1,4 @@
-function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth ...
+function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth, cutoffPercentage ...
     , percentileThreshold, thresholdAreaOfCC, maskBlurFilt, snapshotDir, snapshotFrames)
     vidTrimmed = zeros(size(vidIn));
     boundryMask = zeros(size(vidIn));
@@ -8,10 +8,12 @@ function ccMask = generateConnectedComponentsMask(vidIn, boundryMaskWidth ...
         
     vidTrimmed(boundryMask == 1) = vidIn(boundryMask == 1);
     vidTrimmed = minMaxNorm(vidTrimmed);
-
-    thresholdCC = prctile(vidTrimmed(boundryMaskWidth+1 : end-boundryMaskWidth...
+    vidTrimmedCenter = vidTrimmed(boundryMaskWidth+1 : end-boundryMaskWidth...
             ,boundryMaskWidth+1 : end-boundryMaskWidth...
-            ,boundryMaskWidth+1 : end-boundryMaskWidth), percentileThreshold, 'all');
+            ,boundryMaskWidth+1 : end-boundryMaskWidth);
+
+%     thresholdCC = cutoffPercentage * max(vidTrimmedCenter(:));
+    thresholdCC = prctile(vidTrimmedCenter, percentileThreshold, 'all');
         
     vidThresholded = vidTrimmed > thresholdCC;
     saveSnapshots(vidThresholded, snapshotDir, 'thresholded', snapshotFrames);
