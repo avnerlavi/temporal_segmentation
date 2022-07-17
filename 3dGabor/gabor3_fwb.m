@@ -1,4 +1,4 @@
-function varargout = gabor3_fwb(aspect,angles,wavelength,phase,sigma,shape)
+function varargout = gabor3_fwb(aspect, angles, wavelength, phase, sigma, shape)
 % Returns 3D gabor filter.
 % gb=GABOR_FWB(aspect,theta,bw,psi,sigma,sz)
 %

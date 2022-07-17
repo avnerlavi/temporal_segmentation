@@ -1,6 +1,6 @@
 function [aggregatedTotalResponse, aggregatedOrientations] = computeCombinedLF_IN3D(vidIn, nAzimuths ...
-    , nElevations, elHalfAngle, nScales, thresholdFraction, percentileThreshold, baseFacilitationLength ...
-    , alpha, m1, m2, normQ, snapshotDir, snapshotFrames)
+    , nElevations, elHalfAngle, nScales, thresholdFraction, percentileThreshold, gaborSize, gaborWavelength, ...
+    baseFacilitationLength, alpha, m1, m2, normQ, snapshotDir, snapshotFrames)
 
 %% initialization
 w = waitbar(0, 'starting per-resolution LF computation');
@@ -26,7 +26,7 @@ for k = 1:nScales
     
     %% total contrast power norm caclculation
     %0 elev handling
-    [cp, cn] = calculateGaborResponse(vidScaled, 0, 0);
+    [cp, cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength);
     cpTotalPowerSum = cp.^normQ;
     cnTotalPowerSum = cn.^normQ;
     
@@ -42,7 +42,8 @@ for k = 1:nScales
     
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            [cp, cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j));
+            [cp, cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j), ...
+                gaborSize, gaborWavelength);
             cpTotalPowerSum = cpTotalPowerSum + cp.^normQ;
             cnTotalPowerSum = cnTotalPowerSum + cn.^normQ;
             
@@ -52,7 +53,7 @@ for k = 1:nScales
     end
     
     %% total activation threshold calculation
-    [cp,cn] = calculateGaborResponse(vidScaled, 0, 0);
+    [cp,cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength);
     cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
     cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
     cpNormed = cp ./ cpNormFactor;
@@ -77,7 +78,8 @@ for k = 1:nScales
     
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            [cp,cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j));
+            [cp,cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j), ...
+                gaborSize, gaborWavelength);
             cnNormFactor = 1 + (cnTotalPowerSum - abs(cn).^normQ).^(1/normQ);
             cpNormFactor = 1 + (cpTotalPowerSum - abs(cp).^normQ).^(1/normQ);
             cpNormed = cp ./ cpNormFactor;
@@ -102,7 +104,7 @@ for k = 1:nScales
     tempSnapshotDir = '';
 
     %0 elev handling
-    [cp, cn] = calculateGaborResponse(vidScaled, 0,0);
+    [cp, cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength);
     cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
     cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
     cpNormed = cp ./ cpNormFactor;
@@ -131,7 +133,8 @@ for k = 1:nScales
  
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
-            [cp, cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j));
+            [cp, cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j), ...
+                gaborSize, gaborWavelength);
             cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
             cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
             cpNormed = cp ./ cpNormFactor;
