@@ -39,7 +39,7 @@ for i = 1:maskParams.iterationNumber
     currMask = generateConnectedComponentsMask(detailEnhanced, boundryMaskWidth ...
         , maskParams.cutoffPercentage, maskParams.percentileThreshold, ...
         maskParams.thresholdAreaOfCC, maskBlurFilt, tempSnapshotDir, relativeSnapshotFrames);
-%     currMask = safeResize(currMask,size(vidIn));
+    currMask = safeResize(currMask,size(vidIn));
     
     saveSnapshots(currMask, tempSnapshotDir, 'connected_components_blurred', baseSnapshotFrames);
     
