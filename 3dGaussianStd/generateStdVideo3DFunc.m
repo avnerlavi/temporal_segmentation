@@ -4,7 +4,7 @@ root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
 resizeFactors = Params.resizeFactors;
-vidIn = safeResize(int8(vidIn), resizeFactors.*size(vidIn));
+vidIn = safeResize(vidIn, resizeFactors.*size(vidIn));
 elevationHalfAngle = atand(tand(Params.elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 
 saveSnapshots(vidIn, Params.snapshotDir, 'resized_input');

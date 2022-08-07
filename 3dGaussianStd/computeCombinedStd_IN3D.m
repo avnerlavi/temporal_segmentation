@@ -14,11 +14,15 @@ azimuths = azimuths(1:end-1);
 totalOrientationNumber = length(azimuths) * length(elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
-Gshort = Gaussian3D([0,0], 0, spatialVar, []);
+Gshort1 = Gaussian3D([0,0], 0, 100*spatialVar, []);
+Gshort = safeResize(Gshort1, floor(0.1 * size(Gshort1)));
+Gshort = Gshort./sum(abs(Gshort),'all');
+
+% Gshort = Gaussian3D([0,0], 0, spatialVar, []);
 
 for k = 1:nScales
     vidScaled = gpuArray(safeResize(vidIn, 1/k * size(vidIn)));
-    relativePaddingSize = basePaddingSize / k;
+    relativePaddingSize = floor(basePaddingSize / k);
     frames = [60/k + relativePaddingSize, 120/k + relativePaddingSize];    
     spatialStd = gpuArray(Gaussian3dStd(vidScaled, Gshort));
 

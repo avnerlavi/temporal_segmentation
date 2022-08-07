@@ -59,10 +59,10 @@ if(strcmp(STDMethod, 'Pyr'))
     vidMatrixOrig = readVideoFromFile(inFileDir, false);
     saveSnapshots(vidMatrixOrig, snapshotDir, 'original_input');
     
-    if(strcmp(vidFileName, 'man_running'))
-        STDParams.resizeFactors = [1/3, 1/3, 1];
-    else
+    if(strcmp(vidFileName, 'horse_running'))
         STDParams.resizeFactors = [2/3, 2/3, 1];
+    else
+        STDParams.resizeFactors = [1/3, 1/3, 1];
     end
     STDParams.segmentLength = 9;
     STDParams.pyramidLevel = 5;
@@ -86,10 +86,10 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.m2 = 2;
     STDParams.normQ = 2;
     STDParams.powerFactor = 2;
-    if(strcmp(vidFileName, 'man_running'))
-        STDParams.resizeFactors = [1/3, 1/3, 1];
-    else
+    if(strcmp(vidFileName, 'horse_running'))
         STDParams.resizeFactors = [2/3, 2/3, 1];
+    else
+        STDParams.resizeFactors = [1/3, 1/3, 1];
     end
     
     vidStd = generateStdVideo3DFunc(vidMatrixOrig, STDParams);
@@ -127,7 +127,7 @@ saveSnapshots(resizedMask, snapshotDir, 'output_mask');
 
 groundTruth = readVideoFromFile([root, '\resources\', vidFileName, '_gt.avi'], true);
 
-thresholds = 80:99;
+thresholds = 1:99;
 [precisions, recalls, ious] = getEvaluationMetrics(resizedMask, ...
     groundTruth, thresholds, 'prc');
 evaluationPlot = plotEvaluationMetrics(thresholds, precisions, recalls, ious);

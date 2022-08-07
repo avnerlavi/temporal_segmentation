@@ -19,14 +19,14 @@ totalIterationNumber = 2 * nScales * totalOrientationNumber;
 aggregatedOrientations = cell(1, nScales);
 
 for k = 1:nScales
-    vidScaled = gpuArray(imresize3(vidIn, [1/k, 1/k, 1/k] .* size(vidIn), 'Antialiasing', true));
+    vidScaled = gpuArray(imresize3(vidIn, 1/k * size(vidIn), 'Antialiasing', true));
     relativePaddingSize = floor(basePaddingSize / k);
     frames = floor(snapshotFrames/k + relativePaddingSize);    
     facilitationLength = max(3, baseFacilitationLength/k);
     
     %% total contrast power norm caclculation
     %0 elev handling
-    [cp, cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength);
+    [cp, cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength, relativePaddingSize);
     cpTotalPowerSum = cp.^normQ;
     cnTotalPowerSum = cn.^normQ;
     
@@ -43,7 +43,7 @@ for k = 1:nScales
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
             [cp, cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j), ...
-                gaborSize, gaborWavelength);
+                gaborSize, gaborWavelength, relativePaddingSize);
             cpTotalPowerSum = cpTotalPowerSum + cp.^normQ;
             cnTotalPowerSum = cnTotalPowerSum + cn.^normQ;
             
@@ -53,7 +53,7 @@ for k = 1:nScales
     end
     
     %% total activation threshold calculation
-    [cp,cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength);
+    [cp,cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength, relativePaddingSize);
     cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
     cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
     cpNormed = cp ./ cpNormFactor;
@@ -79,7 +79,7 @@ for k = 1:nScales
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
             [cp,cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j), ...
-                gaborSize, gaborWavelength);
+                gaborSize, gaborWavelength, relativePaddingSize);
             cnNormFactor = 1 + (cnTotalPowerSum - abs(cn).^normQ).^(1/normQ);
             cpNormFactor = 1 + (cpTotalPowerSum - abs(cp).^normQ).^(1/normQ);
             cpNormed = cp ./ cpNormFactor;
@@ -104,7 +104,7 @@ for k = 1:nScales
     tempSnapshotDir = '';
 
     %0 elev handling
-    [cp, cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength);
+    [cp, cn] = calculateGaborResponse(vidScaled, 0, 0, gaborSize, gaborWavelength, relativePaddingSize);
     cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
     cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
     cpNormed = cp ./ cpNormFactor;
@@ -134,7 +134,7 @@ for k = 1:nScales
     for i = 1:length(azimuths)
         for j = 1:length(elevations)
             [cp, cn] = calculateGaborResponse(vidScaled, azimuths(i), elevations(j), ...
-                gaborSize, gaborWavelength);
+                gaborSize, gaborWavelength, relativePaddingSize);
             cpNormFactor = 1 + (cpTotalPowerSum - cp.^normQ).^(1/normQ);
             cnNormFactor = 1 + (cnTotalPowerSum - cn.^normQ).^(1/normQ);
             cpNormed = cp ./ cpNormFactor;
