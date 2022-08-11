@@ -34,7 +34,7 @@ MaskParams.gaussianMaxVal = 1/4;
 MaskParams.snapshotDir = [snapshotDir, '\detection'];
 
 CCLFParams = struct;
-CCLFParams.numOfScales = 4;
+CCLFParams.numOfScales = 6;
 CCLFParams.thresholdFraction = 0.3;
 CCLFParams.percentileThreshold = 95;
 CCLFParams.elevationHalfAngle = 60;

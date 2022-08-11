@@ -28,12 +28,12 @@ for i = 1:maskParams.iterationNumber
     saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_abs_normed_scale_', num2str(i)], ...
         relativeSnapshotFrames);
     
-    detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
+%     detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
     detailEnhancementPyr{i} = detailEnhanced;
     
     %% connected components 
     
-    maskBlurFilt = Gaussian3DIso(0.5*i, maskParams.gaussianShape);
+    maskBlurFilt = Gaussian3DIso(1, maskParams.gaussianShape);
     maskBlurFilt = minMaxNorm(maskBlurFilt) * maskParams.gaussianMaxVal;
 
     currMask = generateConnectedComponentsMask(detailEnhanced, boundryMaskWidth ...
