@@ -5,7 +5,7 @@ addRequired( parser, 'vidIn');
 addParameter(parser, 'displayMinMax'  , true  , @islogical);
 addParameter(parser, 'displayNormed'  , true  , @islogical);
 addParameter(parser, 'fps'            , 20    , (@(x) isnumeric(x) && (x > 0)));
-addParameter(parser, 'displayPermuted', true  , @islogical);
+addParameter(parser, 'displayPermuted', false  , @islogical);
 parse(parser, vidIn, varargin{:});
 %% list maximum and minimum values
 if parser.Results.displayMinMax

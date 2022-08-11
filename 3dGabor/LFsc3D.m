@@ -1,7 +1,7 @@
 function [out, vidNR] = LFsc3D(vid,Az,El,Fac)
 sigmaNR = sqrt(0.1);
 vidNR = NakaRushton(vid, sigmaNR, 0, 2);
-gaussianDim = 1.5 * Fac;
+gaussianDim = floor(1.5 * Fac);
 gaussianDim = gaussianDim + mod(gaussianDim + 1, 2);
 g1 = Gaussian3D([Az,El],0,0.5*100*[0.01,0.01,Fac], 10*gaussianDim);
 g0 = safeResize(g1, gaussianDim * [1, 1, 1]);

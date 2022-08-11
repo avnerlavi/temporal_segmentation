@@ -15,7 +15,9 @@ totalOrientationNumber = length(azimuths) * length(elevations) + 1;
 totalIterationNumber = 2 * nScales * totalOrientationNumber;
 
 Gshort1 = Gaussian3D([0,0], 0, 100*spatialVar, []);
-Gshort = safeResize(Gshort1, floor(0.1 * size(Gshort1)));
+Gsize = floor(0.1 * size(Gshort1));
+Gsize = Gsize + mod(Gsize + 1, 2);
+Gshort = safeResize(Gshort1, Gsize);
 Gshort = Gshort./sum(abs(Gshort),'all');
 
 % Gshort = Gaussian3D([0,0], 0, spatialVar, []);
