@@ -6,9 +6,8 @@ addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
 elevationHalfAngle = [0, 90];
-resizeFactors = [0.5, 0.5, 0.3];
-
-inFileDir = [root ,'/resources/material_from_ynon_19_1_22/filtered/heart_malformation/1018_1029.mp4'];
+resizeFactors = [1, 1, 1];
+inFileDir = [root ,'/resources/material_from_ynon_19_1_22/filtered_new/heart_malformation/1627_1746.avi'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -16,13 +15,15 @@ if(generatePyrFlag)
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     [vid_matrix] = StdUsingPyramidFunc(vid_matrix);
 else
-    vid_matrix = readVideoFromFile(inFileDir, false);
+    vid_matrix = readVideoFromFile(inFileDir, false,[1,1184]);
+    vid_matrix =convn(vid_matrix,1/3*ones(1,1,3),'valid');
 end
 
 vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
+vid_matrix = vid_matrix(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3),:);
     
 CCLFParams = struct;
-CCLFParams.numOfScales = 3;
+CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 CCLFParams.azimuthNum = 8;
 CCLFParams.elevationNum = 7;
