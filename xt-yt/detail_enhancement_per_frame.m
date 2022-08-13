@@ -3,8 +3,8 @@ disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
-vid_matrix = readVideoFromFile([root ,'/resources/ultrasound_1_cropped.avi'], false);
-resizeFactors = [1/4, 1/4, 1/4];
+vid_matrix = readVideoFromFile([root ,'/resources/material_from_ynon_19_1_22/filtered_new/heart_malformation/1627_1746.avi'], false);
+resizeFactors = [1,1,1];
 vid_matrix = safeResize(vid_matrix, resizeFactors.*size(vid_matrix));
 
 permutedAxis = 't';
@@ -26,9 +26,9 @@ for i=1:size(permuted,3)
     detail_enhanced_permuted(:,:,i) = ...
         computeCombinedLF(permuted(:,:,i), ...
         8, ... orientation number
-        1, ... scale number
+        4, ... scale number
         5, ... base facilitation length
-        0, ... alpha
+        0.5, ... alpha
         1, ... m1
         2, ... m2
         false... isSteerableGaussian
