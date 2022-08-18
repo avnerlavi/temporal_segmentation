@@ -82,9 +82,9 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.elevationNum = 4;
     STDParams.spatialVar = [1.5, 1.5, 0.05];
     STDParams.temporalVar = [0.05, 0.05, 3.5];
-    STDParams.m1 = 2;
+    STDParams.m1 = 4;
     STDParams.m2 = 2;
-    STDParams.normQ = 2;
+    STDParams.normQ = 4;
     STDParams.powerFactor = 2;
     if(strcmp(vidFileName, 'horse_running'))
         STDParams.resizeFactors = [2/3, 2/3, 1];
