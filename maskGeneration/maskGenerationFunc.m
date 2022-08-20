@@ -28,7 +28,7 @@ for i = 1:maskParams.iterationNumber
     saveSnapshots(detailEnhanced, cclfParams.snapshotDir, ['detail_enhancement_output_abs_normed_scale_', num2str(i)], ...
         relativeSnapshotFrames);
     
-%     detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
+    detailEnhanced = detailEnhanced .* safeResize(totalMask,size(detailEnhanced));
     detailEnhancementPyr{i} = detailEnhanced;
     
     %% connected components 
@@ -46,4 +46,8 @@ for i = 1:maskParams.iterationNumber
     maskPyr{i} = currMask;
     totalMask = maskParams.alpha * currMask + (1 - maskParams.alpha) * totalMask;
 end
+
+totalMask = minMaxNorm(totalMask);
+saveSnapshots(totalMask, tempSnapshotDir, 'total_mask', baseSnapshotFrames);
+
 end
