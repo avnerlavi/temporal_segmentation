@@ -98,13 +98,14 @@ for k = 1:nScales
     
     vidStdDiffRaised = gather(sign(stdDiffOriTot).*((abs(stdDiffOriTot)).^m2));
     aggregatedOrientationsResponse = imresize3(vidStdDiffRaised, size(vidIn));
-    aggregatedOrientationsResponse = aggregatedOrientationsResponse/(k^m2);
+    aggregatedOrientationsResponse = aggregatedOrientationsResponse / k^2;
     aggregatedTotalResponse = aggregatedTotalResponse + aggregatedOrientationsResponse;
     
     waitbar(progressCounter / totalIterationNumber, w, ['finished scale ', num2str(k)]);
 end
 
 aggregatedTotalResponse = sign(aggregatedTotalResponse) .* (abs(aggregatedTotalResponse).^(1/m2));
+% aggregatedTotalResponse = aggregatedTotalResponse .* (1 - 0.5 * vidIn);
 aggregatedTotalResponse = stripVideo(aggregatedTotalResponse, basePaddingSize);
 
 close(w);

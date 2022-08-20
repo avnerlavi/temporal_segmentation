@@ -177,7 +177,7 @@ for k = 1:nScales
     
     vidOriTotDiffRaised = gather(sign(vidOriTotDiff).*((abs(vidOriTotDiff)).^m2));
     aggregatedOrientationsResponse = imresize3(vidOriTotDiffRaised, size(vidIn));    
-    aggregatedOrientationsResponse = aggregatedOrientationsResponse/(k^m2);
+    aggregatedOrientationsResponse = aggregatedOrientationsResponse / k^2;
     aggregatedOrientations{k} = aggregatedOrientationsResponse;
     aggregatedTotalResponse = aggregatedTotalResponse + aggregatedOrientationsResponse;
     
