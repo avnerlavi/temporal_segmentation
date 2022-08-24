@@ -88,6 +88,8 @@ elseif(strcmp(STDMethod, '3D'))
     STDParams.powerFactor = 2;
     if(strcmp(vidFileName, 'horse_running'))
         STDParams.resizeFactors = [2/3, 2/3, 1];
+    elseif strcmp(vidFileName, 'rabbits')
+        STDParams.resizeFactors = [1/6, 1/6, 1];
     else
         STDParams.resizeFactors = [1/3, 1/3, 1];
     end
