@@ -2,7 +2,7 @@ disp(['Start ', datestr(datetime('now'),'HH:MM:SS')]);
 root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath([root,'/3dGabor/detail_enhancement_multiple_videos_functions']));
-explicit_filenames = false;
+explicit_filenames = true;
 video_in_folder = [root ,'/resources/material_from_ynon_19_1_22/filtered_new/heart_malformation/'];
 video_cropped_folder = [root ,'/resources/material_from_ynon_19_1_22/filtered_new/cropped/heart_malformation/'];
 masks_folder = [root ,'/resources/material_from_ynon_19_1_22/filtered_new/masks/heart_malformation/'];
@@ -27,12 +27,12 @@ if(explicit_filenames)
        % 'heart_malformation/0858_0906.avi',...
        % 'heart_malformation/1018_1029.avi',...
        % 'heart_malformation/1401_1409.avi',...
-       % 'heart_malformation/1627_1746.avi',...
+        '1627_1746.avi'}%,...
        % 'heart_malformation/1756_1832.avi',...
        % 'heart_malformation/2711_2737.avi',...
         %'heart_malformation/2805_2818.avi',...
        % 'eve_c_c/0258_0352.avi',
-        'eve_c_c/1543_1632.avi'};
+        %'eve_c_c/1543_1632.avi'};
 else
     listing = dir(video_in_folder);
     for i = 1:length(listing)
@@ -52,12 +52,12 @@ for i = 1:length(video_names)
          chunk = readVideoFromFile(in_file_dir, false,[1,round(video_frames/num_chunks)]);
          [mask,bbox] = find_ultrasound_boundry(chunk);
          cropped_video_factor = (bbox(3)-bbox(1))*(bbox(2)-bbox(2))/numel(mask);
-         cropped_num_chunks = ceil(required_memory*cropped_video_factor/chunk_size);
+         cropped_num_chunks = max(ceil(required_memory*cropped_video_factor/chunk_size),1);
          for j = 1:cropped_num_chunks
              chunk = readVideoFromFile(in_file_dir, false,[round((j-1)*video_frames/cropped_num_chunks)+1,round(j*video_frames/cropped_num_chunks)]);
              chunk = chunk(bbox(2):bbox(4)+bbox(2),bbox(1):bbox(3)+bbox(1),:);
-             new_vid_name = [video_names{i},'_chunk_',num2str(j)];
-             writeVideoToFile(chunk,new_vid_name(1:end-4),video_cropped_folder);
+             new_vid_name = [video_names{i}(1:end-4),'_chunk_',num2str(j),'.avi'];
+             writeVideoToFile(chunk,new_vid_name,video_cropped_folder);
              imwrite(mask,[masks_folder,'/',new_vid_name(1:end-4),'.png']);
          end
      else
