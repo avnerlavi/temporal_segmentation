@@ -68,9 +68,30 @@ for k = 1:nScales
             c_n_norm_factor = 1 + (c_n_power_sum - c_n.^q_norm).^(1/q_norm);
             c_p_normed = c_p ./ c_p_norm_factor;
             c_n_normed = c_n ./ c_n_norm_factor;
-            [lf_n, lf_p,threshold_data_local] = Gabor3DActivation(c_p_normed,c_n_normed,...
+            lf_p = zeros(size(c_p_normed));
+            lf_n = zeros(size(c_n_normed));
+            lf_p_norm = zeros(size(c_p_normed));
+            lf_n_norm = zeros(size(c_n_normed));
+            lf_power = 2;
+            for j = [0.5,1,2]
+                [curr_lf_n, curr_lf_p, threshold_data_local] = Gabor3DActivation(c_p_normed,c_n_normed,...
                 angles_data.azimuth(i), angles_data.elevation(i), ...
-                total_activation_threshold, angles_data.facilitation_length(i), alpha);
+                total_activation_threshold, angles_data.facilitation_length(i)*j, alpha);
+                lf_p_norm = lf_p_norm + curr_lf_p.^lf_power;
+                lf_n_norm = lf_n_norm + curr_lf_n.^lf_power;
+            end
+            for j = [0.5,1,2]
+                [curr_lf_n, curr_lf_p, threshold_data_local] = Gabor3DActivation(c_p_normed,c_n_normed,...
+                angles_data.azimuth(i), angles_data.elevation(i), ...
+                total_activation_threshold, angles_data.facilitation_length(i)*j, alpha);
+                curr_lf_p_weight = (curr_lf_p.^lf_power./(1e-8 + lf_p_norm));
+                lf_p = curr_lf_p.*curr_lf_p_weight + lf_p;
+                curr_lf_n_weight = (curr_lf_n.^lf_power./(1e-8 + lf_n_norm));
+                lf_n = curr_lf_n.*curr_lf_n_weight + lf_n;
+            end
+%             [lf_n, lf_p,threshold_data_local] = Gabor3DActivation(c_p_normed,c_n_normed,...
+%                 angles_data.azimuth(i), angles_data.elevation(i), ...
+%                 total_activation_threshold, angles_data.facilitation_length(i), alpha);
             threshold_data(:,(k-1)*total_iteration_number+i) = [1/k,threshold_data_local];
             %combining angles
             vid_ori_p = vid_ori_p+(lf_p*angles_data.norm_factor(i)).^m1;
