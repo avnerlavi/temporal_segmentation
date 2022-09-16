@@ -31,7 +31,8 @@ V = 1/4;
 [vid_resized_reg,response_reg] = detailEnhancement3Dfunc(vid_matrix,CCLFParams,false);
 [vid_resized_ste,response_ste] = detailEnhancement3Dfunc(vid_ste,CCLFParams,false);
 %% hist plots
-beta = 1.5;
+beta = 5;
+gamma = 0.75;
 gain = 1;
 
 [hist_response_reg_by_reg,edges] = response_histogram(vid_resized_reg,response_reg,false);
@@ -40,8 +41,8 @@ disp_hists = [hist_response_reg_by_reg',hist_response_ste_by_reg'];
 figure()
 bar(edges,disp_hists)
 legend('DE regular','DE ste by regular')
-[vid_combined_reg] = additiveCombination(vid_resized_reg, response_reg, beta, gain);
-[vid_combined_ste] = additiveCombination(vid_resized_reg, response_ste, beta, gain);
+[vid_combined_reg] = additiveCombination(vid_resized_reg, response_reg, beta, gamma, gain);
+[vid_combined_ste] = additiveCombination(vid_resized_reg, response_ste, beta, gamma, gain);
 [hist_combined_reg_by_reg,edges] = response_histogram(vid_resized_reg,vid_combined_reg-vid_resized_reg,false);
 [hist_combined_ste_by_reg,edges] = response_histogram(vid_resized_reg,vid_combined_ste-vid_resized_reg,false);
 disp_hists = [hist_combined_reg_by_reg',hist_combined_ste_by_reg'];
