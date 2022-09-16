@@ -55,12 +55,11 @@ minVideoValue = min(detail_enhanced(:));
 maxVideoValue = max(detail_enhanced(:));
 implay(vidOut);
 maintainFitToWindow();
-beta = 5;
-gamma = 0.75;
+beta = 2;
 gain = 1;
 
 if(baby)
-[vidCombined] = additiveCombination(vid_matrix, detail_enhanced, beta, gamma, gain);
+[vidCombined] = additiveCombination(vid_matrix, detail_enhanced, beta, gain);
 compareVids(vid_matrix,vidCombined);
 compareVids(vid_matrix,minMaxNorm(vidCombined));
 end
