@@ -3,8 +3,7 @@ out_dir = [root,'\results\3dGabor\combining_expiriments\linear_stitcing_and_gamm
 beta = 5;
 gamma = 0.75;
 gain = 1;
-detail_enhanced_gamma = sign(detail_enhanced).*(abs(detail_enhanced).^gamma);
-[vidCombined] = additiveCombination(detail_enhanced_gamma), beta, gain);
+[vidCombined] = additiveCombination(detail_enhanced, beta, gamma, gain);
 compareVids(vid_matrix,vidCombined);
 compareVids(vid_matrix,minMaxNorm(vidCombined));
     writeVideoToFile(minMaxNorm(detail_enhanced), ...

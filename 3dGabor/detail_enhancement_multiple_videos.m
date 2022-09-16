@@ -37,7 +37,8 @@ else
     end
     video_names = {listing([listing.isvideo]).name};
 end
-beta = 2;
+beta = 5;
+gamma = 0.75;
 gain = 1;
 DE_params = struct;
 DE_params.numOfScales = 4;
