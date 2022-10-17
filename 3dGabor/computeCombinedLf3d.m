@@ -35,7 +35,7 @@ for k = 1:nScales
     waitbar(progress_counter / total_iteration_number, w,['scale ',num2str(k),' power sum computation']);
     for i = 1:size(angles_data,1)
             [c_p,c_n] = calcGaborResponse(vid_in_scaled, angles_data.azimuth(i), angles_data.elevation(i));
-            c_p_power_sum = c_p_power_sum + c_p.^q_norm;
+            c_p_power_sum = c_p_power_sum + c_p.^q_norm;% todo-check that c_p/c_n are positive
             c_n_power_sum = c_n_power_sum + c_n.^q_norm;
             progress_counter = progress_counter + 1;
             waitbar(progress_counter / total_iteration_number, w);
@@ -83,7 +83,7 @@ for k = 1:nScales
     vid_ori_p = vid_ori_p.^(1/m1);
     vid_ori_n = vid_ori_n.^(1/m1);
     
-    curr_vid_scaled = imresize3(vid_ori_p.^m2 - vid_ori_n.^m2,size(vid_in));
+    curr_vid_scaled = imresize3(vid_ori_p.^m2 - vid_ori_n.^m2,size(vid_in));%todo: maybe do after scale\before orientation
     curr_vid_scaled = curr_vid_scaled/(k^m2);
     vid_scales_pyramid{k} = curr_vid_scaled;
     vid_out_scaled = vid_out_scaled + curr_vid_scaled;

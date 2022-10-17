@@ -7,7 +7,9 @@ addpath(genpath([root,'/utils']));
 generatePyrFlag  = false;
 elevationHalfAngle = [0, 90];
 resizeFactors = [1, 1, 1];
-inFileDir = [root ,'/resources/material_from_ynon_19_1_22/filtered_new//cropped/heart_malformation/1627_1746.avi'];
+%"F:\Matlab\docs\temporal_segmentation\resources\ultrasound_1_cropped_new.avi"
+%[root ,'/resources/material_from_ynon_19_1_22/filtered_new/cropped/heart_malformation/2805_2818.avi'];
+inFileDir = [root ,'/resources/ultrasound_1_cropped_new.avi'];
 %%
 if(generatePyrFlag)
     inFileDir = [root,'/captcha_running.avi'];
@@ -15,7 +17,7 @@ if(generatePyrFlag)
     vid_matrix = imresize(vid_matrix_orig, 0.25);
     [vid_matrix] = StdUsingPyramidFunc(vid_matrix);
 else
-    vid_matrix = readVideoFromFile(inFileDir, false,[1,592]);
+    vid_matrix = readVideoFromFile(inFileDir, false);
     vid_matrix =convn(vid_matrix,1/3*ones(1,1,3),'valid');
 end
 
@@ -60,9 +62,9 @@ gamma = 0.75;
 gain = 1;
 
 if(baby)
-[vidCombined] = additiveCombination(vid_matrix, detail_enhanced, beta, gamma, gain);
-compareVids(vid_matrix,vidCombined);
-compareVids(vid_matrix,minMaxNorm(vidCombined));
+    [vidCombined] = additiveCombination(vid_matrix, detail_enhanced, beta, gamma, gain);
+    [diff_clip,total_clip] = compareVids(vid_matrix,vidCombined);
+    [diff_norm,total_norm] = compareVids(vid_matrix,minMaxNorm(vidCombined));
 end
 disp(['Done ' datestr(datetime('now'),'HH:MM:SS')]);
 if (dump_movies)
@@ -70,10 +72,14 @@ if (dump_movies)
         'movie_detail_enhanced_3d_minmax', [root,'\results\3dGabor\detail_enhancement']);
     writeVideoToFile(abs(detail_enhanced), ...
         'movie_detail_enhanced_3d_abs', [root,'\results\3dGabor\detail_enhancement']);
-     writeVideoToFile(minMaxNorm(vidCombined), ...
+    writeVideoToFile(minMaxNorm(vidCombined), ...
         'movie_combined_norm', [root,'\results\3dGabor\detail_enhancement']);
-         writeVideoToFile(max(min(vidCombined,1),0), ...
+    writeVideoToFile(max(min(vidCombined,1),0), ...
         'movie_combined_clipped', [root,'\results\3dGabor\detail_enhancement']);
+    writeVideoToFile(max(min(total_clip,1),0), ...
+        'comparison_clipped', [root,'\results\3dGabor\detail_enhancement']);
+    writeVideoToFile(total_norm, ...
+        'comparison_norm', [root,'\results\3dGabor\detail_enhancement']);
     saveParams([root,'\results\3dGabor\detail_enhancement'], ...
         generatePyrFlag, inFileDir, resizeFactors, elevationHalfAngle, CCLFParams, ...
         minVideoValue, maxVideoValue,beta,gain);

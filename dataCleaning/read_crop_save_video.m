@@ -1,9 +1,9 @@
-dir_in = 'F:\Matlab\docs\temporal_segmentation\resources\material_from_ynon_19_1_22\raw_data\eve_2_c_c\יפעת סקירה 3.mp4';
-dir_out = 'F:\Matlab\docs\temporal_segmentation\resources\material_from_ynon_19_1_22\filtered_new\eve_c_c';
-name = '0258_0352';
+dir_in = 'F:\Matlab\docs\temporal_segmentation\resources\ultrasound_1_cropped.avi';
+dir_out = 'F:\Matlab\docs\temporal_segmentation\resources\';
+name = 'ultrasound_1_cropped_new';
 frame_rate = 30;
-minutes_timerange = [02,03];
-seconds_timerange = [58,52];
+minutes_timerange = [0,0];
+seconds_timerange = [0,7];
 %%
 time_ranges = minutes_timerange*60+seconds_timerange;
 frame_ranges = frame_rate*time_ranges;
