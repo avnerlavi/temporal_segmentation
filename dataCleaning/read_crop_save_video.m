@@ -8,7 +8,7 @@ seconds_timerange = [0,7];
 time_ranges = minutes_timerange*60+seconds_timerange;
 frame_ranges = frame_rate*time_ranges;
 vid_matrix = readVideoFromFile(dir_in, false,frame_ranges);
-[~,rect] = imcrop(vid_matrix(:,:,(frame_ranges(2)-frame_ranges(1))/2));
+[~,rect] = imcrop(vid_matrix(:,:,1));
 vid_matrix = vid_matrix(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3),:);
 %implay(vid_matrix)
 writeVideoToFile(vid_matrix,name,dir_out);

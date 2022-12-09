@@ -3,8 +3,8 @@ root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath('detail_enhancement_multiple_videos_functions'));
 explicit_filenames = false;
-video_in_folder = [root ,'/resources/material_from_ynon_19_1_22/filtered_new/cropped/eve_c_c/'];
-video_out_folder = [root ,'/results/material_from_ynon_19_1_22_edited_results/cropped/eve_c_c/'];
+video_in_folder = [root ,'/resources/corpus_callosum_case_11_11_22/21_3/cropped/'];
+video_out_folder = [root ,'/results/corpus_callosum_case_11_11_22_results/cropped/'];
 if(explicit_filenames)
     video_names = {%'eye_c.c/0258_0352.mp4', ...
         %'eye_c.c/0407_0411.mp4', ...
@@ -46,8 +46,8 @@ DE_params.normQ = 2;
 DE_params.resizeFactors = NaN;
 videos = cell(length(video_names),3);
 target_height = 186;
-upper_size_limit = 3*10^9;
-chunk_size = 3*10^9;
+upper_size_limit = 2*10^9;
+chunk_size = 2*10^9;
 
 for i = 1:length(video_names)
     disp(['started on ',video_names{i},' vid:',num2str(i),'\',num2str(length(video_names))...
