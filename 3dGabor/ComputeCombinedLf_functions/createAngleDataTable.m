@@ -43,9 +43,9 @@ for i=1:length(parser.Results.additionalAzimuthData)
 end
 
 %removing zero duplication
-zero_el = angles_data(angles_data.elevation==0,:);
-first_azimuth = zero_el(1,:).azimuth;
-angles_data(angles_data.elevation==0 & angles_data.azimuth~=first_azimuth,:)=[];
+% zero_el = angles_data(angles_data.elevation==0,:);
+% first_azimuth = zero_el(1,:).azimuth;
+% angles_data(angles_data.elevation==0 & angles_data.azimuth~=first_azimuth,:)=[];
 
 end
 

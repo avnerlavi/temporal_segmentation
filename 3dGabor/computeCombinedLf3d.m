@@ -11,9 +11,10 @@ vid_scales_pyramid = cell(nScales);
 %halfAngle parsing
 
 [elevations,azimuths,is_zero_elevation] = createAzElArrays(nElevations,nAzimuths,elHalfAngle);
+is_zero_elevation = false;
 [spatial_facilitation_length,temporal_facilitation_length] = parseFacilitationLengths(base_facilitation_lengths);
 [elevation_norm_factors] = recomputeElevationNormFactors(elevations,is_zero_elevation,eccentricity,elHalfAngle(1),elHalfAngle(end),nAzimuths);
-total_orientations_number = length(azimuths) * (length(elevations)-1) + 1;
+total_orientations_number = length(azimuths) * (length(elevations));
 total_iteration_number = 3 * nScales * total_orientations_number;
 
 threshold_data = zeros(5,total_iteration_number/3);

@@ -5,7 +5,7 @@ root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 
 generatePyrFlag  = false;
-elevationHalfAngle = [0, 90];
+elevationHalfAngle = [0, 60];
 resizeFactors = [1, 1, 1];
 %[root ,'/resources/material_from_ynon_19_1_22/filtered_new/cropped/heart_malformation/2805_2818.avi'];
 %"F:\Matlab\docs\temporal_segmentation\resources\material_from_ynon_19_1_22\filtered_new\cropped\eve_c_c\0258_0352_chunk_1.avi.avi"
@@ -27,10 +27,10 @@ CCLFParams = struct;
 CCLFParams.numOfScales = 4;
 CCLFParams.elevationHalfAngle = atand(tand(elevationHalfAngle) * resizeFactors(1) / resizeFactors(3));
 CCLFParams.azimuthNum = 8;
-CCLFParams.elevationNum = 7;
+CCLFParams.elevationNum = 6;
 CCLFParams.eccentricity = sqrt(1);
 CCLFParams.activationThreshold = 0.12; %for running man - 0.3
-CCLFParams.facilitationLengths = [10, 5];
+CCLFParams.facilitationLengths = [5, 5];
 CCLFParams.alpha = 0.5;
 CCLFParams.m1 = 1;
 CCLFParams.m2 = 2;
