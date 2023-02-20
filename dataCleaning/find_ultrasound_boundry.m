@@ -10,7 +10,7 @@ end
 vid_g = imfilter(vid_in,reshape([-1,1],[1,1,2]));
 changes = sum(abs(vid_g),3);
 change_edges = abs(conv2(changes,[1,0,-1;2,0,-2;1,0,-1],'same'));
-[h,t,r] = hough(change_edges>8);
+[h,t,r] = hough(change_edges>1);
 p = houghpeaks(h,2,'Threshold',0.25*max(h,[],'all'));
 lines = houghlines(change_edges>2,t,r,p);
 m1 =  (lines(1).point1(2) - lines(1).point2(2)) /(lines(1).point1(1) - lines(1).point2(1));

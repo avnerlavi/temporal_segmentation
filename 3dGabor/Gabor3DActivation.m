@@ -7,8 +7,8 @@ threshold_p = activationThreshold(1);
 threshold_n = activationThreshold(2);
 
 threshold_data = [Azimuth,Elevation];
-threshold_data(end,3) = mean(double(abs(LF_n) > threshold_n),'all');%% todo - fix to be percent from NR response?
-threshold_data(end,4) = mean(double(abs(LF_p) > threshold_p),'all');
+threshold_data(end,3) = mean(abs(Cn(Cn>threshold_n)),'all');%% todo - fix to be percent from NR response?
+threshold_data(end,4) = mean(abs(Cp(Cp>threshold_p)),'all');
 
 LF_n(abs(LF_n) < threshold_n) = NR_n(abs(LF_n) < threshold_n);
 LF_p(abs(LF_p) < threshold_p) = NR_p(abs(LF_p) < threshold_p);

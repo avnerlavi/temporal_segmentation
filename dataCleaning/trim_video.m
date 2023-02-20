@@ -1,6 +1,5 @@
-dir_in = "F:\Matlab\docs\temporal_segmentation\resources\corpus_callosum_case_11_11_22\21_3\מור סקירה 2.mp4";
-dir_out = 'F:\Matlab\docs\temporal_segmentation\resources\corpus_callosum_case_11_11_22\21_3\';
-max_frame_limit = 3000;
+dir_in = "F:\Matlab\docs\temporal_segmentation\resources\materials_from_gal_c_27_12_22\oligohydramnions\exam1_full_1.avi";
+dir_out = 'F:\Matlab\docs\temporal_segmentation\resources\materials_from_gal_c_27_12_22\oligohydramnions\';
 vid_data = VideoReader(dir_in);
 frame_rate = vid_data.FrameRate;
 video_frames = vid_data.Duration*vid_data.FrameRate;
