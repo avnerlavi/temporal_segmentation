@@ -3,8 +3,8 @@ root = getenv('TemporalSegmentation');
 addpath(genpath([root,'/utils']));
 addpath(genpath('detail_enhancement_multiple_videos_functions'));
 explicit_filenames = false;
-video_in_folder = [root ,'/resources/corpus_callosum_case_11_11_22/25_4/cropped/'];
-video_out_folder = [root ,'/results/corpus_callosum_case_11_11_22_results/25_4/cropped/'];
+video_in_folder = [root ,'/resources/materials_from_lior_1_7_23/all_cropped/'];
+video_out_folder = [root ,'/results/materials_from_lior_1_7_23/cropped/'];
 if(explicit_filenames)
     video_names = {...
         '0631_0652.avi',...
@@ -31,7 +31,7 @@ DE_params.azimuthNum = 8;
 DE_params.elevationNum = 7;
 DE_params.eccentricity = sqrt(1);
 DE_params.activationThreshold = 0.12; %for running man - 0.3
-DE_params.facilitationLengths = [10, 5];
+DE_params.facilitationLengths = [15];
 DE_params.alpha = 0.5;
 DE_params.m1 = 1;
 DE_params.m2 = 2;

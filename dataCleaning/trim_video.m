@@ -1,5 +1,5 @@
-dir_in = "F:\Matlab\docs\temporal_segmentation\resources\materials_from_gal_c_27_12_22\oligohydramnions\exam1_full_1.avi";
-dir_out = 'F:\Matlab\docs\temporal_segmentation\resources\materials_from_gal_c_27_12_22\oligohydramnions\';
+dir_in = 'F:\Matlab\docs\temporal_segmentation\resources\materials_from_lior_1_7_23\11\CC (11).mp4';
+dir_out = 'F:\Matlab\docs\temporal_segmentation\resources\materials_from_lior_1_7_23\11';
 vid_data = VideoReader(dir_in);
 frame_rate = vid_data.FrameRate;
 video_frames = vid_data.Duration*vid_data.FrameRate;
@@ -48,9 +48,16 @@ while cont
             out_file_dir = fullfile(dir_out,'trimmed');
             %implay(vid_matrix)
             writeVideoToFile(vid_matrix,file_name,out_file_dir);
+            try
             [mask,bbox] = find_ultrasound_boundry(vid_matrix);
             k = input("keep trim?  ",'s');
             close
+            catch
+                disp('finding US boundry failed, manually crop the image')
+               [~,bbox] = imcrop(vid_matrix(:,:,end/2));
+               mask = zeros(size(vid_matrix(:,:,1)));
+               
+            end
             if(k == 'y')
                 imwrite(mask,fullfile(dir_out,'masks',[file_name,'.png']));
                 vid_matrix = vid_matrix(bbox(2):bbox(2)+bbox(4),bbox(1):bbox(1)+bbox(3),:);

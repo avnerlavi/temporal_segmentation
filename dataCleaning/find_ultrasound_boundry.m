@@ -8,11 +8,11 @@ else
     vid_in = vid_in_raw;
 end
 vid_g = imfilter(vid_in,reshape([-1,1],[1,1,2]));
-changes = sum(abs(vid_g),3);
+changes = sum(abs(vid_g(:,:,2:end-1)),3);
 change_edges = abs(conv2(changes,[1,0,-1;2,0,-2;1,0,-1],'same'));
-[h,t,r] = hough(change_edges>1);
+[h,t,r] = hough(change_edges>2);
 p = houghpeaks(h,2,'Threshold',0.25*max(h,[],'all'));
-lines = houghlines(change_edges>2,t,r,p);
+lines = houghlines(change_edges>2,t,r,p,'FillGap',max(size(change_edges)));
 m1 =  (lines(1).point1(2) - lines(1).point2(2)) /(lines(1).point1(1) - lines(1).point2(1));
 m2 =  (lines(2).point1(2) - lines(2).point2(2)) /(lines(2).point1(1) - lines(2).point2(1));
 n1 = lines(1).point1(2)-m1*lines(1).point1(1);
